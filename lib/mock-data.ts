@@ -12,6 +12,7 @@ export const mockRequests: Request[] = [
   {
     id: 'REQ-001',
     title: 'Paracetamol Infusion 1000mg',
+    requisitionType: 'cash',
     department: 'Pharmacy',
     category: 'Medications',
     items: [
@@ -40,6 +41,7 @@ export const mockRequests: Request[] = [
   {
     id: 'REQ-002',
     title: 'PCR Test Reagents',
+    requisitionType: 'material',
     department: 'Laboratory',
     category: 'Lab Supplies',
     items: [
@@ -66,6 +68,7 @@ export const mockRequests: Request[] = [
   {
     id: 'REQ-003',
     title: 'Industrial Generator Fuel',
+    requisitionType: 'cash',
     department: 'Maintenance',
     category: 'Consumables',
     items: [
@@ -91,6 +94,7 @@ export const mockRequests: Request[] = [
   {
     id: 'REQ-004',
     title: 'Laptop Computers x3',
+    requisitionType: 'cash',
     department: 'IT Department',
     category: 'Equipment',
     items: [
@@ -296,6 +300,7 @@ export const mockRequests: Request[] = [
   {
     id: 'REQ-012',
     title: 'Air Conditioner Repair Parts',
+    requisitionType: 'cash',
     department: 'Maintenance',
     category: 'Spare Parts',
     items: [
@@ -346,6 +351,7 @@ export const mockRequests: Request[] = [
   {
     id: 'REQ-014',
     title: 'Heavy Duty Detergents, Disinfectants & Waste Bags',
+    requisitionType: 'material',
     department: 'Environmental & Janitorial',
     category: 'Sanitation Supplies',
     items: [
@@ -371,6 +377,7 @@ export const mockRequests: Request[] = [
   {
     id: 'REQ-015',
     title: 'Solar Inverter Batteries Replacement for Guard Post & Perimeter Lights',
+    requisitionType: 'cash',
     department: 'Security & Safety',
     category: 'Security Infrastructure',
     items: [
@@ -394,6 +401,7 @@ export const mockRequests: Request[] = [
   {
     id: 'REQ-016',
     title: 'Executive Meeting Stationery & A4 Paper Bundles',
+    requisitionType: 'material',
     department: 'Administration & HR',
     category: 'Office Supplies',
     items: [

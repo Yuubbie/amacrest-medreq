@@ -115,6 +115,7 @@ export default function NewRequestPage() {
 
   // Step 1
   const [department, setDepartment] = useState('');
+  const [requisitionType, setRequisitionType] = useState<'material' | 'cash'>('material');
   const [category, setCategory] = useState('');
   const [urgency, setUrgency] = useState<'routine' | 'priority' | 'stat'>('routine');
   const [justification, setJustification] = useState('');
@@ -234,7 +235,51 @@ export default function NewRequestPage() {
           {/* STEP 1 */}
           {step === 1 && (
             <div className="space-y-5">
-              <h2 className="text-lg font-bold text-slate-800">Request Details</h2>
+              <h2 className="text-lg font-bold text-slate-800">Request Details & Pathway</h2>
+
+              {/* Pathway Switcher */}
+              <div className="bg-slate-50 border border-slate-200 rounded-xl p-4">
+                <label className="block text-xs font-bold text-slate-700 uppercase tracking-wider mb-2">
+                  Requisition Pathway *
+                </label>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  <button
+                    type="button"
+                    onClick={() => setRequisitionType('material')}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 ${
+                      requisitionType === 'material'
+                        ? 'bg-emerald-50 border-emerald-500 ring-2 ring-emerald-200'
+                        : 'bg-white border-slate-200 hover:bg-slate-100/50'
+                    }`}
+                  >
+                    <div className={`p-2 rounded-lg ${requisitionType === 'material' ? 'bg-emerald-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      📦
+                    </div>
+                    <div>
+                      <span className="block text-sm font-bold text-slate-800">Internal Store Issue (Material)</span>
+                      <span className="block text-xs text-slate-500 mt-0.5">Consumables, drugs, gloves, linen. Issued from central store. No cash out.</span>
+                    </div>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => setRequisitionType('cash')}
+                    className={`p-3 rounded-xl border text-left transition-all flex items-start gap-3 ${
+                      requisitionType === 'cash'
+                        ? 'bg-amber-50 border-amber-500 ring-2 ring-amber-200'
+                        : 'bg-white border-slate-200 hover:bg-slate-100/50'
+                    }`}
+                  >
+                    <div className={`p-2 rounded-lg ${requisitionType === 'cash' ? 'bg-amber-600 text-white' : 'bg-slate-100 text-slate-600'}`}>
+                      💵
+                    </div>
+                    <div>
+                      <span className="block text-sm font-bold text-slate-800">Financial Disbursement / Cash PO</span>
+                      <span className="block text-xs text-slate-500 mt-0.5">Emergency repairs, diesel purchase, external vendor orders requiring payment.</span>
+                    </div>
+                  </button>
+                </div>
+              </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
                 <div>

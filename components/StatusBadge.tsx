@@ -6,13 +6,15 @@ const statusConfig: Record<RequestStatus, { label: string; classes: string }> = 
   draft:              { label: 'Draft',              classes: 'bg-slate-100 text-slate-600 border-slate-200' },
   submitted:          { label: 'Submitted',          classes: 'bg-blue-50 text-blue-700 border-blue-200' },
   'hod-review':       { label: 'HOD Review',         classes: 'bg-amber-50 text-amber-700 border-amber-200' },
+  'store-review':     { label: 'Central Stores Issuing', classes: 'bg-teal-50 text-teal-800 border-teal-200' },
   'finance-review':   { label: 'Finance Review',     classes: 'bg-orange-50 text-orange-700 border-orange-200' },
   'executive-review': { label: 'Executive Review',   classes: 'bg-purple-50 text-purple-700 border-purple-200' },
+  'disbursement-ready': { label: 'Disbursement Ready', classes: 'bg-emerald-50 text-emerald-800 border-emerald-300' },
   'procurement-queue':{ label: 'Procurement Queue',  classes: 'bg-indigo-50 text-indigo-700 border-indigo-200' },
   approved:           { label: 'Approved',            classes: 'bg-green-50 text-green-700 border-green-200' },
   rejected:           { label: 'Rejected',            classes: 'bg-red-50 text-red-700 border-red-200' },
-  dispatched:         { label: 'Dispatched',          classes: 'bg-teal-50 text-teal-700 border-teal-200' },
-  closed:             { label: 'Closed',              classes: 'bg-slate-200 text-slate-600 border-slate-300' },
+  dispatched:         { label: 'Dispatched / Collected', classes: 'bg-teal-50 text-teal-700 border-teal-200' },
+  closed:             { label: 'Closed & Audited',    classes: 'bg-slate-200 text-slate-600 border-slate-300' },
 };
 
 const urgencyConfig: Record<Urgency, { label: string; classes: string; dot?: string }> = {

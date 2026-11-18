@@ -1,11 +1,15 @@
 export type Urgency = 'routine' | 'priority' | 'stat';
 
+export type RequisitionType = 'material' | 'cash';
+
 export type RequestStatus =
   | 'draft'
   | 'submitted'
   | 'hod-review'
+  | 'store-review'
   | 'finance-review'
   | 'executive-review'
+  | 'disbursement-ready'
   | 'procurement-queue'
   | 'approved'
   | 'rejected'
@@ -31,9 +35,18 @@ export interface TimelineEvent {
   type: 'submitted' | 'approved' | 'rejected' | 'queried' | 'dispatched' | 'finance' | 'procurement' | 'reviewed';
 }
 
+export interface Comment {
+  id: string;
+  author: string;
+  role: string;
+  text: string;
+  timestamp: string;
+}
+
 export interface Request {
   id: string;
   title: string;
+  requisitionType?: RequisitionType; // 'material' = Internal store transfer | 'cash' = Financial disbursement
   department: string;
   category: string;
   items: RequestItem[];
