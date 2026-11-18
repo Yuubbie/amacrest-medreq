@@ -123,6 +123,8 @@ export default function NewRequestPage() {
   const [items, setItems] = useState<LineItem[]>([]);
   const [catalogSearch, setCatalogSearch] = useState('');
   const [showCatalog, setShowCatalog] = useState(false);
+  const [showCustomModal, setShowCustomModal] = useState(false);
+  const [customItem, setCustomItem] = useState({ name: '', quantity: 1, unit: 'Units', unitPrice: 0 });
 
   const totalValue = items.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
   const budget = budgetMap[department] || { allocated: 1000000, spent: 500000 };
@@ -144,6 +146,19 @@ export default function NewRequestPage() {
     }]);
     setShowCatalog(false);
     setCatalogSearch('');
+  };
+
+  const addCustomItem = () => {
+    if (!customItem.name || customItem.unitPrice <= 0) return;
+    setItems(prev => [...prev, {
+      id: Date.now().toString(),
+      name: `[Custom Item] ${customItem.name}`,
+      quantity: customItem.quantity,
+      unit: customItem.unit,
+      unitPrice: customItem.unitPrice,
+    }]);
+    setCustomItem({ name: '', quantity: 1, unit: 'Units', unitPrice: 0 });
+    setShowCustomModal(false);
   };
 
   const removeItem = (id: string) => setItems(prev => prev.filter(i => i.id !== id));
@@ -325,37 +340,49 @@ export default function NewRequestPage() {
                 </div>
               )}
 
-              {/* Item catalog search */}
-              <div className="relative">
-                <label className="block text-sm font-medium text-slate-700 mb-1.5">Search Item Catalog</label>
-                <input
-                  type="text"
-                  value={catalogSearch}
-                  onChange={e => { setCatalogSearch(e.target.value); setShowCatalog(true); }}
-                  onFocus={() => setShowCatalog(true)}
-                  placeholder="Search by item name..."
-                  className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400"
-                />
-                {showCatalog && (
-                  <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-10 overflow-hidden">
-                    {filtered.map((cat, idx) => (
-                      <button
-                        key={idx}
-                        onClick={() => addItem(cat)}
-                        className="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-center justify-between gap-2 border-b border-slate-50 last:border-0 transition-colors"
-                      >
-                        <div>
-                          <p className="text-sm font-medium text-slate-700">{cat.name}</p>
-                          <p className="text-xs text-slate-400">Unit: {cat.unit} · ₦{cat.price.toLocaleString()} per unit</p>
-                        </div>
-                        <Plus size={14} className="text-teal-600 flex-shrink-0" />
-                      </button>
-                    ))}
-                    {filtered.length === 0 && (
-                      <div className="px-4 py-3 text-sm text-slate-400">No items found</div>
-                    )}
-                  </div>
-                )}
+              {/* Item catalog search & Custom button */}
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <label className="block text-sm font-medium text-slate-700">Search Item Catalog</label>
+                  <button
+                    type="button"
+                    onClick={() => setShowCustomModal(true)}
+                    className="text-xs font-bold text-teal-700 hover:text-teal-800 bg-teal-50 px-2.5 py-1 rounded-md border border-teal-200 flex items-center gap-1"
+                  >
+                    <Plus size={12} />
+                    <span>Item not listed? Add Custom Item</span>
+                  </button>
+                </div>
+                <div className="relative">
+                  <input
+                    type="text"
+                    value={catalogSearch}
+                    onChange={e => { setCatalogSearch(e.target.value); setShowCatalog(true); }}
+                    onFocus={() => setShowCatalog(true)}
+                    placeholder="Search by item name..."
+                    className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400"
+                  />
+                  {showCatalog && (
+                    <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-10 overflow-hidden">
+                      {filtered.map((cat, idx) => (
+                        <button
+                          key={idx}
+                          onClick={() => addItem(cat)}
+                          className="w-full text-left px-4 py-3 hover:bg-slate-50 flex items-center justify-between gap-2 border-b border-slate-50 last:border-0 transition-colors"
+                        >
+                          <div>
+                            <p className="text-sm font-medium text-slate-700">{cat.name}</p>
+                            <p className="text-xs text-slate-400">Unit: {cat.unit} · ₦{cat.price.toLocaleString()} per unit</p>
+                          </div>
+                          <Plus size={14} className="text-teal-600 flex-shrink-0" />
+                        </button>
+                      ))}
+                      {filtered.length === 0 && (
+                        <div className="px-4 py-3 text-sm text-slate-400">No items found</div>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
 
               {/* Items list */}
@@ -518,6 +545,81 @@ export default function NewRequestPage() {
           </div>
         </div>
       </div>
+
+      {/* Custom Item Modal */}
+      {showCustomModal && (
+        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-white rounded-2xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+            <h3 className="text-base font-bold text-slate-800 mb-1">Add Custom / Unlisted Requisition Item</h3>
+            <p className="text-xs text-slate-500 mb-4">Provide specifications and estimated price for your approval chain to review.</p>
+
+            <div className="space-y-3">
+              <div>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">Item Description / Name *</label>
+                <input
+                  type="text"
+                  placeholder="e.g. Special Tyre Tubes / Customized Surgical Pack"
+                  value={customItem.name}
+                  onChange={(e) => setCustomItem({ ...customItem, name: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Quantity</label>
+                  <input
+                    type="number"
+                    min="1"
+                    value={customItem.quantity}
+                    onChange={(e) => setCustomItem({ ...customItem, quantity: Number(e.target.value) || 1 })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Unit</label>
+                  <input
+                    type="text"
+                    placeholder="Units/Sets"
+                    value={customItem.unit}
+                    onChange={(e) => setCustomItem({ ...customItem, unit: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">Unit Price (₦) *</label>
+                  <input
+                    type="number"
+                    min="1"
+                    placeholder="5000"
+                    value={customItem.unitPrice || ''}
+                    onChange={(e) => setCustomItem({ ...customItem, unitPrice: Number(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-3">
+                <button
+                  type="button"
+                  onClick={() => setShowCustomModal(false)}
+                  className="px-3 py-2 text-xs font-semibold text-slate-600 hover:bg-slate-100 rounded-lg"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="button"
+                  onClick={addCustomItem}
+                  disabled={!customItem.name || customItem.unitPrice <= 0}
+                  className="px-4 py-2 bg-teal-600 text-white text-xs font-bold rounded-lg hover:bg-teal-700 disabled:opacity-50"
+                >
+                  Add to Requisition
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

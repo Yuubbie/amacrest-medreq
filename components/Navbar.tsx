@@ -39,6 +39,10 @@ export default function Navbar({ role = 'Staff Nurse', userName = 'Nurse Fatima 
 
           {/* Desktop nav */}
           <div className="hidden md:flex items-center gap-4">
+            <Link href="/inventory" className="text-xs font-semibold text-teal-400 hover:text-teal-300 px-3 py-1.5 rounded-lg bg-teal-950/60 border border-teal-800 transition-colors">
+              📦 Stores & Inventory (CSV)
+            </Link>
+
             {/* Role badge */}
             <div className="flex items-center gap-2 bg-slate-800 rounded-lg px-3 py-1.5">
               <div className="w-2 h-2 bg-teal-400 rounded-full animate-pulse"></div>
