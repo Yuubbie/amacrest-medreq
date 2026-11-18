@@ -340,7 +340,7 @@ export default function LoginPage() {
 
       {/* Footer Compliance Strip */}
       <footer className="border-t border-zinc-800/60 bg-zinc-950/80 px-6 py-4 text-center text-xs text-zinc-500">
-        AMACREST HOSPITAL & MATERNITY · Digital Procurement & Requisition Protocol v2.4 · Powered by MedReq
+        AMACREST HOSPITAL & MATERNITY · Digital Procurement & Requisition System v2.4 · Powered by MedReq
       </footer>
     </div>
   );

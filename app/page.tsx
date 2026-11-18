@@ -42,7 +42,7 @@ export default function LandingPage() {
 
           <nav className="hidden md:flex items-center gap-8 text-xs font-semibold text-zinc-400">
             <a href="#problem" className="hover:text-zinc-200 transition-colors">The Problem</a>
-            <a href="#solution" className="hover:text-zinc-200 transition-colors">The Protocol</a>
+            <a href="#solution" className="hover:text-zinc-200 transition-colors">How It Works</a>
             <a href="#flow" className="hover:text-zinc-200 transition-colors">Approval Chain</a>
             <Link href="/inventory" className="hover:text-teal-400 transition-colors flex items-center gap-1.5">
               <span>Stores & CSV</span>
@@ -74,7 +74,7 @@ export default function LandingPage() {
         <div className="inline-flex items-center gap-2 border border-zinc-800 bg-zinc-900/80 rounded-full px-4 py-1.5 mb-8 shadow-inner">
           <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-ping"></span>
           <span className="text-xs font-semibold text-zinc-300">
-            Built for AMACREST Hospital & Maternity · Chartered Accountant Protocol
+            AMACREST Hospital & Maternity · Digital Requisition & Approval System
           </span>
         </div>
 
@@ -261,7 +261,7 @@ export default function LandingPage() {
               World-Class Hospital Operating System
             </span>
             <h2 className="text-3xl sm:text-4xl font-black text-white mt-4 tracking-tight">
-              One Unified Protocol Across All Departments
+              One Unified System Across All Departments
             </h2>
             <p className="text-zinc-400 text-sm sm:text-base mt-3">
               From clinical wards and pharmacy to drivers, security, janitorial, and executive accounting.
