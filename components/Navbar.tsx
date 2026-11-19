@@ -5,8 +5,9 @@ import { useRouter, usePathname } from 'next/navigation';
 import { useState } from 'react';
 import {
   Heart, Bell, ChevronDown, Menu, X, LogOut, User,
-  FilePlus, ShieldCheck, DollarSign, Package, BarChart3, ArrowRight
+  FilePlus, ShieldCheck, DollarSign, Package, BarChart3, ArrowRight, RotateCcw
 } from 'lucide-react';
+import { resetStoredRequests } from '@/lib/storage';
 
 interface NavbarProps {
   role?: string;
@@ -26,14 +27,33 @@ export default function Navbar({ role = 'Staff Nurse', userName = 'Nurse Hauwa B
     { href: '/reports', label: 'Reports & Forecast', icon: BarChart3 },
   ];
 
+  const handleResetData = () => {
+    if (confirm('Reset prototype demo data to pristine initial state?')) {
+      resetStoredRequests();
+      window.location.reload();
+    }
+  };
+
   return (
     <nav className="bg-zinc-950/95 border-b border-zinc-800/80 sticky top-0 z-50 backdrop-blur-md font-sans">
       {/* Top Banner */}
-      <div className="bg-gradient-to-r from-teal-950 via-zinc-900 to-teal-950 border-b border-teal-800/30 text-zinc-300 text-center text-xs py-1.5 px-4 flex items-center justify-center gap-2">
-        <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-ping"></span>
-        <span>
-          <strong className="text-teal-300 font-bold">NANI ReqFlow Live Demo</strong> — Noma Aid Nigeria Initiative · Multi-Department Requisition Portal
-        </span>
+      <div className="bg-gradient-to-r from-teal-950 via-zinc-900 to-teal-950 border-b border-teal-800/30 text-zinc-300 text-center text-xs py-1 px-4 flex items-center justify-between">
+        <div className="hidden sm:flex items-center gap-2">
+          <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-ping"></span>
+          <span>
+            <strong className="text-teal-300 font-bold">NANI ReqFlow Live Demo</strong> — Noma Aid Nigeria Initiative
+          </span>
+        </div>
+        <div className="flex items-center justify-center sm:justify-end gap-3 w-full sm:w-auto">
+          <button
+            onClick={handleResetData}
+            title="Reset to fresh mock dataset anytime before a presentation"
+            className="text-[11px] font-mono text-zinc-400 hover:text-teal-300 flex items-center gap-1 bg-zinc-900/80 hover:bg-zinc-800 px-2.5 py-0.5 rounded-md border border-zinc-700/60 transition-colors"
+          >
+            <RotateCcw size={11} />
+            <span>Reset Demo Data</span>
+          </button>
+        </div>
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6">

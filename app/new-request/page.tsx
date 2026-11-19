@@ -10,6 +10,8 @@ import {
   currentUser,
   formatCurrency 
 } from '@/lib/mock-data';
+import { addStoredRequest } from '@/lib/storage';
+import { Request, RequestItem, TransportPassenger } from '@/lib/types';
 import { 
   Building2, ShieldCheck, Heart, DollarSign, Users, 
   Check, ChevronRight, ChevronLeft, AlertTriangle, Plus, 
@@ -49,6 +51,7 @@ export default function NewRequestPage() {
   const router = useRouter();
   const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
+  const [createdReqId, setCreatedReqId] = useState('NANI-REQ-088');
 
   // ── Step 1 State: Department, Unit, Pathway ──────────────────────────────
   const [selectedDeptId, setSelectedDeptId] = useState('clinicals');
@@ -200,6 +203,67 @@ export default function NewRequestPage() {
   };
 
   const handleSubmit = () => {
+    const nextNum = Math.floor(100 + Math.random() * 900);
+    const newId = `NANI-REQ-${nextNum}`;
+    setCreatedReqId(newId);
+
+    const title = isTransportMode
+      ? `Patient Transport — ${transportRows.map(r => r.stateOfOrigin).filter((v,i,a) => a.indexOf(v) === i).join(', ')} States (${transportRows.length} Passengers)`
+      : items[0]?.name ? `${items[0].name}${items.length > 1 ? ` (+ ${items.length - 1} more items)` : ''}` : `${selectedUnit} Consumables Requisition`;
+
+    const newReq: Request = {
+      id: newId,
+      title,
+      requisitionType,
+      department: currentDept.name,
+      unit: selectedUnit,
+      category: isTransportMode ? 'Patient Transport' : 'Clinical Consumables',
+      transactionCode: defaultTransCode,
+      donorGrantCode: donorGrantCode,
+      urgency,
+      status: 'supervisor-review',
+      currentApprovalLevel: 'supervisor',
+      requestedBy: requesterName,
+      requestedByRole: `${selectedUnit} Staff`,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      totalValue: grandTotal,
+      justification: justification || 'Voucher raised via Staff Portal.',
+      budgetCode: `${currentDept.id.toUpperCase()}-${selectedUnit.slice(0,3).toUpperCase()}-2026-VCH`,
+      items: isTransportMode ? [] : items.map((i, idx) => ({ ...i, sn: idx + 1, totalPrice: i.quantity * i.unitPrice })),
+      transportPassengers: isTransportMode ? transportRows.map((r, idx) => ({
+        id: `tp-${Date.now()}-${idx}`,
+        sn: idx + 1,
+        name: r.name || `Passenger ${idx + 1}`,
+        type: r.type,
+        stateOfOrigin: r.stateOfOrigin,
+        transportCost: r.cost,
+        direction: r.direction
+      })) : [],
+      signatures: [
+        {
+          level: 'requester',
+          actor: requesterName,
+          role: `${selectedUnit} Staff`,
+          timestamp: new Date().toISOString(),
+          signatureStamp: `${requesterName.replace(/\s+/g,'').toUpperCase()}/VOUCH/2026`
+        }
+      ],
+      timeline: [
+        {
+          id: `t-${Date.now()}`,
+          action: 'Requisition Submitted & Digitally Signed ✓',
+          actor: requesterName,
+          role: `${selectedUnit} Staff`,
+          timestamp: new Date().toISOString(),
+          type: 'submitted' as const,
+          comment: justification || 'Initial voucher submission'
+        }
+      ],
+      comments: []
+    };
+
+    addStoredRequest(newReq);
     setSubmitted(true);
   };
 
@@ -876,7 +940,7 @@ export default function NewRequestPage() {
                   VOUCHER TRANSMITTED TO SUPERVISOR DESK
                 </span>
                 <h2 className="text-2xl font-black text-white mt-1">
-                  Requisition NANI-REQ-2026-088 Created
+                  Requisition {createdReqId} Created
                 </h2>
                 <p className="text-xs text-zinc-400 mt-2 max-w-md mx-auto leading-relaxed">
                   Your requisition has been digitally signed and routed to your Unit Supervisor for Level 2 verification. You will receive an alert once Finance clears the grant allocation.
@@ -885,7 +949,7 @@ export default function NewRequestPage() {
                 <div className="mt-6 p-4 rounded-xl bg-zinc-950 border border-zinc-800 max-w-sm mx-auto text-left text-xs font-mono">
                   <div className="flex justify-between py-1 text-zinc-400">
                     <span>Voucher No:</span>
-                    <strong className="text-teal-400">NANI-REQ-088</strong>
+                    <strong className="text-teal-400">{createdReqId}</strong>
                   </div>
                   <div className="flex justify-between py-1 text-zinc-400">
                     <span>Department:</span>
@@ -907,7 +971,7 @@ export default function NewRequestPage() {
 
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                   <button
-                    onClick={() => router.push('/hod')}
+                    onClick={() => router.push(`/hod?dept=${selectedDeptId}`)}
                     className="px-6 py-3 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-2"
                   >
                     <span>View in Supervisor Approval Desk</span>
@@ -915,13 +979,11 @@ export default function NewRequestPage() {
                   </button>
 
                   <button
-                    onClick={() => {
-                      setSubmitted(false);
-                      setStep(1);
-                    }}
-                    className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-300 font-bold text-xs rounded-xl transition-all"
+                    onClick={() => router.push(`/request/${createdReqId}`)}
+                    className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs rounded-xl transition-all flex items-center gap-2"
                   >
-                    Raise Another Requisition
+                    <FileText size={14} className="text-teal-400" />
+                    <span>View Printable Voucher</span>
                   </button>
                 </div>
               </div>

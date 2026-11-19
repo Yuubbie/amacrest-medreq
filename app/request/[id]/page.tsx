@@ -1,12 +1,13 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
 import ApprovalTimeline from '@/components/ApprovalTimeline';
 import { mockRequests, formatCurrency, formatDate } from '@/lib/mock-data';
+import { getStoredRequests, saveStoredRequests } from '@/lib/storage';
 import { Request, RequestStatus, TimelineEvent, ApprovalSignature } from '@/lib/types';
 import {
   ArrowLeft, Building2, User, Calendar, Tag, FileText,
@@ -20,10 +21,16 @@ export default function RequestDetailPage() {
   const router = useRouter();
   const id = params?.id as string;
 
-  const original = mockRequests.find(r => r.id === id);
-  const [request, setRequest] = useState<Request | null>(original || null);
+  const [request, setRequest] = useState<Request | null>(null);
   const [comment, setComment] = useState('');
   const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+  useEffect(() => {
+    const list = getStoredRequests();
+    const found = list.find(r => r.id === id);
+    if (found) setRequest(found);
+    else setRequest(mockRequests.find(r => r.id === id) || null);
+  }, [id]);
 
   const showToast = (msg: string, type: 'success' | 'error' | 'info') => {
     setToast({ msg, type });

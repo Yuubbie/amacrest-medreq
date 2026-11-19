@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
@@ -13,6 +13,7 @@ import {
   formatCurrency, 
   formatDate 
 } from '@/lib/mock-data';
+import { getStoredRequests, saveStoredRequests } from '@/lib/storage';
 import { Request, RequestStatus, ApprovalSignature } from '@/lib/types';
 import {
   BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer,
@@ -31,6 +32,15 @@ export default function FinancePage() {
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
   const [selectedGrant, setSelectedGrant] = useState<string>('all');
 
+  useEffect(() => {
+    setRequests(getStoredRequests());
+    const handleUpdate = () => {
+      setRequests(getStoredRequests());
+    };
+    window.addEventListener('nani_requests_updated', handleUpdate);
+    return () => window.removeEventListener('nani_requests_updated', handleUpdate);
+  }, []);
+
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3000);
@@ -41,7 +51,7 @@ export default function FinancePage() {
     const timestamp = new Date().toISOString();
     const stampCode = `BU/FIN/${new Date().getFullYear()}`;
 
-    setRequests(prev => prev.map(r => {
+    const updated = requests.map(r => {
       if (r.id === id) {
         const newSig: ApprovalSignature = {
           level: 'finance',
@@ -63,21 +73,23 @@ export default function FinancePage() {
               actor: 'Mrs. Bilkisu Umar',
               role: 'Finance Officer & Grant Controller',
               timestamp,
-              type: 'finance',
+              type: 'finance' as const,
               comment: `Donor grant line ${r.donorGrantCode || 'HN-2026-SURG-Q4'} verified and committed. Forwarded to Programme Coordinator.`,
             }
           ]
         };
       }
       return r;
-    }));
+    });
 
+    setRequests(updated);
+    saveStoredRequests(updated);
     showToast(`✓ Voucher ${id} approved & grant line locked. Forwarded to Programme Coordinator.`, 'success');
   };
 
   const handleReject = (id: string) => {
     const timestamp = new Date().toISOString();
-    setRequests(prev => prev.map(r => {
+    const updated = requests.map(r => {
       if (r.id === id) {
         return {
           ...r,
@@ -90,15 +102,17 @@ export default function FinancePage() {
               actor: 'Mrs. Bilkisu Umar',
               role: 'Finance Officer & Grant Controller',
               timestamp,
-              type: 'rejected',
+              type: 'rejected' as const,
               comment: 'Declined due to budget allocation limits.',
             }
           ]
         };
       }
       return r;
-    }));
+    });
 
+    setRequests(updated);
+    saveStoredRequests(updated);
     showToast(`Voucher ${id} has been declined. Returned to department.`, 'error');
   };
 

@@ -1,10 +1,12 @@
 'use client';
 
 import Link from 'next/link';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
 import { mockRequests, formatCurrency, formatDate } from '@/lib/mock-data';
+import { getStoredRequests } from '@/lib/storage';
+import { Request } from '@/lib/types';
 import {
   Plus, Search, FileText, Clock, CheckCircle, XCircle,
   TrendingUp, AlertTriangle, Bell, ChevronRight, Filter,
@@ -13,19 +15,24 @@ import {
 
 export default function DashboardPage() {
   const [search, setSearch] = useState('');
+  const [requests, setRequests] = useState<Request[]>(mockRequests);
 
-  const myRequests = mockRequests.filter(r =>
-    r.requestedBy.includes('Hauwa') ||
-    r.department === 'Clinicals'
-  );
+  useEffect(() => {
+    setRequests(getStoredRequests());
+    const handleUpdate = () => {
+      setRequests(getStoredRequests());
+    };
+    window.addEventListener('nani_requests_updated', handleUpdate);
+    return () => window.removeEventListener('nani_requests_updated', handleUpdate);
+  }, []);
 
-  const allRequests = mockRequests.filter(r =>
+  const allRequests = requests.filter(r =>
     r.id.toLowerCase().includes(search.toLowerCase()) ||
     r.title.toLowerCase().includes(search.toLowerCase()) ||
     r.department.toLowerCase().includes(search.toLowerCase())
   );
 
-  const displayRequests = search ? allRequests : mockRequests;
+  const displayRequests = search ? allRequests : requests;
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">

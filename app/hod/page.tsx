@@ -1,10 +1,11 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
 import { mockRequests, formatCurrency, formatDate, naniDepartments } from '@/lib/mock-data';
+import { getStoredRequests, saveStoredRequests } from '@/lib/storage';
 import { Request, RequestStatus, ApprovalSignature } from '@/lib/types';
 import {
   Check, X, MessageSquare, AlertCircle, Clock, 
@@ -93,6 +94,29 @@ export default function HODHubPage() {
   const [activeReqModal, setActiveReqModal] = useState<Request | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
 
+  useEffect(() => {
+    // Load from localStorage
+    setRequests(getStoredRequests());
+
+    if (typeof window !== 'undefined') {
+      const urlParams = new URLSearchParams(window.location.search);
+      const deptParam = urlParams.get('dept');
+      const roleParam = urlParams.get('role');
+      if (roleParam === 'coordinator') {
+        setSelectedProfileId('coordinator');
+      } else if (deptParam) {
+        const match = supervisorProfiles.find(p => p.id.toLowerCase() === deptParam.toLowerCase() || p.departmentName.toLowerCase().includes(deptParam.toLowerCase()));
+        if (match) setSelectedProfileId(match.id);
+      }
+    }
+
+    const handleUpdate = () => {
+      setRequests(getStoredRequests());
+    };
+    window.addEventListener('nani_requests_updated', handleUpdate);
+    return () => window.removeEventListener('nani_requests_updated', handleUpdate);
+  }, []);
+
   const activeProfile = supervisorProfiles.find(p => p.id === selectedProfileId) || supervisorProfiles[0];
 
   const showToast = (message: string, type: 'success' | 'info' | 'error') => {
@@ -120,7 +144,7 @@ export default function HODHubPage() {
     const timestamp = new Date().toISOString();
     const stampCode = `${activeProfile.supervisorName.split(' ').map(n => n[0]).join('')}/APPR/${new Date().getFullYear()}`;
 
-    setRequests(prev => prev.map(r => {
+    const updated = requests.map(r => {
       if (r.id === reqId) {
         const nextStatus: RequestStatus = 
           activeProfile.id === 'coordinator' 
@@ -147,25 +171,27 @@ export default function HODHubPage() {
               actor: activeProfile.supervisorName,
               role: activeProfile.supervisorTitle,
               timestamp,
-              type: 'approved',
+              type: 'approved' as const,
               comment: `Digitally signed [Stamp: ${stampCode}]. Forwarded to ${nextStatus === 'finance-review' ? 'Finance' : 'Next Stage'}.`,
             }
           ]
         };
       }
       return r;
-    }));
+    });
 
+    setRequests(updated);
+    saveStoredRequests(updated);
     showToast(`✓ Digitally Signed & Approved by ${activeProfile.supervisorName}. Forwarded to next level.`, 'success');
   };
 
   const handleDecline = (reqId: string) => {
     const timestamp = new Date().toISOString();
-    setRequests(prev => prev.map(r => {
+    const updated = requests.map(r => {
       if (r.id === reqId) {
         return {
           ...r,
-          status: 'rejected',
+          status: 'rejected' as RequestStatus,
           timeline: [
             ...r.timeline,
             {
@@ -174,15 +200,17 @@ export default function HODHubPage() {
               actor: activeProfile.supervisorName,
               role: activeProfile.supervisorTitle,
               timestamp,
-              type: 'rejected',
+              type: 'rejected' as const,
               comment: 'Declined by supervisor. Resubmission required.',
             }
           ]
         };
       }
       return r;
-    }));
+    });
 
+    setRequests(updated);
+    saveStoredRequests(updated);
     showToast(`Requisition ${reqId} rejected. Returned to requester.`, 'error');
   };
 
