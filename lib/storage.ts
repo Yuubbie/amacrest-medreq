@@ -2,6 +2,50 @@ import { Request } from './types';
 import { mockRequests } from './mock-data';
 
 const STORAGE_KEY = 'nani_requests_v3';
+const USER_STORAGE_KEY = 'nani_current_user_v1';
+
+export interface AuthUser {
+  id: string;
+  name: string;
+  roleTitle: string;
+  department: string;
+  unit: string;
+  roleType: 'staff' | 'supervisor' | 'finance' | 'coordinator' | 'store';
+  avatar?: string;
+  badge?: string;
+}
+
+export const defaultUser: AuthUser = {
+  id: 'staff-nurse',
+  name: 'Nurse Hauwa Bello',
+  roleTitle: 'Staff Nurse (Post-Op Ward)',
+  department: 'Clinicals',
+  unit: 'Nursing',
+  roleType: 'staff',
+  avatar: 'HB',
+  badge: 'Frontline Clinical Staff',
+};
+
+export function getStoredUser(): AuthUser {
+  if (typeof window === 'undefined') return defaultUser;
+  try {
+    const raw = localStorage.getItem(USER_STORAGE_KEY);
+    if (!raw) return defaultUser;
+    return JSON.parse(raw);
+  } catch {
+    return defaultUser;
+  }
+}
+
+export function saveStoredUser(user: AuthUser): void {
+  if (typeof window === 'undefined') return;
+  try {
+    localStorage.setItem(USER_STORAGE_KEY, JSON.stringify(user));
+    window.dispatchEvent(new Event('nani_user_updated'));
+  } catch (e) {
+    console.error('Error saving user to storage', e);
+  }
+}
 
 export function getStoredRequests(): Request[] {
   if (typeof window === 'undefined') {

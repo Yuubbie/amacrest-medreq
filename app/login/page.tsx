@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
+import { saveStoredUser } from '@/lib/storage';
 import { 
   Building2, Lock, ArrowRight, ShieldCheck, UserCheck, 
   Heart, Activity, CheckCircle2, ChevronRight,
@@ -31,7 +32,7 @@ const presetUsers: PresetUser[] = [
     department: 'Clinicals',
     unit: 'Nursing',
     roleType: 'staff',
-    destination: '/new-request',
+    destination: '/dashboard',
     avatar: 'HB',
     badge: 'Frontline Clinical Staff',
     badgeColor: 'bg-teal-500/10 text-teal-300 border-teal-500/20',
@@ -43,7 +44,7 @@ const presetUsers: PresetUser[] = [
     department: 'Clinicals',
     unit: 'Hostel',
     roleType: 'staff',
-    destination: '/new-request?dept=Clinicals&unit=Hostel',
+    destination: '/dashboard',
     avatar: 'SD',
     badge: 'Patient Transport Logistics',
     badgeColor: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
@@ -55,7 +56,7 @@ const presetUsers: PresetUser[] = [
     department: 'Facility',
     unit: 'Logistics/Fleet',
     roleType: 'staff',
-    destination: '/new-request?dept=Facility&unit=Logistics/Fleet',
+    destination: '/dashboard',
     avatar: 'ST',
     badge: 'Facility & Fleet Staff',
     badgeColor: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
@@ -163,9 +164,19 @@ export default function LoginPage() {
 
   const handleLogin = (userToLogin: PresetUser) => {
     setIsLoggingIn(true);
+    saveStoredUser({
+      id: userToLogin.id,
+      name: userToLogin.name,
+      roleTitle: userToLogin.roleTitle,
+      department: userToLogin.department,
+      unit: userToLogin.unit,
+      roleType: userToLogin.roleType,
+      avatar: userToLogin.avatar,
+      badge: userToLogin.badge,
+    });
     setTimeout(() => {
       router.push(userToLogin.destination);
-    }, 500);
+    }, 350);
   };
 
   const filteredUsers = activeFilter === 'all' 

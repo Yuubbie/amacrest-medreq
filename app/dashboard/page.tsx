@@ -5,26 +5,35 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
 import { mockRequests, formatCurrency, formatDate } from '@/lib/mock-data';
-import { getStoredRequests, saveStoredRequests } from '@/lib/storage';
+import { getStoredRequests, saveStoredRequests, getStoredUser, AuthUser } from '@/lib/storage';
 import { Request, RequestStatus } from '@/lib/types';
 import {
   Plus, Search, FileText, Clock, CheckCircle, XCircle,
   TrendingUp, AlertTriangle, Bell, ChevronRight, Filter,
-  Heart, Bus, Package, ShieldCheck, ArrowRight, Check, DollarSign, Award
+  Heart, Bus, Package, ShieldCheck, ArrowRight, Check, DollarSign, Award, Fuel
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const [search, setSearch] = useState('');
   const [requests, setRequests] = useState<Request[]>(mockRequests);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
   const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     setRequests(getStoredRequests());
+    setCurrentUser(getStoredUser());
     const handleUpdate = () => {
       setRequests(getStoredRequests());
     };
+    const handleUserUpdate = () => {
+      setCurrentUser(getStoredUser());
+    };
     window.addEventListener('nani_requests_updated', handleUpdate);
-    return () => window.removeEventListener('nani_requests_updated', handleUpdate);
+    window.addEventListener('nani_user_updated', handleUserUpdate);
+    return () => {
+      window.removeEventListener('nani_requests_updated', handleUpdate);
+      window.removeEventListener('nani_user_updated', handleUserUpdate);
+    };
   }, []);
 
   const showToast = (msg: string) => {
@@ -78,7 +87,7 @@ export default function DashboardPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
-      <Navbar role="Staff Nurse" userName="Nurse Hauwa Bello" />
+      <Navbar />
 
       {toast && (
         <div className="fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl bg-teal-950 border border-teal-500 text-teal-300 shadow-2xl flex items-center gap-3 animate-in fade-in text-xs font-bold font-sans">
@@ -95,31 +104,43 @@ export default function DashboardPage() {
             <div className="flex items-center gap-2 text-xs font-mono text-teal-400 mb-1">
               <span>NOMA AID NIGERIA INITIATIVE</span>
               <span>/</span>
-              <span>STAFF REQUISITION PORTAL</span>
+              <span>STAFF WORKSTATION & DASHBOARD</span>
             </div>
             <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-              Welcome back, Nurse Hauwa 👋
+              Welcome back, {currentUser?.name || 'Frontline Staff'} 👋
             </h1>
             <p className="text-xs sm:text-sm text-zinc-400 mt-1">
-              Clinical Post-Op Ward · Track your pending vouchers, patient transport reimbursements, and store issues.
+              <strong className="text-teal-300">{currentUser?.roleTitle || 'Staff Member'}</strong> · {currentUser?.department || 'Clinicals'} Department ({currentUser?.unit || 'General'}) · Track your vouchers, approvals, and physical receipt confirmations.
             </p>
           </div>
 
           <div className="flex items-center gap-3">
-            <Link
-              href="/new-request?dept=Clinicals&unit=Hostel"
-              className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 flex items-center gap-1.5 transition-all"
-            >
-              <Bus size={14} className="text-teal-400" />
-              <span>Hostel Transport</span>
-            </Link>
+            {(currentUser?.unit === 'Hostel' || currentUser?.roleTitle?.includes('Hostel')) && (
+              <Link
+                href="/new-request?dept=Clinicals&unit=Hostel"
+                className="px-4 py-2.5 bg-blue-500/10 hover:bg-blue-500/20 text-blue-300 border border-blue-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
+              >
+                <Bus size={14} className="text-blue-400" />
+                <span>+ Patient Transport Voucher</span>
+              </Link>
+            )}
+
+            {(currentUser?.unit === 'Logistics/Fleet' || currentUser?.roleTitle?.includes('Fleet') || currentUser?.roleTitle?.includes('Driver')) && (
+              <Link
+                href="/new-request?dept=Facility&unit=Logistics/Fleet"
+                className="px-4 py-2.5 bg-amber-500/10 hover:bg-amber-500/20 text-amber-300 border border-amber-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all"
+              >
+                <Fuel size={14} className="text-amber-400" />
+                <span>+ Fleet / Fuel Requisition</span>
+              </Link>
+            )}
 
             <Link
-              href="/new-request"
+              href={`/new-request?dept=${encodeURIComponent(currentUser?.department || 'Clinicals')}&unit=${encodeURIComponent(currentUser?.unit || 'Nursing')}`}
               className="px-5 py-2.5 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-teal-500/20 active:scale-95"
             >
               <Plus size={14} strokeWidth={3} />
-              <span>+ Raise Requisition</span>
+              <span>+ Raise New Requisition</span>
             </Link>
           </div>
         </div>

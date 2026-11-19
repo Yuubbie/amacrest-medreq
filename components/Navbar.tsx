@@ -2,22 +2,36 @@
 
 import Link from 'next/link';
 import { useRouter, usePathname } from 'next/navigation';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Heart, Bell, ChevronDown, Menu, X, LogOut, User,
   FilePlus, ShieldCheck, DollarSign, Package, BarChart3, ArrowRight, RotateCcw
 } from 'lucide-react';
-import { resetStoredRequests } from '@/lib/storage';
+import { resetStoredRequests, getStoredUser, AuthUser } from '@/lib/storage';
 
 interface NavbarProps {
   role?: string;
   userName?: string;
 }
 
-export default function Navbar({ role = 'Staff Nurse', userName = 'Nurse Hauwa Bello' }: NavbarProps) {
+export default function Navbar({ role, userName }: NavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    setCurrentUser(getStoredUser());
+    const handleUserUpdate = () => {
+      setCurrentUser(getStoredUser());
+    };
+    window.addEventListener('nani_user_updated', handleUserUpdate);
+    return () => window.removeEventListener('nani_user_updated', handleUserUpdate);
+  }, []);
+
+  const activeRole = role || currentUser?.roleTitle || 'Staff Member';
+  const activeName = userName || currentUser?.name || 'Frontline Staff';
+  const activeAvatar = currentUser?.avatar || activeName.split(' ').map(n => n[0]).join('').slice(0, 2);
 
   const navLinks = [
     { href: '/new-request', label: 'New Requisition', icon: FilePlus },
@@ -101,16 +115,16 @@ export default function Navbar({ role = 'Staff Nurse', userName = 'Nurse Hauwa B
             {/* Active Role Pill */}
             <div className="flex items-center gap-2 bg-zinc-900 border border-zinc-800 rounded-xl px-3 py-1.5">
               <div className="w-2 h-2 bg-emerald-400 rounded-full animate-pulse"></div>
-              <span className="text-zinc-300 text-xs font-medium">{role}</span>
+              <span className="text-zinc-300 text-xs font-medium">{activeRole}</span>
             </div>
 
             {/* User Avatar */}
             <div className="flex items-center gap-2.5 pl-1">
-              <div className="w-8 h-8 bg-teal-500/20 border border-teal-500/40 rounded-xl flex items-center justify-center text-teal-300 text-xs font-bold">
-                {userName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              <div className="w-8 h-8 bg-teal-500/20 border border-teal-500/40 rounded-xl flex items-center justify-center text-teal-300 text-xs font-bold font-mono">
+                {activeAvatar}
               </div>
               <div className="hidden xl:block">
-                <p className="text-white text-xs font-bold leading-tight">{userName}</p>
+                <p className="text-white text-xs font-bold leading-tight">{activeName}</p>
                 <p className="text-zinc-500 text-[10px] font-mono">Authenticated</p>
               </div>
             </div>
@@ -140,11 +154,11 @@ export default function Navbar({ role = 'Staff Nurse', userName = 'Nurse Hauwa B
         <div className="lg:hidden bg-zinc-900 border-t border-zinc-800 px-4 py-4 space-y-3">
           <div className="flex items-center gap-3 pb-3 border-b border-zinc-800">
             <div className="w-9 h-9 bg-teal-500 rounded-xl flex items-center justify-center text-zinc-950 font-black text-sm">
-              {userName.split(' ').map(n => n[0]).join('').slice(0, 2)}
+              {activeAvatar}
             </div>
             <div>
-              <p className="text-white text-sm font-bold">{userName}</p>
-              <p className="text-teal-400 text-xs">{role}</p>
+              <p className="text-white text-sm font-bold">{activeName}</p>
+              <p className="text-teal-400 text-xs">{activeRole}</p>
             </div>
           </div>
 

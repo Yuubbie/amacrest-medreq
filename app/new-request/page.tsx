@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useMemo } from 'react';
+import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Navbar from '@/components/Navbar';
 import { 
@@ -10,7 +10,7 @@ import {
   currentUser,
   formatCurrency 
 } from '@/lib/mock-data';
-import { addStoredRequest } from '@/lib/storage';
+import { addStoredRequest, getStoredUser } from '@/lib/storage';
 import { Request, RequestItem, TransportPassenger } from '@/lib/types';
 import { 
   Building2, ShieldCheck, Heart, DollarSign, Users, 
@@ -79,6 +79,49 @@ export default function NewRequestPage() {
     { id: '2', sn: 2, name: 'Aisha Musa', type: 'caregiver', stateOfOrigin: 'Borno', direction: 'incoming', cost: 22000 },
     { id: '3', sn: 3, name: 'Ibrahim Hassan', type: 'patient', stateOfOrigin: 'Adamawa', direction: 'incoming', cost: 25000 },
   ]);
+
+  useEffect(() => {
+    const user = getStoredUser();
+    if (user && user.name) {
+      setRequesterName(user.name);
+    }
+    if (typeof window !== 'undefined') {
+      const params = new URLSearchParams(window.location.search);
+      const deptParam = params.get('dept');
+      const unitParam = params.get('unit');
+      if (deptParam) {
+        const found = naniDepartments.find(d => d.id.toLowerCase() === deptParam.toLowerCase() || d.name.toLowerCase() === deptParam.toLowerCase());
+        if (found) {
+          setSelectedDeptId(found.id);
+          if (unitParam) {
+            setSelectedUnit(unitParam);
+            if (unitParam === 'Hostel') {
+              setRequisitionType('transport');
+              setDefaultTransCode('TRN-001');
+            } else if (unitParam === 'Logistics/Fleet') {
+              setRequisitionType('cash');
+              setDefaultTransCode('FAC-004');
+            }
+          }
+        }
+      } else if (user && user.department) {
+        const found = naniDepartments.find(d => d.name.toLowerCase() === user.department.toLowerCase());
+        if (found) {
+          setSelectedDeptId(found.id);
+          if (user.unit) {
+            setSelectedUnit(user.unit);
+            if (user.unit === 'Hostel') {
+              setRequisitionType('transport');
+              setDefaultTransCode('TRN-001');
+            } else if (user.unit === 'Logistics/Fleet') {
+              setRequisitionType('cash');
+              setDefaultTransCode('FAC-004');
+            }
+          }
+        }
+      }
+    }
+  }, []);
 
   const isTransportMode = requisitionType === 'transport' || selectedUnit === 'Hostel';
 
@@ -269,7 +312,7 @@ export default function NewRequestPage() {
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
-      <Navbar role="Staff Nurse" userName={requesterName} />
+      <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         
