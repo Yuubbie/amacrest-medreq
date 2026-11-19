@@ -80,19 +80,28 @@ export default function RequestDetailPage() {
 
   const handleAcknowledgeReceipt = () => {
     const timestamp = new Date().toISOString();
+    const stamp = `${request.requestedBy.split(' ').map(n=>n[0]).join('')}/RETIRE/${new Date().getFullYear()}`;
     const updatedReq: Request = {
       ...request,
       status: 'closed' as RequestStatus,
+      retirementDetails: {
+        retiredAt: timestamp,
+        retiredBy: request.requestedBy,
+        receiptNotes: 'Requester verified physical receipt of funds / materials. Requisition permanently retired and closed for audit.',
+        signatureStamp: stamp,
+        amountRetired: request.totalValue,
+        variance: 0,
+      },
       timeline: [
         ...request.timeline,
         {
           id: Date.now().toString(),
-          action: 'Funds Receipt Confirmed & Retired by Requester ✓',
+          action: 'Physical Receipt Confirmed & Voucher Retired by Requester ✓',
           actor: request.requestedBy,
           role: request.requestedByRole,
           timestamp,
           type: 'approved' as const,
-          comment: 'Requester verified physical receipt of funds / materials. Requisition permanently retired and closed for audit.',
+          comment: `Requester physically verified receipt of ${formatCurrency(request.totalValue)}. Requisition permanently retired and closed for international donor audit. [Stamp: ${stamp}]`,
         }
       ]
     };
@@ -105,11 +114,12 @@ export default function RequestDetailPage() {
 
   const isTransport = request.requisitionType === 'transport' || request.unit === 'Hostel';
   const isDisbursed = request.status === 'disbursement-ready' || request.status === 'dispatched';
+  const isRetired = request.status === 'closed';
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
       <div className="print:hidden">
-        <Navbar role="Staff Reviewer" userName="Nurse Hauwa Bello" />
+        <Navbar />
       </div>
 
       {toast && (
@@ -170,6 +180,35 @@ export default function RequestDetailPage() {
               <Check size={16} strokeWidth={3} />
               <span>Confirm Receipt & Retire Voucher</span>
             </button>
+          </div>
+        )}
+
+        {/* ── Official Donor Audit Retirement Certificate Banner ── */}
+        {isRetired && (
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/60 to-zinc-900 border border-emerald-500/50 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl">
+            <div className="flex items-center gap-3.5">
+              <div className="w-12 h-12 rounded-2xl bg-emerald-500/20 border border-emerald-500/40 flex items-center justify-center text-emerald-400 shrink-0">
+                <ShieldCheck size={26} />
+              </div>
+              <div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[10px] font-mono text-emerald-400 font-bold uppercase tracking-wider">
+                    INTERNATIONAL DONOR AUDIT-READY
+                  </span>
+                  <span className="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-bold font-mono">
+                    100% RETIRED & CLOSED
+                  </span>
+                </div>
+                <h3 className="text-base font-black text-white mt-0.5">Physical Receipt & Voucher Retirement Cleared</h3>
+                <p className="text-xs text-zinc-300 font-mono mt-1">
+                  PV Reference: <strong className="text-teal-300">{request.disbursementDetails?.pvNumber || `PV/NANI/2026/${request.id.replace('NANI-REQ-','')}`}</strong> · Retired by <strong className="text-white">{request.retirementDetails?.retiredBy || request.requestedBy}</strong> [Stamp: {request.retirementDetails?.signatureStamp || 'CONF/2026'}]
+                </p>
+              </div>
+            </div>
+            <div className="text-right shrink-0 font-mono text-xs">
+              <span className="text-emerald-400 font-black text-lg block">{formatCurrency(request.totalValue)}</span>
+              <span className="text-zinc-500 text-[10px]">Grant: {request.donorGrantCode || 'HN-2026-SURG-Q4'}</span>
+            </div>
           </div>
         )}
 

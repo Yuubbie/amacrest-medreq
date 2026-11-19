@@ -41,27 +41,49 @@ export default function DashboardPage() {
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Requester Acknowledgment Action (Confirms receipt of funds/supplies and retires voucher)
-  const handleAcknowledgeReceipt = (e: React.MouseEvent, reqId: string) => {
+  const [retireModalReq, setRetireModalReq] = useState<Request | null>(null);
+  const [receiptNotes, setReceiptNotes] = useState('');
+  const [certifyChecked, setCertifyChecked] = useState(false);
+
+  // Open Retirement Modal
+  const openRetireModal = (e: React.MouseEvent, item: Request) => {
     e.preventDefault();
     e.stopPropagation();
+    setRetireModalReq(item);
+    setReceiptNotes(item.requisitionType === 'transport' 
+      ? 'All passenger transport manifests, travel receipts, and signed patient discharge forms attached.' 
+      : 'All physical goods/materials received in full specification. Delivery dockets lodged with Finance.');
+    setCertifyChecked(true);
+  };
 
+  // Complete Official Voucher Retirement
+  const handleCompleteRetirement = () => {
+    if (!retireModalReq) return;
     const timestamp = new Date().toISOString();
+    const stamp = `${retireModalReq.requestedBy.split(' ').map(n=>n[0]).join('')}/RETIRE/${new Date().getFullYear()}`;
     const updated = requests.map(r => {
-      if (r.id === reqId) {
+      if (r.id === retireModalReq.id) {
         return {
           ...r,
           status: 'closed' as RequestStatus,
+          retirementDetails: {
+            retiredAt: timestamp,
+            retiredBy: retireModalReq.requestedBy,
+            receiptNotes: receiptNotes || 'Physical receipt confirmed. All invoices and delivery slips lodged.',
+            signatureStamp: stamp,
+            amountRetired: r.totalValue,
+            variance: 0,
+          },
           timeline: [
             ...r.timeline,
             {
               id: Date.now().toString(),
-              action: 'Receipt Confirmed & Retired by Requester ✓',
-              actor: r.requestedBy,
-              role: r.requestedByRole,
+              action: 'Physical Receipt Confirmed & Voucher Retired ✓',
+              actor: retireModalReq.requestedBy,
+              role: retireModalReq.requestedByRole,
               timestamp,
               type: 'approved' as const,
-              comment: 'Requester confirmed physical receipt of funds/materials. Requisition retired and closed for audit.',
+              comment: `Physical receipt of ${formatCurrency(r.totalValue)} confirmed. Requisition retired and closed for international donor audit. [Stamp: ${stamp}]`,
             }
           ]
         };
@@ -71,7 +93,10 @@ export default function DashboardPage() {
 
     setRequests(updated);
     saveStoredRequests(updated);
-    showToast(`✓ Receipt confirmed for ${reqId}. Voucher closed and recorded for all donor reports.`);
+    showToast(`✓ Voucher ${retireModalReq.id} retired! Reflected in all Finance and Donor reports.`);
+    setRetireModalReq(null);
+    setCertifyChecked(false);
+    setReceiptNotes('');
   };
 
   const allRequests = requests.filter(r =>
@@ -164,7 +189,7 @@ export default function DashboardPage() {
                     <span className="text-zinc-500 ml-2 font-mono">({formatCurrency(item.totalValue)})</span>
                   </div>
                   <button
-                    onClick={(e) => handleAcknowledgeReceipt(e, item.id)}
+                    onClick={(e) => openRetireModal(e, item)}
                     className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black rounded-lg text-xs flex items-center gap-1 transition-all shadow-md shadow-emerald-500/20"
                   >
                     <Check size={14} strokeWidth={3} />
@@ -295,11 +320,11 @@ export default function DashboardPage() {
                     {/* Quick Acknowledge Button right on row if ready */}
                     {isReadyForAck ? (
                       <button
-                        onClick={(e) => handleAcknowledgeReceipt(e, req.id)}
+                        onClick={(e) => openRetireModal(e, req)}
                         className="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-bold rounded-lg flex items-center gap-1 shadow-md shadow-emerald-500/20"
                       >
                         <Check size={12} strokeWidth={3} />
-                        <span>Acknowledge</span>
+                        <span>Retire Voucher</span>
                       </button>
                     ) : (
                       <ChevronRight size={16} className="text-zinc-600 hidden sm:block" />
@@ -312,6 +337,107 @@ export default function DashboardPage() {
         </div>
 
       </main>
+
+      {/* ── Official Requester Physical Receipt & Voucher Retirement Modal ── */}
+      {retireModalReq && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-700/80 rounded-3xl max-w-xl w-full p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400">
+                  <ShieldCheck size={20} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-teal-400 uppercase font-bold">FRONTLINE REQUESTER RETIREMENT</span>
+                  <h3 className="text-base font-black text-white">Certify Physical Receipt & Retire Voucher</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setRetireModalReq(null)}
+                className="p-1.5 text-zinc-400 hover:text-white rounded-lg bg-zinc-800"
+              >
+                <XCircle size={18} />
+              </button>
+            </div>
+
+            {/* Voucher and Payment Details */}
+            <div className="my-4 p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2 text-xs font-mono">
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <span className="text-zinc-500">VOUCHER ID:</span>
+                <span className="font-bold text-white">{retireModalReq.id}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <span className="text-zinc-500">DESCRIPTION:</span>
+                <span className="font-bold text-zinc-300 truncate max-w-[260px]">{retireModalReq.title}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <span className="text-zinc-500">PAYMENT VOUCHER (PV #):</span>
+                <span className="text-teal-300 font-bold">{retireModalReq.disbursementDetails?.pvNumber || `PV/NANI/2026/${retireModalReq.id.replace('NANI-REQ-','')}`}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <span className="text-zinc-500">DISBURSED BY:</span>
+                <span className="text-zinc-200">{retireModalReq.disbursementDetails?.disbursedBy || 'Mr. AY, FCA · Head of Finance'}</span>
+              </div>
+              <div className="flex justify-between items-center pt-1 text-sm">
+                <span className="text-zinc-400 font-bold">FUNDS RECEIVED:</span>
+                <strong className="text-emerald-400 font-black text-base">{formatCurrency(retireModalReq.totalValue)}</strong>
+              </div>
+            </div>
+
+            {/* Certification Statement */}
+            <div className="space-y-4 mb-6">
+              <label className="flex items-start gap-3 p-3.5 rounded-2xl bg-emerald-950/20 border border-emerald-500/30 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={certifyChecked}
+                  onChange={(e) => setCertifyChecked(e.target.checked)}
+                  className="mt-1 w-4 h-4 rounded border-zinc-700 text-teal-500 focus:ring-teal-400 bg-zinc-950"
+                />
+                <span className="text-xs text-zinc-200 leading-relaxed font-sans">
+                  <strong>Physical Receipt Certification:</strong> I, <strong className="text-teal-300">{retireModalReq.requestedBy}</strong>, hereby certify that the sum of <strong className="text-emerald-400 font-mono">{formatCurrency(retireModalReq.totalValue)}</strong> (or specified physical supplies) has been received in full and applied strictly towards the authorized operational purpose.
+                </span>
+              </label>
+
+              <div>
+                <label className="text-xs font-mono uppercase text-zinc-400 block mb-1">
+                  Receipts / Invoices / Travel Slips Attached
+                </label>
+                <textarea
+                  rows={2}
+                  value={receiptNotes}
+                  onChange={(e) => setReceiptNotes(e.target.value)}
+                  placeholder="e.g. Attached 5 passenger signed reimbursement slips, pump fuel receipts, and delivery dockets..."
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-white focus:border-teal-500 outline-none"
+                />
+              </div>
+
+              <div className="text-[11px] font-mono text-zinc-500 flex items-center justify-between">
+                <span>DIGITAL RETIREMENT STAMP:</span>
+                <strong className="text-teal-400">{retireModalReq.requestedBy.split(' ').map(n=>n[0]).join('')}/RETIRE/{new Date().getFullYear()}</strong>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
+              <button
+                onClick={() => setRetireModalReq(null)}
+                className="px-4 py-2.5 bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-xs font-bold transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                disabled={!certifyChecked}
+                onClick={handleCompleteRetirement}
+                className="px-6 py-2.5 bg-teal-500 hover:bg-teal-400 disabled:opacity-50 disabled:cursor-not-allowed text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-1.5 active:scale-95"
+              >
+                <Check size={14} strokeWidth={3} />
+                <span>Confirm Receipt & Complete Retirement</span>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -1,7 +1,7 @@
 import { Request } from './types';
 import { mockRequests } from './mock-data';
 
-const STORAGE_KEY = 'nani_requests_v3';
+const STORAGE_KEY = 'nani_requests_v4';
 const USER_STORAGE_KEY = 'nani_current_user_v1';
 
 export interface AuthUser {

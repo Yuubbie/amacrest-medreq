@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
@@ -14,6 +14,8 @@ import {
   formatCurrency, 
   formatDate
 } from '@/lib/mock-data';
+import { getStoredRequests } from '@/lib/storage';
+import { Request } from '@/lib/types';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
   Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area
@@ -34,10 +36,29 @@ const forecastData = [
 ];
 
 export default function ReportsPage() {
+  const [requests, setRequests] = useState<Request[]>(mockRequests);
   const [reportCycle, setReportCycle] = useState<'monthly' | 'quarterly' | 'annual'>('monthly');
   const [deptFilter, setDeptFilter] = useState('all');
+  const [ledgerSearch, setLedgerSearch] = useState('');
   const [isExporting, setIsExporting] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+
+  useEffect(() => {
+    setRequests(getStoredRequests());
+    const handleUpdate = () => {
+      setRequests(getStoredRequests());
+    };
+    window.addEventListener('nani_requests_updated', handleUpdate);
+    return () => window.removeEventListener('nani_requests_updated', handleUpdate);
+  }, []);
+
+  const closedVouchers = requests.filter(r => r.status === 'closed');
+  const disbursedVouchers = requests.filter(r => r.status === 'dispatched' || r.status === 'disbursement-ready');
+  const inPipelineVouchers = requests.filter(r => r.status !== 'closed' && r.status !== 'dispatched' && r.status !== 'disbursement-ready' && r.status !== 'rejected');
+  
+  const totalRetiredAmount = closedVouchers.reduce((s, r) => s + r.totalValue, 0);
+  const totalDisbursedAmount = disbursedVouchers.reduce((s, r) => s + r.totalValue, 0);
+  const totalInPipelineAmount = inPipelineVouchers.reduce((s, r) => s + r.totalValue, 0);
 
   const showToast = (msg: string) => {
     setToast(msg);
@@ -144,11 +165,11 @@ export default function ReportsPage() {
         {/* ── Executive KPI Summary Strip ── */}
         <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
           {[
-            { label: 'Requisitions Cleared', value: '142', sub: '94% Approval SLA', color: 'text-teal-400' },
-            { label: 'Total Value Committed', value: '₦28.45M', sub: 'YTD Donor Outflow', color: 'text-emerald-400' },
-            { label: 'Hostel Transport Fares', value: '₦3.28M', sub: '128 Patients & Escorts', color: 'text-blue-400' },
-            { label: 'Surgical & Medicines', value: '₦14.62M', sub: 'Clinical Reconstructions', color: 'text-purple-400' },
-            { label: '2027 Q1 Projected', value: '₦14.50M', sub: '+17% Capacity Scale', color: 'text-amber-400' },
+            { label: 'Total Vouchers Logged', value: requests.length.toString(), sub: 'Across 5 departments', color: 'text-teal-400' },
+            { label: '100% Retired & Audited', value: formatCurrency(totalRetiredAmount), sub: `${closedVouchers.length} Vouchers Cleared`, color: 'text-emerald-400' },
+            { label: 'Disbursed (In Field)', value: formatCurrency(totalDisbursedAmount), sub: `${disbursedVouchers.length} Awaiting Receipts`, color: 'text-blue-400' },
+            { label: 'In Approval Pipeline', value: formatCurrency(totalInPipelineAmount), sub: `${inPipelineVouchers.length} Under Review`, color: 'text-amber-400' },
+            { label: '2027 Q1 Projected Scale', value: '₦14.50M', sub: '+17% Capacity Scale', color: 'text-purple-400' },
           ].map((card) => (
             <div key={card.label} className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
               <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">{card.label}</span>
@@ -280,6 +301,141 @@ export default function ReportsPage() {
                         }`}>
                           {pct}%
                         </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── Official Donor Audit & Requisition Retirement Ledger ── */}
+        <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-xl mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-zinc-800">
+            <div>
+              <div className="flex items-center gap-2">
+                <Shield className="text-teal-400" size={18} />
+                <h3 className="text-base font-black text-white">
+                  Official Donor Audit & Requisition Retirement Ledger
+                </h3>
+              </div>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Full end-to-end provenance: Supervisor Sign-Off → Mr. AY Finance Budget Lock → Coordinator Ratification → PV Disbursement → Requester Physical Confirmation.
+              </p>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-xs font-mono text-zinc-400">
+                Audit Clearance: <strong className="text-emerald-400">{closedVouchers.length} Retired</strong> / {requests.length} Total
+              </span>
+            </div>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-xs text-left">
+              <thead>
+                <tr className="border-b border-zinc-800 text-[10px] font-mono uppercase text-zinc-400 bg-zinc-950/60">
+                  <th className="py-3 px-3">Voucher & Department</th>
+                  <th className="py-3 px-3">Donor Grant Line</th>
+                  <th className="py-3 px-3 text-right">Value (₦)</th>
+                  <th className="py-3 px-3">Finance Lock (Mr. AY)</th>
+                  <th className="py-3 px-3">Executive Auth</th>
+                  <th className="py-3 px-3">Disbursement PV</th>
+                  <th className="py-3 px-3">Requester Physical Receipt</th>
+                  <th className="py-3 px-3 text-center">Audit Status</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/60 font-mono">
+                {requests.map((r) => {
+                  const isClosed = r.status === 'closed';
+                  const isDisbursed = r.status === 'dispatched' || r.status === 'disbursement-ready';
+                  const finSig = r.signatures?.find(s => s.level === 'finance');
+                  const coordSig = r.signatures?.find(s => s.level === 'coordinator' || s.level === 'national-coordinator');
+
+                  return (
+                    <tr key={r.id} className="hover:bg-zinc-800/30 transition-colors">
+                      <td className="py-3 px-3">
+                        <Link href={`/request/${r.id}`} className="font-bold text-teal-400 hover:underline block">
+                          {r.id}
+                        </Link>
+                        <span className="text-[10px] text-zinc-400 font-sans">{r.department} · {r.unit}</span>
+                      </td>
+
+                      <td className="py-3 px-3">
+                        <span className="text-emerald-400 font-bold block">{r.donorGrantCode || 'HN-2026-SURG-Q4'}</span>
+                        <span className="text-[10px] text-zinc-500 font-sans truncate block max-w-[150px]">{r.title}</span>
+                      </td>
+
+                      <td className="py-3 px-3 text-right font-bold text-white text-xs">
+                        {formatCurrency(r.totalValue)}
+                      </td>
+
+                      <td className="py-3 px-3 text-[11px]">
+                        {finSig ? (
+                          <div>
+                            <span className="text-teal-300 font-bold block">✓ LOCKED</span>
+                            <span className="text-[9px] text-zinc-500">{finSig.signatureStamp || 'AY/FIN/2026'}</span>
+                          </div>
+                        ) : (
+                          <span className="text-zinc-600 text-[10px]">Pending Lock</span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-3 text-[11px]">
+                        {coordSig ? (
+                          <div>
+                            <span className="text-indigo-300 font-bold block">✓ AUTHORIZED</span>
+                            <span className="text-[9px] text-zinc-500">{coordSig.signatureStamp || 'EB/CORD/2026'}</span>
+                          </div>
+                        ) : (
+                          <span className="text-zinc-600 text-[10px]">Awaiting Auth</span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-3 text-[11px]">
+                        {r.disbursementDetails ? (
+                          <div>
+                            <span className="text-emerald-300 font-bold block">{r.disbursementDetails.pvNumber}</span>
+                            <span className="text-[9px] text-zinc-500">{formatDate(r.disbursementDetails.disbursedAt)}</span>
+                          </div>
+                        ) : isClosed ? (
+                          <div>
+                            <span className="text-emerald-300 font-bold block">PV/NANI/2026/{r.id.replace('NANI-REQ-','')}</span>
+                            <span className="text-[9px] text-zinc-500">Paid & Released</span>
+                          </div>
+                        ) : (
+                          <span className="text-zinc-600 text-[10px]">Unreleased</span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-3 text-[11px]">
+                        {isClosed ? (
+                          <div>
+                            <span className="text-emerald-400 font-bold block">✓ CONFIRMED</span>
+                            <span className="text-[9px] text-zinc-500">{r.retirementDetails?.signatureStamp || 'RETIRED/2026'}</span>
+                          </div>
+                        ) : isDisbursed ? (
+                          <span className="text-amber-400 font-bold text-[10px]">⏳ Pending Confirmation</span>
+                        ) : (
+                          <span className="text-zinc-600 text-[10px]">Not yet reached</span>
+                        )}
+                      </td>
+
+                      <td className="py-3 px-3 text-center">
+                        {isClosed ? (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 whitespace-nowrap">
+                            100% RETIRED ✓
+                          </span>
+                        ) : isDisbursed ? (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 whitespace-nowrap">
+                            DISBURSED · AWAIT RETIRE
+                          </span>
+                        ) : (
+                          <span className="px-2 py-0.5 rounded-full text-[9px] font-bold bg-zinc-800 text-zinc-400 whitespace-nowrap">
+                            IN APPROVAL
+                          </span>
+                        )}
                       </td>
                     </tr>
                   );

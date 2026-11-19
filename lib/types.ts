@@ -71,6 +71,23 @@ export interface Comment {
   timestamp: string;
 }
 
+export interface DisbursementDetails {
+  pvNumber: string;
+  paymentMethod: string;
+  disbursedAt: string;
+  disbursedBy: string;
+  amount: number;
+}
+
+export interface RetirementDetails {
+  retiredAt: string;
+  retiredBy: string;
+  receiptNotes: string;
+  signatureStamp: string;
+  amountRetired: number;
+  variance?: number;
+}
+
 export interface Request {
   id: string;
   title: string;
@@ -95,6 +112,8 @@ export interface Request {
   budgetCode: string;
   donorGrantCode?: string;
   comments: Comment[];
+  disbursementDetails?: DisbursementDetails;
+  retirementDetails?: RetirementDetails;
 }
 
 export interface User {

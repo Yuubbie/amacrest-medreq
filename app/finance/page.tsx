@@ -31,6 +31,10 @@ export default function FinancePage() {
   const [requests, setRequests] = useState<Request[]>(mockRequests);
   const [activeTab, setActiveTab] = useState<'pending' | 'disburse' | 'closed'>('pending');
   const [selectedInspectReq, setSelectedInspectReq] = useState<Request | null>(null);
+  const [disburseModalReq, setDisburseModalReq] = useState<Request | null>(null);
+  const [paymentMethod, setPaymentMethod] = useState<'Direct Bank Remittance (CBN/Commercial)' | 'Hospital Petty Cash' | 'Corporate Bank Cheque'>('Direct Bank Remittance (CBN/Commercial)');
+  const [pvNumber, setPvNumber] = useState('');
+  const [paymentRef, setPaymentRef] = useState('');
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' } | null>(null);
 
   useEffect(() => {
@@ -45,6 +49,53 @@ export default function FinancePage() {
   const showToast = (message: string, type: 'success' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
+  };
+
+  // Open Disbursement Modal with Auto-Generated PV Number
+  const openDisburseModal = (req: Request) => {
+    setDisburseModalReq(req);
+    const pv = `PV/NANI/2026/${req.id.replace('NANI-REQ-', '')}`;
+    setPvNumber(pv);
+    setPaymentRef(`CBN-EFT-${Math.floor(100000 + Math.random() * 900000)}`);
+  };
+
+  // Confirm Disbursement Action (Finance Head releases funds & generates official Payment Voucher)
+  const handleConfirmDisbursement = () => {
+    if (!disburseModalReq) return;
+    const timestamp = new Date().toISOString();
+    const updated = requests.map(r => {
+      if (r.id === disburseModalReq.id) {
+        return {
+          ...r,
+          status: 'dispatched' as RequestStatus,
+          disbursementDetails: {
+            pvNumber,
+            paymentMethod: `${paymentMethod} [Ref: ${paymentRef}]`,
+            disbursedAt: timestamp,
+            disbursedBy: 'Mr. AY, FCA · Head of Finance',
+            amount: r.totalValue,
+          },
+          timeline: [
+            ...r.timeline,
+            {
+              id: Date.now().toString(),
+              action: `Funds Disbursed & Payment Voucher Issued (${pvNumber}) 💵`,
+              actor: 'Mr. AY, FCA',
+              role: 'Head of Finance & Chartered Accountant',
+              timestamp,
+              type: 'finance' as const,
+              comment: `Payment of ${formatCurrency(r.totalValue)} authorized via ${paymentMethod} (${paymentRef}). PV Ref: ${pvNumber}. Sent to ${r.requestedBy} for physical receipt confirmation & retirement.`,
+            }
+          ]
+        };
+      }
+      return r;
+    });
+
+    setRequests(updated);
+    saveStoredRequests(updated);
+    showToast(`✓ Payment disbursed & ${pvNumber} issued by Mr. AY. Sent to ${disburseModalReq.requestedBy} for receipt confirmation!`, 'success');
+    setDisburseModalReq(null);
   };
 
   // Finance Approval advances voucher to Programme Coordinator (Level 4)
@@ -86,36 +137,6 @@ export default function FinancePage() {
     setRequests(updated);
     saveStoredRequests(updated);
     showToast(`✓ Voucher ${id} approved & grant line locked by Mr. AY (Finance Head). Forwarded to Coordinator.`, 'success');
-  };
-
-  // Disburse Funds Action (Finance Head releases funds to requester)
-  const handleDisburse = (id: string) => {
-    const timestamp = new Date().toISOString();
-    const updated = requests.map(r => {
-      if (r.id === id) {
-        return {
-          ...r,
-          status: 'disbursement-ready' as RequestStatus,
-          timeline: [
-            ...r.timeline,
-            {
-              id: Date.now().toString(),
-              action: 'Funds Disbursed by Finance (Bank Remittance / Cash Issued) 💵',
-              actor: 'Mr. AY, FCA',
-              role: 'Head of Finance & Chartered Accountant',
-              timestamp,
-              type: 'finance' as const,
-              comment: 'Payment authorized and released by Mr. AY (Finance Head). Requester acknowledgment required for retirement.',
-            }
-          ]
-        };
-      }
-      return r;
-    });
-
-    setRequests(updated);
-    saveStoredRequests(updated);
-    showToast(`✓ Payment disbursed for ${id} by Mr. AY. Requester has been notified to acknowledge receipt.`, 'success');
   };
 
   const handleReject = (id: string) => {
@@ -449,11 +470,11 @@ export default function FinancePage() {
                         {formatCurrency(req.totalValue)}
                       </span>
                       <button
-                        onClick={() => handleDisburse(req.id)}
+                        onClick={() => openDisburseModal(req)}
                         className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 active:scale-95"
                       >
                         <DollarSign size={14} />
-                        <span>Disburse Payment (Issue Funds)</span>
+                        <span>Issue PV & Disburse Payment</span>
                       </button>
                     </div>
                   </div>
@@ -464,29 +485,86 @@ export default function FinancePage() {
             {activeTab === 'closed' && (
               disbursedOrClosed.length === 0 ? (
                 <div className="py-12 text-center text-zinc-500">
-                  <p className="text-xs font-bold text-zinc-400">No vouchers in disbursed or retired state.</p>
+                  <p className="text-xs font-bold text-zinc-400">No vouchers currently in disbursed or retired state.</p>
                 </div>
               ) : (
-                disbursedOrClosed.map((req) => (
-                  <div
-                    key={req.id}
-                    className="p-4 rounded-2xl bg-zinc-950/40 border border-zinc-800/80 flex items-center justify-between gap-4"
-                  >
-                    <div>
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="font-mono text-xs font-bold text-teal-400">{req.id}</span>
-                        <span className="text-[10px] text-zinc-500">{req.department} ({req.unit})</span>
-                        <StatusBadge status={req.status} />
+                disbursedOrClosed.map((req) => {
+                  const isRetired = req.status === 'closed';
+                  return (
+                    <div
+                      key={req.id}
+                      className={`p-5 rounded-2xl border transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 ${
+                        isRetired
+                          ? 'bg-zinc-950/80 border-emerald-500/30'
+                          : 'bg-zinc-950/50 border-amber-500/30'
+                      }`}
+                    >
+                      <div className="flex-1">
+                        <div className="flex flex-wrap items-center gap-2 mb-1.5">
+                          <span className="font-mono text-xs font-bold text-teal-400">{req.id}</span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 font-mono">
+                            {req.department} · {req.unit}
+                          </span>
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-mono">
+                            Grant: {req.donorGrantCode || 'HN-2026-SURG-Q4'}
+                          </span>
+                          {isRetired ? (
+                            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/30 font-bold flex items-center gap-1 font-mono">
+                              <Check size={11} strokeWidth={3} /> 100% RETIRED & CLOSED (AUDIT-READY)
+                            </span>
+                          ) : (
+                            <span className="text-[10px] px-2.5 py-0.5 rounded-full bg-amber-500/10 text-amber-300 border border-amber-500/30 font-bold flex items-center gap-1 font-mono">
+                              <Clock size={11} /> FUNDS DISBURSED · AWAITING REQUESTER RETIREMENT
+                            </span>
+                          )}
+                        </div>
+
+                        <h4 className="text-sm font-black text-white">{req.title}</h4>
+                        <p className="text-xs text-zinc-400 mt-0.5">
+                          Requested by <strong className="text-zinc-200">{req.requestedBy}</strong> ({req.requestedByRole})
+                        </p>
+
+                        {/* Audit Details */}
+                        <div className="mt-3 p-3 rounded-xl bg-zinc-900/80 border border-zinc-800/80 text-xs font-mono space-y-1">
+                          <div className="flex flex-wrap items-center justify-between gap-2 text-zinc-300">
+                            <span>PV REFERENCE: <strong className="text-teal-300">{req.disbursementDetails?.pvNumber || `PV/NANI/2026/${req.id.replace('NANI-REQ-','')}`}</strong></span>
+                            <span>METHOD: <strong className="text-zinc-200">{req.disbursementDetails?.paymentMethod || 'Bank Remittance'}</strong></span>
+                            <span>DISBURSED BY: <strong className="text-zinc-200">{req.disbursementDetails?.disbursedBy || 'Mr. AY, FCA'}</strong></span>
+                          </div>
+
+                          {isRetired && req.retirementDetails && (
+                            <div className="pt-2 border-t border-zinc-800 flex flex-wrap items-center justify-between gap-2 text-emerald-400">
+                              <span>RETIRED BY: <strong className="text-white">{req.retirementDetails.retiredBy}</strong> [Stamp: {req.retirementDetails.signatureStamp}]</span>
+                              <span>CONFIRMED: {formatDate(req.retirementDetails.retiredAt)}</span>
+                            </div>
+                          )}
+
+                          {isRetired && req.retirementDetails?.receiptNotes && (
+                            <p className="text-[11px] text-zinc-400 italic pt-1">
+                              "{req.retirementDetails.receiptNotes}"
+                            </p>
+                          )}
+
+                          {!isRetired && (
+                            <div className="pt-1 text-[11px] text-amber-400/90 flex items-center gap-1.5">
+                              <AlertTriangle size={12} />
+                              <span>Requester has been notified on their dashboard to certify physical receipt and lodge invoice slips.</span>
+                            </div>
+                          )}
+                        </div>
                       </div>
-                      <h4 className="text-xs font-bold text-white">{req.title}</h4>
-                      <p className="text-[11px] text-zinc-500 mt-0.5">Requester: {req.requestedBy}</p>
+
+                      <div className="text-right shrink-0 lg:w-44">
+                        <span className="font-mono text-lg font-black text-teal-400 block">
+                          {formatCurrency(req.totalValue)}
+                        </span>
+                        <span className="text-[10px] text-zinc-500 font-mono block mt-1">
+                          {isRetired ? 'Fully Reconciled' : 'Disbursed Balance'}
+                        </span>
+                      </div>
                     </div>
-                    <div className="text-right">
-                      <span className="font-mono text-xs font-bold text-teal-400">{formatCurrency(req.totalValue)}</span>
-                      <div className="text-[10px] text-zinc-500 font-mono">{req.donorGrantCode || 'HN-2026-SURG-Q4'}</div>
-                    </div>
-                  </div>
-                ))
+                  );
+                })
               )
             )}
           </div>
@@ -702,6 +780,123 @@ export default function FinancePage() {
                   Lock Grant & Approve
                 </button>
               </div>
+            </div>
+
+          </div>
+        </div>
+      )}
+
+      {/* ── Official Payment Voucher (PV) & Disbursement Modal ── */}
+      {disburseModalReq && (
+        <div className="fixed inset-0 z-50 bg-black/85 backdrop-blur-md flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-700/80 rounded-3xl max-w-xl w-full p-6 shadow-2xl animate-in zoom-in-95 duration-200">
+            
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+              <div className="flex items-center gap-2.5">
+                <div className="w-10 h-10 rounded-xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400">
+                  <DollarSign size={20} />
+                </div>
+                <div>
+                  <span className="text-[10px] font-mono text-emerald-400 uppercase font-bold">FINANCE DISBURSEMENT STATION</span>
+                  <h3 className="text-base font-black text-white">Issue Official Payment Voucher (PV)</h3>
+                </div>
+              </div>
+              <button
+                onClick={() => setDisburseModalReq(null)}
+                className="p-1.5 text-zinc-400 hover:text-white rounded-lg bg-zinc-800"
+              >
+                <X size={16} />
+              </button>
+            </div>
+
+            {/* Voucher Brief */}
+            <div className="my-4 p-4 rounded-2xl bg-zinc-950 border border-zinc-800 space-y-2 text-xs font-mono">
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <span className="text-zinc-500">REQUISITION:</span>
+                <span className="font-bold text-white">{disburseModalReq.id} · {disburseModalReq.title}</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <span className="text-zinc-500">REQUESTER / BENEFICIARY:</span>
+                <span className="text-teal-300 font-bold">{disburseModalReq.requestedBy} ({disburseModalReq.department} / {disburseModalReq.unit})</span>
+              </div>
+              <div className="flex justify-between items-center pb-2 border-b border-zinc-900">
+                <span className="text-zinc-500">DONOR GRANT LINE:</span>
+                <span className="text-emerald-400 font-bold">{disburseModalReq.donorGrantCode || 'HN-2026-SURG-Q4'}</span>
+              </div>
+              <div className="flex justify-between items-center pt-1 text-sm">
+                <span className="text-zinc-400 font-bold">TOTAL DISBURSEMENT:</span>
+                <strong className="text-teal-400 font-black text-base">{formatCurrency(disburseModalReq.totalValue)}</strong>
+              </div>
+            </div>
+
+            {/* Payment Fields */}
+            <div className="space-y-4 mb-6">
+              <div>
+                <label className="text-xs font-mono uppercase text-zinc-400 block mb-1">
+                  Payment Voucher (PV) Number
+                </label>
+                <input
+                  type="text"
+                  value={pvNumber}
+                  onChange={(e) => setPvNumber(e.target.value)}
+                  className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3.5 py-2.5 text-xs text-white font-mono focus:border-teal-500 outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="text-xs font-mono uppercase text-zinc-400 block mb-1">
+                    Payment Method
+                  </label>
+                  <select
+                    value={paymentMethod}
+                    onChange={(e: any) => setPaymentMethod(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-zinc-200 focus:border-teal-500 outline-none"
+                  >
+                    <option value="Direct Bank Remittance (CBN/Commercial)">Direct Bank Remittance (EFT)</option>
+                    <option value="Hospital Petty Cash">Hospital Petty Cash Voucher</option>
+                    <option value="Corporate Bank Cheque">Corporate Bank Cheque</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="text-xs font-mono uppercase text-zinc-400 block mb-1">
+                    Bank Reference / Remittance Code
+                  </label>
+                  <input
+                    type="text"
+                    value={paymentRef}
+                    onChange={(e) => setPaymentRef(e.target.value)}
+                    className="w-full bg-zinc-950 border border-zinc-800 rounded-xl px-3 py-2.5 text-xs text-white font-mono focus:border-teal-500 outline-none"
+                  />
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-teal-950/20 border border-teal-500/20 text-xs text-teal-300">
+                <p className="font-bold flex items-center gap-1.5">
+                  <ShieldCheck size={14} className="text-teal-400" />
+                  <span>Authorizing Officer: Mr. AY, FCA · Head of Finance</span>
+                </p>
+                <p className="text-[11px] text-zinc-400 mt-1">
+                  Releasing these funds will update the voucher to Disbursed and notify {disburseModalReq.requestedBy} to certify physical receipt and retire the voucher.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-4 border-t border-zinc-800">
+              <button
+                onClick={() => setDisburseModalReq(null)}
+                className="px-4 py-2.5 bg-zinc-800 text-zinc-300 hover:text-white rounded-xl text-xs font-bold transition-all"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDisbursement}
+                className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-emerald-500/20 flex items-center gap-1.5 active:scale-95"
+              >
+                <DollarSign size={14} />
+                <span>Confirm & Release Funds Now</span>
+              </button>
             </div>
 
           </div>
