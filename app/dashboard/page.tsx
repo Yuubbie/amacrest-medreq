@@ -5,17 +5,18 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
 import { mockRequests, formatCurrency, formatDate } from '@/lib/mock-data';
-import { getStoredRequests } from '@/lib/storage';
-import { Request } from '@/lib/types';
+import { getStoredRequests, saveStoredRequests } from '@/lib/storage';
+import { Request, RequestStatus } from '@/lib/types';
 import {
   Plus, Search, FileText, Clock, CheckCircle, XCircle,
   TrendingUp, AlertTriangle, Bell, ChevronRight, Filter,
-  Heart, Bus, Package, ShieldCheck, ArrowRight
+  Heart, Bus, Package, ShieldCheck, ArrowRight, Check, DollarSign, Award
 } from 'lucide-react';
 
 export default function DashboardPage() {
   const [search, setSearch] = useState('');
   const [requests, setRequests] = useState<Request[]>(mockRequests);
+  const [toast, setToast] = useState<string | null>(null);
 
   useEffect(() => {
     setRequests(getStoredRequests());
@@ -26,6 +27,44 @@ export default function DashboardPage() {
     return () => window.removeEventListener('nani_requests_updated', handleUpdate);
   }, []);
 
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // Requester Acknowledgment Action (Confirms receipt of funds/supplies and retires voucher)
+  const handleAcknowledgeReceipt = (e: React.MouseEvent, reqId: string) => {
+    e.preventDefault();
+    e.stopPropagation();
+
+    const timestamp = new Date().toISOString();
+    const updated = requests.map(r => {
+      if (r.id === reqId) {
+        return {
+          ...r,
+          status: 'closed' as RequestStatus,
+          timeline: [
+            ...r.timeline,
+            {
+              id: Date.now().toString(),
+              action: 'Receipt Confirmed & Retired by Requester ✓',
+              actor: r.requestedBy,
+              role: r.requestedByRole,
+              timestamp,
+              type: 'approved' as const,
+              comment: 'Requester confirmed physical receipt of funds/materials. Requisition retired and closed for audit.',
+            }
+          ]
+        };
+      }
+      return r;
+    });
+
+    setRequests(updated);
+    saveStoredRequests(updated);
+    showToast(`✓ Receipt confirmed for ${reqId}. Voucher closed and recorded for all donor reports.`);
+  };
+
   const allRequests = requests.filter(r =>
     r.id.toLowerCase().includes(search.toLowerCase()) ||
     r.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -34,9 +73,19 @@ export default function DashboardPage() {
 
   const displayRequests = search ? allRequests : requests;
 
+  // Awaiting acknowledgment list
+  const awaitingAck = requests.filter(r => r.status === 'disbursement-ready' || r.status === 'dispatched');
+
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
       <Navbar role="Staff Nurse" userName="Nurse Hauwa Bello" />
+
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl bg-teal-950 border border-teal-500 text-teal-300 shadow-2xl flex items-center gap-3 animate-in fade-in text-xs font-bold font-sans">
+          <div className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></div>
+          <span>{toast}</span>
+        </div>
+      )}
 
       <main className="max-w-7xl mx-auto px-4 py-8">
         
@@ -75,13 +124,44 @@ export default function DashboardPage() {
           </div>
         </div>
 
+        {/* ── Disbursed Acknowledgment Banner (High Priority) ── */}
+        {awaitingAck.length > 0 && (
+          <div className="p-5 rounded-2xl bg-gradient-to-r from-emerald-950/60 to-zinc-900 border border-emerald-500/40 mb-8 shadow-xl">
+            <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider mb-2">
+              <DollarSign size={16} />
+              <span>Action Required: Funds Disbursed by Finance ({awaitingAck.length})</span>
+            </div>
+            <p className="text-xs text-zinc-300 mb-3">
+              Finance has issued payments/materials for the vouchers below. Please confirm that you have received the funds/supplies to retire the voucher.
+            </p>
+            <div className="space-y-2">
+              {awaitingAck.map(item => (
+                <div key={item.id} className="p-3 bg-zinc-950/80 border border-zinc-800 rounded-xl flex items-center justify-between gap-3 text-xs">
+                  <div>
+                    <span className="font-mono font-bold text-teal-400">{item.id}</span>
+                    <span className="text-white font-bold ml-2">{item.title}</span>
+                    <span className="text-zinc-500 ml-2 font-mono">({formatCurrency(item.totalValue)})</span>
+                  </div>
+                  <button
+                    onClick={(e) => handleAcknowledgeReceipt(e, item.id)}
+                    className="px-4 py-1.5 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black rounded-lg text-xs flex items-center gap-1 transition-all shadow-md shadow-emerald-500/20"
+                  >
+                    <Check size={14} strokeWidth={3} />
+                    <span>Confirm Receipt & Retire</span>
+                  </button>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
         {/* ── KPI Cards ── */}
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
           {[
-            { label: 'Total Requisitions Logged', value: '12', color: 'text-teal-400', sub: 'Across Clinicals' },
-            { label: 'Pending Multi-Level Sign-Off', value: '4', color: 'text-amber-400', sub: 'In Supervisor / Finance' },
-            { label: 'Fully Approved & Disbursed', value: '6', color: 'text-emerald-400', sub: 'Cleared by Coordinator' },
-            { label: 'Total Value Requested', value: '₦3.24M', color: 'text-blue-400', sub: 'Donor Grant Covered' },
+            { label: 'Total Requisitions Logged', value: requests.length.toString(), color: 'text-teal-400', sub: 'Across 5 departments' },
+            { label: 'Pending Multi-Level Sign-Off', value: requests.filter(r => r.status === 'submitted' || r.status === 'supervisor-review' || r.status === 'finance-review' || r.status === 'coordinator-review').length.toString(), color: 'text-amber-400', sub: 'In Supervisor / Finance' },
+            { label: 'Disbursed / Retired', value: requests.filter(r => r.status === 'disbursement-ready' || r.status === 'closed' || r.status === 'approved').length.toString(), color: 'text-emerald-400', sub: 'Cleared by Leadership' },
+            { label: 'Total Value Requested', value: formatCurrency(requests.reduce((s, r) => s + r.totalValue, 0)), color: 'text-blue-400', sub: 'Donor Grant Covered' },
           ].map(card => (
             <div key={card.label} className="p-5 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
               <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">{card.label}</span>
@@ -137,7 +217,7 @@ export default function DashboardPage() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-4 border-b border-zinc-800">
             <div>
               <h2 className="text-base font-black text-white">Recent Departmental Requisitions</h2>
-              <p className="text-xs text-zinc-400">Click any voucher to view full signature trail, passenger list, or audit history.</p>
+              <p className="text-xs text-zinc-400">Click any voucher to view full signature trail, passenger list, or acknowledge disbursement.</p>
             </div>
 
             <div className="relative w-full sm:w-64">
@@ -155,6 +235,7 @@ export default function DashboardPage() {
           <div className="space-y-3">
             {displayRequests.map((req) => {
               const isTransport = req.requisitionType === 'transport' || req.unit === 'Hostel';
+              const isReadyForAck = req.status === 'disbursement-ready' || req.status === 'dispatched';
               return (
                 <Link
                   key={req.id}
@@ -190,7 +271,18 @@ export default function DashboardPage() {
 
                     <StatusBadge status={req.status} />
 
-                    <ChevronRight size={16} className="text-zinc-600 hidden sm:block" />
+                    {/* Quick Acknowledge Button right on row if ready */}
+                    {isReadyForAck ? (
+                      <button
+                        onClick={(e) => handleAcknowledgeReceipt(e, req.id)}
+                        className="px-3 py-1 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 text-xs font-bold rounded-lg flex items-center gap-1 shadow-md shadow-emerald-500/20"
+                      >
+                        <Check size={12} strokeWidth={3} />
+                        <span>Acknowledge</span>
+                      </button>
+                    ) : (
+                      <ChevronRight size={16} className="text-zinc-600 hidden sm:block" />
+                    )}
                   </div>
                 </Link>
               );

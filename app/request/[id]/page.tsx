@@ -57,21 +57,54 @@ export default function RequestDetailPage() {
 
   const addComment = () => {
     if (!comment.trim()) return;
-    setRequest(prev => prev ? {
-      ...prev,
-      comments: [...prev.comments, {
+    const updatedComments = [
+      ...request.comments,
+      {
         id: Date.now().toString(),
         author: 'Dr. Grace Mshelia',
         role: 'Director of Clinical Services',
         text: comment,
         timestamp: new Date().toISOString(),
-      }]
-    } : prev);
+      }
+    ];
+    const updatedReq = { ...request, comments: updatedComments };
+    setRequest(updatedReq);
+
+    // Save to storage
+    const all = getStoredRequests();
+    saveStoredRequests(all.map(r => r.id === request.id ? updatedReq : r));
+
     setComment('');
     showToast('Comment appended to audit trail', 'info');
   };
 
+  const handleAcknowledgeReceipt = () => {
+    const timestamp = new Date().toISOString();
+    const updatedReq: Request = {
+      ...request,
+      status: 'closed' as RequestStatus,
+      timeline: [
+        ...request.timeline,
+        {
+          id: Date.now().toString(),
+          action: 'Funds Receipt Confirmed & Retired by Requester ✓',
+          actor: request.requestedBy,
+          role: request.requestedByRole,
+          timestamp,
+          type: 'approved' as const,
+          comment: 'Requester verified physical receipt of funds / materials. Requisition permanently retired and closed for audit.',
+        }
+      ]
+    };
+
+    setRequest(updatedReq);
+    const all = getStoredRequests();
+    saveStoredRequests(all.map(r => r.id === request.id ? updatedReq : r));
+    showToast('✓ Receipt confirmed! Voucher has been permanently retired and logged for all reporting.', 'success');
+  };
+
   const isTransport = request.requisitionType === 'transport' || request.unit === 'Hostel';
+  const isDisbursed = request.status === 'disbursement-ready' || request.status === 'dispatched';
 
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
@@ -116,6 +149,29 @@ export default function RequestDetailPage() {
             </Link>
           </div>
         </div>
+
+        {/* ── Requester Acknowledgment Banner (When Disbursed) ── */}
+        {isDisbursed && (
+          <div className="p-6 rounded-2xl bg-gradient-to-r from-emerald-950/70 to-zinc-900 border border-emerald-500/50 mb-6 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-xl print:hidden">
+            <div>
+              <div className="flex items-center gap-2 text-emerald-400 font-bold text-xs uppercase tracking-wider mb-1">
+                <CheckCircle2 size={16} />
+                <span>Payment Disbursed by Finance Head (Mr. AY, FCA)</span>
+              </div>
+              <h3 className="text-base font-black text-white">Requester Physical Receipt Confirmation Required</h3>
+              <p className="text-xs text-zinc-300 mt-0.5">
+                Funds of <strong className="text-teal-300 font-mono">{formatCurrency(request.totalValue)}</strong> have been released by Finance. Confirm receipt below to close and retire this voucher for donor audits.
+              </p>
+            </div>
+            <button
+              onClick={handleAcknowledgeReceipt}
+              className="px-6 py-3 bg-emerald-500 hover:bg-emerald-400 text-zinc-950 font-black text-xs rounded-xl shadow-lg shadow-emerald-500/25 flex items-center gap-2 transition-all active:scale-95 shrink-0"
+            >
+              <Check size={16} strokeWidth={3} />
+              <span>Confirm Receipt & Retire Voucher</span>
+            </button>
+          </div>
+        )}
 
         {/* ── Official Printable Voucher Document ── */}
         <div className="p-8 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl mb-8 print:bg-white print:text-zinc-950 print:border-zinc-300 print:shadow-none">

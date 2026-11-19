@@ -1103,8 +1103,8 @@ export default function NewRequestPage() {
                             AWAITING L2
                           </span>
                         </div>
-                        <p className="font-bold text-xs text-zinc-200">Mrs. Bilkisu Umar</p>
-                        <p className="text-[10px] text-zinc-500">Finance & Grant Controller</p>
+                        <p className="font-bold text-xs text-zinc-200">Mr. AY, FCA</p>
+                        <p className="text-[10px] text-zinc-500">Head of Finance & CA</p>
                         <div className="mt-3 pt-2 border-t border-zinc-900 text-[9px] font-mono text-zinc-600">
                           Locks {donorGrantCode}
                         </div>

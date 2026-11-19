@@ -173,7 +173,7 @@ export const mockRequests: Request[] = [
     signatures: [
       { level: 'requester', actor: 'Mr. Samuel Danladi', role: 'Hostel Coordinator', timestamp: '2026-11-17T08:00:00Z', signatureStamp: 'SD/HST/2026' },
       { level: 'supervisor', actor: 'Dr. Grace Mshelia', role: 'Clinicals Dept. Head', timestamp: '2026-11-17T10:15:00Z', signatureStamp: 'GM/SUPV/2026' },
-      { level: 'finance', actor: 'Mrs. Bilkisu Umar', role: 'Finance Officer', timestamp: '2026-11-17T14:00:00Z', signatureStamp: 'BU/FIN/2026' },
+      { level: 'finance', actor: 'Mr. AY, FCA', role: 'Head of Finance & CA', timestamp: '2026-11-17T14:00:00Z', signatureStamp: 'AY/FIN/2026' },
     ],
     requestedBy: 'Mr. Samuel Danladi',
     requestedByRole: 'Hostel Coordinator',
@@ -186,7 +186,7 @@ export const mockRequests: Request[] = [
     timeline: [
       { id: 't1', action: 'Transport Requisition Submitted', actor: 'Mr. Samuel Danladi', role: 'Hostel Coordinator', timestamp: '2026-11-17T08:00:00Z', type: 'submitted' },
       { id: 't2', action: 'Supervisor Approved ✓', actor: 'Dr. Grace Mshelia', role: 'Clinicals Dept. Head', timestamp: '2026-11-17T10:15:00Z', type: 'approved' },
-      { id: 't3', action: 'Finance Approved ✓', actor: 'Mrs. Bilkisu Umar', role: 'Finance Officer', timestamp: '2026-11-17T14:00:00Z', type: 'finance', comment: 'All state rates confirmed. Donor code verified.' },
+      { id: 't3', action: 'Finance Approved ✓', actor: 'Mr. AY, FCA', role: 'Head of Finance & CA', timestamp: '2026-11-17T14:00:00Z', type: 'finance', comment: 'All state rates confirmed. Donor code verified.' },
       { id: 't4', action: 'Sent to Coordinator', actor: 'System', role: 'Automated', timestamp: '2026-11-17T14:01:00Z', type: 'coordinator' },
     ],
     comments: [],
@@ -210,7 +210,7 @@ export const mockRequests: Request[] = [
     signatures: [
       { level: 'requester', actor: 'Dr. Yemi Adeyinka', role: 'Dental Surgeon', timestamp: '2026-11-16T09:00:00Z', signatureStamp: 'YA/DEN/2026' },
       { level: 'supervisor', actor: 'Dr. Grace Mshelia', role: 'Clinicals Dept. Head', timestamp: '2026-11-16T11:00:00Z', signatureStamp: 'GM/SUPV/2026' },
-      { level: 'finance', actor: 'Mrs. Bilkisu Umar', role: 'Finance Officer', timestamp: '2026-11-16T14:00:00Z', signatureStamp: 'BU/FIN/2026' },
+      { level: 'finance', actor: 'Mr. AY, FCA', role: 'Head of Finance & CA', timestamp: '2026-11-16T14:00:00Z', signatureStamp: 'AY/FIN/2026' },
       { level: 'coordinator', actor: 'Dr. Emmanuel Bawa', role: 'Programme Coordinator', timestamp: '2026-11-17T09:00:00Z', signatureStamp: 'EB/CORD/2026' },
     ],
     requestedBy: 'Dr. Yemi Adeyinka',
@@ -224,7 +224,7 @@ export const mockRequests: Request[] = [
     timeline: [
       { id: 't1', action: 'Request Submitted', actor: 'Dr. Yemi Adeyinka', role: 'Dental Surgeon', timestamp: '2026-11-16T09:00:00Z', type: 'submitted' },
       { id: 't2', action: 'Supervisor Approved ✓', actor: 'Dr. Grace Mshelia', role: 'Clinicals Dept. Head', timestamp: '2026-11-16T11:00:00Z', type: 'approved' },
-      { id: 't3', action: 'Finance Approved ✓', actor: 'Mrs. Bilkisu Umar', role: 'Finance Officer', timestamp: '2026-11-16T14:00:00Z', type: 'finance' },
+      { id: 't3', action: 'Finance Approved ✓', actor: 'Mr. AY, FCA', role: 'Head of Finance & CA', timestamp: '2026-11-16T14:00:00Z', type: 'finance' },
       { id: 't4', action: 'Coordinator Approved ✓', actor: 'Dr. Emmanuel Bawa', role: 'Programme Coordinator', timestamp: '2026-11-17T09:00:00Z', type: 'coordinator', comment: 'Within programme budget. Approved.' },
     ],
     comments: [],
@@ -247,7 +247,7 @@ export const mockRequests: Request[] = [
     signatures: [
       { level: 'requester', actor: 'Malam Sule Tanko', role: 'Fleet Officer', timestamp: '2026-11-15T08:00:00Z', signatureStamp: 'ST/FLT/2026' },
       { level: 'supervisor', actor: 'Mr. Patrick Adaeze', role: 'Facility Head', timestamp: '2026-11-15T10:00:00Z', signatureStamp: 'PA/SUPV/2026' },
-      { level: 'finance', actor: 'Mrs. Bilkisu Umar', role: 'Finance Officer', timestamp: '2026-11-15T13:30:00Z', signatureStamp: 'BU/FIN/2026' },
+      { level: 'finance', actor: 'Mr. AY, FCA', role: 'Head of Finance & CA', timestamp: '2026-11-15T13:30:00Z', signatureStamp: 'AY/FIN/2026' },
       { level: 'coordinator', actor: 'Dr. Emmanuel Bawa', role: 'Programme Coordinator', timestamp: '2026-11-16T09:00:00Z', signatureStamp: 'EB/CORD/2026' },
     ],
     requestedBy: 'Malam Sule Tanko',
@@ -261,7 +261,7 @@ export const mockRequests: Request[] = [
     timeline: [
       { id: 't1', action: 'Request Submitted', actor: 'Malam Sule Tanko', role: 'Fleet Officer', timestamp: '2026-11-15T08:00:00Z', type: 'submitted' },
       { id: 't2', action: 'Supervisor Approved ✓', actor: 'Mr. Patrick Adaeze', role: 'Facility Head', timestamp: '2026-11-15T10:00:00Z', type: 'approved' },
-      { id: 't3', action: 'Finance Approved ✓', actor: 'Mrs. Bilkisu Umar', role: 'Finance Officer', timestamp: '2026-11-15T13:30:00Z', type: 'finance' },
+      { id: 't3', action: 'Finance Approved ✓', actor: 'Mr. AY, FCA', role: 'Head of Finance & CA', timestamp: '2026-11-15T13:30:00Z', type: 'finance' },
       { id: 't4', action: 'Coordinator Approved ✓', actor: 'Dr. Emmanuel Bawa', role: 'Programme Coordinator', timestamp: '2026-11-16T09:00:00Z', type: 'coordinator' },
     ],
     comments: [],
@@ -411,7 +411,7 @@ export const mockRequests: Request[] = [
     signatures: [
       { level: 'requester', actor: 'Mrs. Comfort Yakubu', role: 'Janitorial Supervisor', timestamp: '2026-11-16T10:00:00Z', signatureStamp: 'CY/JAN/2026' },
       { level: 'supervisor', actor: 'Mr. Patrick Adaeze', role: 'Facility Head', timestamp: '2026-11-16T12:00:00Z', signatureStamp: 'PA/SUPV/2026' },
-      { level: 'finance', actor: 'Mrs. Bilkisu Umar', role: 'Finance Officer', timestamp: '2026-11-16T15:00:00Z', signatureStamp: 'BU/FIN/2026' },
+      { level: 'finance', actor: 'Mr. AY, FCA', role: 'Head of Finance & CA', timestamp: '2026-11-16T15:00:00Z', signatureStamp: 'AY/FIN/2026' },
       { level: 'coordinator', actor: 'Dr. Emmanuel Bawa', role: 'Programme Coordinator', timestamp: '2026-11-17T09:00:00Z', signatureStamp: 'EB/CORD/2026' },
     ],
     requestedBy: 'Mrs. Comfort Yakubu',
@@ -425,7 +425,7 @@ export const mockRequests: Request[] = [
     timeline: [
       { id: 't1', action: 'Request Submitted', actor: 'Mrs. Comfort Yakubu', role: 'Janitorial Supervisor', timestamp: '2026-11-16T10:00:00Z', type: 'submitted' },
       { id: 't2', action: 'Supervisor Approved ✓', actor: 'Mr. Patrick Adaeze', role: 'Facility Head', timestamp: '2026-11-16T12:00:00Z', type: 'approved' },
-      { id: 't3', action: 'Finance Approved ✓', actor: 'Mrs. Bilkisu Umar', role: 'Finance Officer', timestamp: '2026-11-16T15:00:00Z', type: 'finance' },
+      { id: 't3', action: 'Finance Approved ✓', actor: 'Mr. AY, FCA', role: 'Head of Finance & CA', timestamp: '2026-11-16T15:00:00Z', type: 'finance' },
       { id: 't4', action: 'Coordinator Approved ✓', actor: 'Dr. Emmanuel Bawa', role: 'Programme Coordinator', timestamp: '2026-11-17T09:00:00Z', type: 'coordinator' },
     ],
     comments: [],
@@ -455,11 +455,11 @@ export const mockRequests: Request[] = [
     donorGrantCode: 'HN-2026-CAP-Q4',
     timeline: [
       { id: 't1', action: 'Request Submitted', actor: 'Mrs. Zainab Aliyu', role: 'HR Officer', timestamp: '2026-11-14T10:00:00Z', type: 'submitted' },
-      { id: 't2', action: 'Supervisor Approved ✓', actor: 'Mrs. Bilkisu Umar', role: 'HR & Admin Head', timestamp: '2026-11-14T14:00:00Z', type: 'approved' },
-      { id: 't3', action: 'Finance Rejected ✗', actor: 'Mrs. Bilkisu Umar', role: 'Finance Officer', timestamp: '2026-11-16T14:00:00Z', type: 'rejected', comment: 'Training budget Q4 exhausted. Resubmit in Q1 2027.' },
+      { id: 't2', action: 'Supervisor Approved ✓', actor: 'Hajia Amina Bello', role: 'HR Head', timestamp: '2026-11-14T14:00:00Z', type: 'approved' },
+      { id: 't3', action: 'Finance Rejected ✗', actor: 'Mr. AY, FCA', role: 'Head of Finance & CA', timestamp: '2026-11-16T14:00:00Z', type: 'rejected', comment: 'Training budget Q4 exhausted. Resubmit in Q1 2027.' },
     ],
     comments: [
-      { id: 'c1', author: 'Mrs. Bilkisu Umar', role: 'Finance Officer', text: 'HR Training budget for Q4 is exhausted. This request should be resubmitted in January 2027. Recommend keeping the same workshop booking for a Q1 date.', timestamp: '2026-11-16T14:00:00Z' },
+      { id: 'c1', author: 'Mr. AY, FCA', role: 'Head of Finance & CA', text: 'HR Training budget for Q4 is exhausted. This request should be resubmitted in January 2027. Recommend keeping the same workshop booking for a Q1 date.', timestamp: '2026-11-16T14:00:00Z' },
     ],
   },
   {

@@ -102,14 +102,14 @@ const presetUsers: PresetUser[] = [
   // 3. Finance & Grants (Level 3)
   {
     id: 'finance-head',
-    name: 'Mrs. Bilkisu Umar',
-    roleTitle: 'Senior Finance Officer & Grant Controller',
+    name: 'Mr. AY, FCA',
+    roleTitle: 'Head of Finance & Chartered Accountant',
     department: 'Finance',
     unit: 'Finance',
     roleType: 'finance',
     destination: '/finance',
-    avatar: 'BU',
-    badge: 'Level 3: Finance & Grants',
+    avatar: 'AY',
+    badge: 'Level 3: Head of Finance & CA',
     badgeColor: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
   },
 

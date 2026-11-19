@@ -163,8 +163,8 @@ export default function LandingPage() {
             <div className="p-3.5 rounded-xl bg-zinc-950 border border-teal-500/20 flex flex-col justify-between ring-1 ring-teal-500/10">
               <div>
                 <span className="text-[9px] font-bold uppercase tracking-wider text-blue-400">3 · Finance</span>
-                <p className="font-bold text-xs text-zinc-200 mt-1">Mrs. Bilkisu Umar</p>
-                <p className="text-[10px] text-zinc-500">HN-2026-SURG-Q4</p>
+                <p className="font-bold text-xs text-zinc-200 mt-1">Mr. AY, FCA</p>
+                <p className="text-[10px] text-zinc-500">Head of Finance · CA</p>
               </div>
               <div className="mt-3 pt-2 border-t border-zinc-900 flex items-center justify-between text-[10px]">
                 <span className="text-teal-300 font-mono">₦2.1M Left</span>
