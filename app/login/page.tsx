@@ -133,7 +133,7 @@ const presetUsers: PresetUser[] = [
     department: 'Executive',
     unit: 'National Office',
     roleType: 'coordinator',
-    destination: '/reports',
+    destination: '/hod?role=national',
     avatar: 'US',
     badge: 'Level 5: National Coordinator',
     badgeColor: 'bg-rose-500/10 text-rose-300 border-rose-500/20',

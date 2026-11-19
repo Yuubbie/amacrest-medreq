@@ -6,7 +6,7 @@ import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
 import { mockRequests, formatCurrency, formatDate, naniDepartments } from '@/lib/mock-data';
 import { getStoredRequests, saveStoredRequests } from '@/lib/storage';
-import { Request, RequestStatus, ApprovalSignature } from '@/lib/types';
+import { Request, RequestStatus, ApprovalSignature, ApprovalLevel } from '@/lib/types';
 import {
   Check, X, MessageSquare, AlertCircle, Clock, 
   ArrowRight, ShieldCheck, ChevronRight, Layers,
@@ -104,6 +104,8 @@ export default function HODHubPage() {
       const roleParam = urlParams.get('role');
       if (roleParam === 'coordinator') {
         setSelectedProfileId('coordinator');
+      } else if (roleParam === 'national') {
+        setSelectedProfileId('national');
       } else if (deptParam) {
         const match = supervisorProfiles.find(p => p.id.toLowerCase() === deptParam.toLowerCase() || p.departmentName.toLowerCase().includes(deptParam.toLowerCase()));
         if (match) setSelectedProfileId(match.id);
@@ -127,17 +129,19 @@ export default function HODHubPage() {
   // Filter requests based on selected supervisor desk
   const filteredRequests = requests.filter(r => {
     if (activeProfile.id === 'coordinator') {
-      return r.status === 'coordinator-review' || r.status === 'finance-review' || r.status === 'approved';
+      return r.status === 'coordinator-review' || r.status === 'finance-review' || r.status === 'approved' || r.status === 'disbursement-ready' || r.status === 'closed';
     }
     if (activeProfile.id === 'national') {
-      return r.totalValue >= 500000;
+      return r.status === 'national-coordinator-review' || r.totalValue >= 500000;
     }
     return r.department.toLowerCase() === activeProfile.departmentName.toLowerCase().replace(' department', '');
   });
 
-  const pendingCount = filteredRequests.filter(r => 
-    r.status === 'submitted' || r.status === 'supervisor-review' || r.status === 'coordinator-review'
-  ).length;
+  const pendingCount = filteredRequests.filter(r => {
+    if (activeProfile.id === 'coordinator') return r.status === 'coordinator-review';
+    if (activeProfile.id === 'national') return r.status === 'national-coordinator-review' || (r.totalValue >= 500000 && r.status === 'coordinator-review');
+    return r.status === 'submitted' || r.status === 'supervisor-review';
+  }).length;
 
   // Approve with Automatic Digital Signature Watermark
   const handleApprove = (reqId: string) => {
@@ -149,15 +153,31 @@ export default function HODHubPage() {
         const nextStatus: RequestStatus = 
           activeProfile.id === 'coordinator' 
             ? (r.totalValue >= 500000 ? 'national-coordinator-review' : 'approved')
+            : activeProfile.id === 'national'
+            ? 'approved'
             : 'finance-review';
 
+        const sigLevel: ApprovalLevel = 
+          activeProfile.id === 'national' 
+            ? 'national-coordinator' 
+            : activeProfile.id === 'coordinator' 
+            ? 'coordinator' 
+            : 'supervisor';
+
         const newSignature: ApprovalSignature = {
-          level: activeProfile.id === 'coordinator' ? 'coordinator' : 'supervisor',
+          level: sigLevel,
           actor: activeProfile.supervisorName,
           role: activeProfile.supervisorTitle,
           timestamp,
           signatureStamp: stampCode,
         };
+
+        const targetStage = 
+          nextStatus === 'finance-review' 
+            ? 'Mr. AY, FCA (Finance Head)' 
+            : nextStatus === 'national-coordinator-review' 
+            ? 'National Coordinator Directorate' 
+            : 'Finance (Ready for Disbursement)';
 
         return {
           ...r,
@@ -172,7 +192,7 @@ export default function HODHubPage() {
               role: activeProfile.supervisorTitle,
               timestamp,
               type: 'approved' as const,
-              comment: `Digitally signed [Stamp: ${stampCode}]. Forwarded to ${nextStatus === 'finance-review' ? 'Finance' : 'Next Stage'}.`,
+              comment: `Digitally signed [Stamp: ${stampCode}]. Forwarded to ${targetStage}.`,
             }
           ]
         };
@@ -182,7 +202,7 @@ export default function HODHubPage() {
 
     setRequests(updated);
     saveStoredRequests(updated);
-    showToast(`✓ Digitally Signed & Approved by ${activeProfile.supervisorName}. Forwarded to next level.`, 'success');
+    showToast(`✓ Digitally Signed & Approved by ${activeProfile.supervisorName}. Forwarded to next stage.`, 'success');
   };
 
   const handleDecline = (reqId: string) => {
@@ -339,9 +359,19 @@ export default function HODHubPage() {
         <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl">
           <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-800">
             <div>
-              <h3 className="text-base font-black text-white">Requisitions Pending Verification</h3>
+              <h3 className="text-base font-black text-white">
+                {activeProfile.id === 'coordinator' 
+                  ? 'Programme Coordinator Executive Authorization Queue'
+                  : activeProfile.id === 'national'
+                  ? 'National Directorate Ratification Queue'
+                  : 'Departmental Requisitions Pending Verification'}
+              </h3>
               <p className="text-xs text-zinc-400">
-                1-click approval immediately applies your encrypted digital signature stamp and routes to Finance.
+                {activeProfile.id === 'coordinator'
+                  ? 'Final executive approval following Finance Head (Mr. AY, FCA) budget and grant lock.'
+                  : activeProfile.id === 'national'
+                  ? 'Ratification for high-value capital expenditure (>₦500,000) and board-level compliance.'
+                  : '1-click approval immediately applies your encrypted digital signature stamp and routes to Mr. AY (Finance Head).'}
               </p>
             </div>
             <span className="text-xs font-mono text-zinc-500">{filteredRequests.length} Vouchers Listed</span>
@@ -351,7 +381,7 @@ export default function HODHubPage() {
             <div className="py-16 text-center text-zinc-500">
               <CheckCircle2 size={36} className="mx-auto text-teal-500/40 mb-3" />
               <p className="text-sm font-bold text-zinc-300">Desk Cleared</p>
-              <p className="text-xs text-zinc-500 mt-1">No requisitions currently awaiting approval in this department.</p>
+              <p className="text-xs text-zinc-500 mt-1">No requisitions currently awaiting approval in this workstation.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -359,7 +389,15 @@ export default function HODHubPage() {
                 const isTransport = req.requisitionType === 'transport' || req.unit === 'Hostel';
                 const isStoreIssue = req.requisitionType === 'store-issue';
                 const isHighValue = req.totalValue >= 500000;
-                const isApproved = req.status === 'approved' || req.status === 'finance-review' || req.status === 'coordinator-review' || req.status === 'national-coordinator-review';
+                
+                const isActionable = 
+                  activeProfile.id === 'coordinator'
+                    ? req.status === 'coordinator-review'
+                    : activeProfile.id === 'national'
+                    ? (req.status === 'national-coordinator-review' || (req.totalValue >= 500000 && req.status === 'coordinator-review'))
+                    : (req.status === 'submitted' || req.status === 'supervisor-review');
+
+                const hasAlreadySigned = req.signatures?.some(s => s.actor === activeProfile.supervisorName);
 
                 return (
                   <div
@@ -443,7 +481,7 @@ export default function HODHubPage() {
                           <span className="hidden sm:inline">Details</span>
                         </button>
 
-                        {!isApproved && (
+                        {isActionable ? (
                           <>
                             <button
                               onClick={() => handleDecline(req.id)}
@@ -458,9 +496,17 @@ export default function HODHubPage() {
                               className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-1.5 active:scale-95"
                             >
                               <Check size={14} strokeWidth={3} />
-                              <span>Sign & Approve</span>
+                              <span>Sign & Authorize</span>
                             </button>
                           </>
+                        ) : hasAlreadySigned ? (
+                          <span className="px-3 py-1.5 rounded-xl bg-teal-500/10 text-teal-300 border border-teal-500/20 text-[10px] font-mono font-bold flex items-center gap-1">
+                            <Check size={12} strokeWidth={3} /> Signed & Stamped
+                          </span>
+                        ) : (
+                          <span className="px-3 py-1.5 rounded-xl bg-zinc-800 text-zinc-400 text-[10px] font-mono">
+                            {req.status === 'finance-review' ? 'At Finance (Mr. AY)' : req.status === 'disbursement-ready' ? 'Ready to Disburse' : req.status.replace('-', ' ')}
+                          </span>
                         )}
                       </div>
 
