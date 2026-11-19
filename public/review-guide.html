@@ -1,0 +1,314 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>AMACREST Hospital - Management Review Guide</title>
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@10/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: true, theme: 'neutral' });</script>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;600&display=swap');
+    
+    @page {
+      size: A4;
+      margin: 18mm 16mm 18mm 16mm;
+    }
+    
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+      color: #1e293b;
+      background: #ffffff;
+      line-height: 1.6;
+      font-size: 13px;
+      margin: 0;
+      padding: 0;
+    }
+
+    .header-box {
+      border-bottom: 3px solid #0d9488;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .hospital-title {
+      font-size: 20px;
+      font-weight: 800;
+      color: #0f172a;
+      letter-spacing: -0.5px;
+      margin: 0;
+    }
+
+    .doc-subtitle {
+      font-size: 13px;
+      font-weight: 600;
+      color: #0d9488;
+      margin-top: 4px;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .doc-meta {
+      font-size: 11px;
+      color: #64748b;
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    h2 {
+      font-size: 15px;
+      font-weight: 800;
+      color: #0f172a;
+      border-left: 4px solid #0d9488;
+      padding-left: 10px;
+      margin-top: 24px;
+      margin-bottom: 12px;
+      letter-spacing: -0.3px;
+    }
+
+    h3 {
+      font-size: 13px;
+      font-weight: 700;
+      color: #1e293b;
+      margin-top: 14px;
+      margin-bottom: 6px;
+    }
+
+    p, li {
+      color: #334155;
+    }
+
+    .highlight-card {
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 12px 14px;
+      margin: 12px 0;
+    }
+
+    .rule-pill {
+      display: inline-block;
+      font-weight: 700;
+      font-size: 11px;
+      padding: 2px 8px;
+      border-radius: 4px;
+      margin-right: 6px;
+    }
+    .rule-mat { background: #dcfce7; color: #166534; border: 1px solid #bbf7d0; }
+    .rule-cash { background: #fef3c7; color: #92400e; border: 1px solid #fde68a; }
+
+    .step-box {
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      background: #ffffff;
+      page-break-inside: avoid;
+    }
+
+    .step-num {
+      display: inline-block;
+      width: 20px;
+      height: 20px;
+      background: #0d9488;
+      color: #fff;
+      font-weight: 800;
+      font-size: 11px;
+      border-radius: 50%;
+      text-align: center;
+      line-height: 20px;
+      margin-right: 8px;
+    }
+
+    .question-card {
+      background: #f0fdfa;
+      border-left: 3px solid #0d9488;
+      padding: 10px 14px;
+      margin-bottom: 10px;
+      border-radius: 0 6px 6px 0;
+      page-break-inside: avoid;
+    }
+
+    .question-title {
+      font-weight: 700;
+      font-size: 12px;
+      color: #0f766e;
+      margin-bottom: 4px;
+    }
+
+    .diagram-container {
+      text-align: center;
+      background: #f8fafc;
+      border: 1px solid #e2e8f0;
+      border-radius: 8px;
+      padding: 16px;
+      margin: 16px 0;
+      page-break-inside: avoid;
+    }
+
+    .footer {
+      margin-top: 30px;
+      border-top: 1px solid #e2e8f0;
+      padding-top: 12px;
+      font-size: 10px;
+      color: #94a3b8;
+      display: flex;
+      justify-content: space-between;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="header-box">
+    <div>
+      <h1 class="hospital-title">AMACREST HOSPITAL & MATERNITY</h1>
+      <div class="doc-subtitle">Digital Requisition & Departmental Approval System</div>
+    </div>
+    <div class="doc-meta">
+      <strong>Operational Review Guide</strong><br>
+      Recipient: Chartered Accountant & Management<br>
+      System Version: MedReq v2.4 (Enterprise)
+    </div>
+  </div>
+
+  <h2>1. Executive Summary & Purpose</h2>
+  <p>
+    This operational guide accompanies the live demonstration prototype built for <strong>AMACREST Hospital & Maternity</strong>. 
+    The platform eliminates paper memo requisitions, ends administrative delays, prevents unbudgeted expenditure leakages, 
+    and gives the Chartered Accountant and executive leadership 100% real-time spending and inventory control.
+  </p>
+
+  <div class="highlight-card">
+    <strong>The Core Administrative Philosophy:</strong>
+    <ul style="margin: 6px 0 0 0; padding-left: 20px;">
+      <li><strong>Line Manager Rule:</strong> Every request originates from and is signed off by the direct departmental HOD. Top management is protected from micro-managing routine supplies.</li>
+      <li><strong>Dual Pathway Split:</strong> Moving physical consumables from Central Stores is completely separated from paying cash out of the hospital bank account.</li>
+    </ul>
+  </div>
+
+  <h2>2. Hospital Process Flow & Governance Chain</h2>
+  
+  <div class="diagram-container">
+    <pre class="mermaid">
+    graph TD
+      A[1. Staff Identifies Need: Nurse / Driver / Pharmacist] --> B{Requisition Pathway}
+      B -->|Store Consumable| C[Internal Material Issue]
+      B -->|External Outflow| D[Cash / Purchase Order]
+      C --> E[2. Direct Line HOD Approval]
+      D --> E
+      E -->|Material| F[3. Central Stores: Direct Warehousing Picking]
+      E -->|Cash <= ₦100k| G[Accounts Petty Cashier: Immediate Payout]
+      E -->|Cash > ₦100k| H[4. Finance Head & CA: Budget Code Lock]
+      E -->|Capital > ₦500k| I[Chief Medical Director / Board]
+      F --> J[5. Staff Confirms Receipt: Permanent Audit Trail Sealed]
+      G --> J
+      H --> J
+      I --> J
+    </pre>
+  </div>
+
+  <div style="display: flex; gap: 12px; margin-top: 12px;">
+    <div style="flex: 1;" class="highlight-card">
+      <span class="rule-pill rule-mat">📦 Pathway A: Material Requisition</span>
+      <p style="font-size: 11px; margin-top: 6px;">
+        <strong>80% of Hospital Volume.</strong> Wards pulling consumables, gloves, syringes, and gauze from Central Stores. 
+        <em>Zero cash is touched; warehouse stock is decremented immediately.</em>
+      </p>
+    </div>
+    <div style="flex: 1;" class="highlight-card">
+      <span class="rule-pill rule-cash">💵 Pathway B: Cash & Purchase Requisition</span>
+      <p style="font-size: 11px; margin-top: 6px;">
+        <strong>20% of Hospital Volume.</strong> Emergency vehicle maintenance, generator diesel, outside vendors. 
+        <em>Directly locks against department monthly budget codes.</em>
+      </p>
+    </div>
+  </div>
+
+  <div style="page-break-before: always;"></div>
+
+  <h2>3. Step-by-Step Prototype Testing Guide</h2>
+  
+  <div class="step-box">
+    <span class="step-num">1</span><strong>Access the Live Workstation</strong>
+    <p style="font-size: 12px; margin: 4px 0 0 28px;">
+      Open the URL in any mobile browser or laptop. Click <strong>"Launch Workstation"</strong> to enter the 1-Click Role Gateway.
+    </p>
+  </div>
+
+  <div class="step-box">
+    <span class="step-num">2</span><strong>Test as Frontline Staff (Raising a Requisition)</strong>
+    <p style="font-size: 12px; margin: 4px 0 0 28px;">
+      Sign in as <strong>Malam Ibrahim (Driver)</strong> or <strong>Nurse Fatima (Ward 3)</strong>. Tap <strong>"+ New Requisition"</strong>. 
+      Select either Material or Cash. Pick catalog items or tap <strong>"+ Add Custom Item"</strong> if unlisted, then tap <strong>Submit</strong>.
+    </p>
+  </div>
+
+  <div class="step-box">
+    <span class="step-num">3</span><strong>Test Department HOD Authorization Desk (/hod)</strong>
+    <p style="font-size: 12px; margin: 4px 0 0 28px;">
+      Switch to <strong>Dr. Eze (Pharmacy)</strong> or <strong>Matron Beatrice (Nursing)</strong>. Notice inboxes are strictly siloed. 
+      For store items, tap <strong>[Approve & Send to Store]</strong>; for minor cash under ₦100k, tap <strong>[Approve Disbursement]</strong>; 
+      for capital projects over ₦500k, tap <strong>[Approve & Escalate]</strong>.
+    </p>
+  </div>
+
+  <div class="step-box">
+    <span class="step-num">4</span><strong>Test Central Stores & Opening Balance CSV Import (/inventory)</strong>
+    <p style="font-size: 12px; margin: 4px 0 0 28px;">
+      Open the Stores Register to see stock status and safety par-levels. Click <strong>"Download CSV Template"</strong> 
+      or <strong>"Import CSV File"</strong> to experience instant Excel batch ingestion.
+    </p>
+  </div>
+
+  <div class="step-box">
+    <span class="step-num">5</span><strong>Test Finance & Chartered Accountant Control Room (/finance)</strong>
+    <p style="font-size: 12px; margin: 4px 0 0 28px;">
+      View real-time department budget progress bars (Allocated vs. Spent vs. Committed) in Naira (₦) with instant monthly spend charts.
+    </p>
+  </div>
+
+  <h2>4. Management Review Questionnaire</h2>
+  <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">
+    Please share your feedback on these 6 operational points so we can fine-tune the production build to AMACREST Hospital:
+  </p>
+
+  <div class="question-card">
+    <div class="question-title">1. Hospital Department Structure & Coverage</div>
+    Are there specific clinical or administrative units currently missing from the system? 
+    <em>(e.g., Theatre, Dialysis Unit, Billing Counter, NHIA Desk, Security post?)</em>
+  </div>
+
+  <div class="question-card">
+    <div class="question-title">2. Financial Authorization Threshold Limits</div>
+    In the prototype, routine HOD approval is capped at ₦100,000, mid-tier Finance review at ₦100,000–₦500,000, and capital items above ₦500,000 require CMD sign-off. What are AMACREST Hospital's official spending limits?
+  </div>
+
+  <div class="question-card">
+    <div class="question-title">3. Petty Cash Disbursement Process</div>
+    How does the hospital currently disburse approved petty cash for drivers and emergency repairs? 
+    <em>(Direct cashier cash desk, bank transfer/EFT, or staff reimbursement?)</em>
+  </div>
+
+  <div class="question-card">
+    <div class="question-title">4. Ward Floor-Stock Replenishment</div>
+    How does Central Stores currently restock ward emergency cupboards and theatre trays?
+  </div>
+
+  <div class="question-card">
+    <div class="question-title">5. HOD Delegation & Proxy Authority</div>
+    When an HOD is in a 6-hour surgery, on night call, or on annual leave, who holds secondary approval rights?
+  </div>
+
+  <div class="question-card">
+    <div class="question-title">6. Unique Operational Blind Spots</div>
+    Are there unique administrative bottlenecks, vendor disputes, or local hospital quirks you would like the production build to resolve?
+  </div>
+
+  <div class="footer">
+    <span>AMACREST HOSPITAL & MATERNITY · MedReq Enterprise Requisition Protocol</span>
+    <span>Confidential — For Internal Hospital Management Review Only</span>
+  </div>
+
+</body>
+</html>

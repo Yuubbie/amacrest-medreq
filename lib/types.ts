@@ -1,14 +1,15 @@
 export type Urgency = 'routine' | 'priority' | 'stat';
 
-export type RequisitionType = 'material' | 'cash';
+export type RequisitionType = 'material' | 'cash' | 'store-issue' | 'transport';
 
 export type RequestStatus =
   | 'draft'
   | 'submitted'
-  | 'hod-review'
+  | 'supervisor-review'
   | 'store-review'
   | 'finance-review'
-  | 'executive-review'
+  | 'coordinator-review'
+  | 'national-coordinator-review'
   | 'disbursement-ready'
   | 'procurement-queue'
   | 'approved'
@@ -16,13 +17,40 @@ export type RequestStatus =
   | 'dispatched'
   | 'closed';
 
+export type ApprovalLevel =
+  | 'requester'
+  | 'supervisor'
+  | 'finance'
+  | 'coordinator'
+  | 'national-coordinator';
+
 export interface RequestItem {
   id: string;
+  sn?: number;
   name: string;
   quantity: number;
   unit: string;
   unitPrice: number;
   totalPrice: number;
+  transactionCode?: string;
+}
+
+export interface TransportPassenger {
+  id: string;
+  sn: number;
+  name: string;
+  type: 'patient' | 'caregiver';
+  stateOfOrigin: string;
+  transportCost: number;
+  direction: 'incoming' | 'discharge';
+}
+
+export interface ApprovalSignature {
+  level: ApprovalLevel;
+  actor: string;
+  role: string;
+  timestamp: string;
+  signatureStamp: string;
 }
 
 export interface TimelineEvent {
@@ -32,7 +60,7 @@ export interface TimelineEvent {
   role: string;
   timestamp: string;
   comment?: string;
-  type: 'submitted' | 'approved' | 'rejected' | 'queried' | 'dispatched' | 'finance' | 'procurement' | 'reviewed';
+  type: 'submitted' | 'approved' | 'rejected' | 'queried' | 'dispatched' | 'finance' | 'procurement' | 'reviewed' | 'coordinator' | 'national';
 }
 
 export interface Comment {
@@ -46,12 +74,17 @@ export interface Comment {
 export interface Request {
   id: string;
   title: string;
-  requisitionType?: RequisitionType; // 'material' = Internal store transfer | 'cash' = Financial disbursement
+  requisitionType?: RequisitionType;
   department: string;
+  unit: string;
   category: string;
+  transactionCode?: string;
   items: RequestItem[];
+  transportPassengers?: TransportPassenger[];
   urgency: Urgency;
   status: RequestStatus;
+  currentApprovalLevel?: ApprovalLevel;
+  signatures?: ApprovalSignature[];
   requestedBy: string;
   requestedByRole: string;
   createdAt: string;
@@ -60,15 +93,8 @@ export interface Request {
   justification: string;
   timeline: TimelineEvent[];
   budgetCode: string;
+  donorGrantCode?: string;
   comments: Comment[];
-}
-
-export interface Comment {
-  id: string;
-  author: string;
-  role: string;
-  text: string;
-  timestamp: string;
 }
 
 export interface User {
@@ -76,12 +102,16 @@ export interface User {
   name: string;
   role: string;
   department: string;
+  unit?: string;
   avatar: string;
 }
 
 export interface Department {
   id: string;
   name: string;
+  icon: string;
+  color: string;
+  units: string[];
   budget: number;
   spent: number;
 }
@@ -91,4 +121,10 @@ export interface BudgetItem {
   allocated: number;
   spent: number;
   committed: number;
+}
+
+export interface StateTransportRate {
+  state: string;
+  rateIncoming: number;
+  rateDischarge: number;
 }

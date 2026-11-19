@@ -4,31 +4,36 @@ import { useState } from 'react';
 import Navbar from '@/components/Navbar';
 import { 
   Upload, FileSpreadsheet, Plus, CheckCircle2, AlertCircle, 
-  Search, ArrowDownToLine, Package, RefreshCw, Layers, ShieldCheck
+  Search, ArrowDownToLine, Package, RefreshCw, Layers, ShieldCheck,
+  Send, X, Check, Heart, Building2, Trash2
 } from 'lucide-react';
+import { formatCurrency } from '@/lib/mock-data';
 
 interface InventoryItem {
   id: string;
   code: string;
   name: string;
   department: string;
+  unit: string;
   category: string;
   quantity: number;
-  unit: string;
+  unitType: string;
   unitPrice: number;
   minLevel: number;
   status: 'In Stock' | 'Low Stock' | 'Out of Stock';
 }
 
 const initialInventory: InventoryItem[] = [
-  { id: '1', code: 'PHR-001', name: 'Paracetamol Infusion 1000mg/100ml', department: 'Pharmacy', category: 'Medications', quantity: 180, unit: 'Units', unitPrice: 375, minLevel: 50, status: 'In Stock' },
-  { id: '2', code: 'LAB-014', name: 'PCR Test Reagent Kit (Complete)', department: 'Laboratory', category: 'Lab Supplies', quantity: 12, unit: 'Kits', unitPrice: 3600, minLevel: 25, status: 'Low Stock' },
-  { id: '3', code: 'NUR-089', name: 'Latex Surgical Gloves Medium (Box of 100)', department: 'Nursing (Ward 3)', category: 'PPE', quantity: 240, unit: 'Boxes', unitPrice: 620, minLevel: 80, status: 'In Stock' },
-  { id: '4', code: 'LOG-003', name: 'Toyota HiAce Ambulance Tyres (215/70 R15)', department: 'Transport & Logistics (Drivers)', category: 'Vehicle Parts', quantity: 2, unit: 'Units', unitPrice: 42000, minLevel: 4, status: 'Low Stock' },
-  { id: '5', code: 'ENV-011', name: 'Hospital-Grade Bleach (Sodium Hypochlorite 25L)', department: 'Environmental & Janitorial', category: 'Sanitation', quantity: 18, unit: 'Jerry Cans', unitPrice: 14500, minLevel: 5, status: 'In Stock' },
-  { id: '6', code: 'MNT-042', name: 'Industrial Generator Diesel (AGO)', department: 'Maintenance & Engineering', category: 'Fuel', quantity: 650, unit: 'Litres', unitPrice: 750, minLevel: 300, status: 'In Stock' },
-  { id: '7', code: 'SEC-009', name: 'Deep Cycle Tubular Inverter Battery 12V 220Ah', department: 'Security & Safety', category: 'Infrastructure', quantity: 0, unit: 'Units', unitPrice: 175000, minLevel: 2, status: 'Out of Stock' },
-  { id: '8', code: 'ADM-022', name: 'A4 Copy Printing Paper 80gsm (Carton of 5 Reams)', department: 'Administration & HR', category: 'Stationery', quantity: 35, unit: 'Cartons', unitPrice: 22500, minLevel: 10, status: 'In Stock' },
+  { id: '1', code: 'MED-001', name: 'Amoxicillin 500mg Capsules (Pack of 500)', department: 'Clinicals', unit: 'Pharmacy', category: 'Medicines', quantity: 85, unitType: 'Packs', unitPrice: 18000, minLevel: 20, status: 'In Stock' },
+  { id: '2', code: 'MED-002', name: 'Sterile Wound Dressing Packs (10x10cm)', department: 'Clinicals', unit: 'Nursing', category: 'Medical Consumables', quantity: 18, unitType: 'Packs', unitPrice: 1200, minLevel: 40, status: 'Low Stock' },
+  { id: '3', code: 'MED-004', name: 'Dental Extraction Forceps (Upper Molars)', department: 'Clinicals', unit: 'Dental Clinic', category: 'Surgical Tools', quantity: 6, unitType: 'Pairs', unitPrice: 18000, minLevel: 2, status: 'In Stock' },
+  { id: '4', code: 'MED-005', name: 'Resistance Therapy Bands Set (Post-Op Facial)', department: 'Clinicals', unit: 'Physiotherapy', category: 'Rehabilitation', quantity: 12, unitType: 'Sets', unitPrice: 8500, minLevel: 10, status: 'In Stock' },
+  { id: '5', code: 'FAC-001', name: 'Hospital-Grade Disinfectant (25L Jerry Can)', department: 'Facility', unit: 'Janitorial', category: 'Sanitation', quantity: 24, unitType: 'Jerry Cans', unitPrice: 16000, minLevel: 5, status: 'In Stock' },
+  { id: '6', code: 'FAC-002', name: 'Industrial Laundry Bleach (Sodium Hypochlorite 25L)', department: 'Facility', unit: 'Laundry', category: 'Sanitation', quantity: 4, unitType: 'Jerry Cans', unitPrice: 12000, minLevel: 10, status: 'Low Stock' },
+  { id: '7', code: 'FAC-004', name: 'Diesel Fuel AGO (Generator & Ambulance)', department: 'Facility', unit: 'Logistics/Fleet', category: 'Fuel', quantity: 850, unitType: 'Litres', unitPrice: 950, minLevel: 300, status: 'In Stock' },
+  { id: '8', code: 'ADM-002', name: 'Parboiled Rice (50kg Bag) — Kitchen Supply', department: 'Admin', unit: 'Kitchen', category: 'Nutrition', quantity: 15, unitType: 'Bags', unitPrice: 35000, minLevel: 8, status: 'In Stock' },
+  { id: '9', code: 'ADM-001', name: 'A4 Printing Paper (Carton of 5 Reams)', department: 'Admin', unit: 'Admin', category: 'Stationery', quantity: 20, unitType: 'Cartons', unitPrice: 22500, minLevel: 10, status: 'In Stock' },
+  { id: '10', code: 'MED-005', name: 'Art Therapy Coloured Pencils & Drawing Pads', department: 'Clinicals', unit: 'Art & Craft', category: 'Rehabilitation', quantity: 0, unitType: 'Sets', unitPrice: 3700, minLevel: 15, status: 'Out of Stock' },
 ];
 
 export default function InventoryPage() {
@@ -36,17 +41,27 @@ export default function InventoryPage() {
   const [search, setSearch] = useState('');
   const [deptFilter, setDeptFilter] = useState('All');
   const [showAddModal, setShowAddModal] = useState(false);
-  const [uploadSuccess, setUploadSuccess] = useState<string | null>(null);
+  const [showIssueModal, setShowIssueModal] = useState(false);
+  const [selectedIssueItem, setSelectedIssueItem] = useState<InventoryItem | null>(null);
+  const [issueQuantity, setIssueQuantity] = useState(1);
+  const [issueRecipient, setIssueRecipient] = useState('Post-Op Nursing Ward');
+  const [toast, setToast] = useState<string | null>(null);
 
-  // Manual Add Form State
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  // Add Item State
   const [newItem, setNewItem] = useState({
-    code: '',
+    code: 'MED-002',
     name: '',
-    department: 'Pharmacy',
-    category: 'General Supplies',
-    quantity: 1,
-    unit: 'Units',
-    unitPrice: 0,
+    department: 'Clinicals',
+    unit: 'Nursing',
+    category: 'Medical Consumables',
+    quantity: 10,
+    unitType: 'Units',
+    unitPrice: 1000,
     minLevel: 5,
   });
 
@@ -56,12 +71,13 @@ export default function InventoryPage() {
 
     const created: InventoryItem = {
       id: Date.now().toString(),
-      code: newItem.code || `MED-${Math.floor(100 + Math.random() * 900)}`,
+      code: newItem.code,
       name: newItem.name,
       department: newItem.department,
+      unit: newItem.unit,
       category: newItem.category,
       quantity: Number(newItem.quantity),
-      unit: newItem.unit,
+      unitType: newItem.unitType,
       unitPrice: Number(newItem.unitPrice),
       minLevel: Number(newItem.minLevel),
       status: Number(newItem.quantity) > Number(newItem.minLevel) ? 'In Stock' : Number(newItem.quantity) === 0 ? 'Out of Stock' : 'Low Stock',
@@ -69,322 +85,379 @@ export default function InventoryPage() {
 
     setItems([created, ...items]);
     setShowAddModal(false);
-    setUploadSuccess(`Successfully added custom item "${created.name}" to inventory.`);
-    setTimeout(() => setUploadSuccess(null), 4000);
+    showToast(`✓ Registered "${created.name}" in Central Store Register.`);
   };
 
-  const handleCsvSimulation = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
+  // Internal Store Issue Execution
+  const handleStoreIssue = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedIssueItem) return;
 
-    // Simulate CSV Parsing
-    setUploadSuccess(`Parsing and importing "${file.name}"...`);
-    setTimeout(() => {
-      const simulatedImport: InventoryItem[] = [
-        { id: `csv-${Date.now()}-1`, code: 'IMP-091', name: 'Catheter Foley 2-Way Silicone 16Fr', department: 'Nursing (Ward 3)', category: 'Consumables', quantity: 95, unit: 'Units', unitPrice: 1200, minLevel: 30, status: 'In Stock' },
-        { id: `csv-${Date.now()}-2`, code: 'IMP-092', name: 'Total Quartz 20W-50 Engine Oil (5L)', department: 'Transport & Logistics (Drivers)', category: 'Lubricants', quantity: 12, unit: 'Gallons', unitPrice: 18000, minLevel: 4, status: 'In Stock' },
-        { id: `csv-${Date.now()}-3`, code: 'IMP-093', name: 'Yellow Biohazard Clinical Bags', department: 'Environmental & Janitorial', category: 'Sanitation', quantity: 50, unit: 'Packs', unitPrice: 4800, minLevel: 15, status: 'In Stock' },
-      ];
-      setItems(prev => [...simulatedImport, ...prev]);
-      setUploadSuccess(`✅ 3 items successfully imported and synced from "${file.name}"!`);
-      setTimeout(() => setUploadSuccess(null), 5000);
-    }, 1200);
+    if (issueQuantity > selectedIssueItem.quantity) {
+      showToast(`Error: Requested ${issueQuantity} exceeds available stock of ${selectedIssueItem.quantity}.`);
+      return;
+    }
+
+    setItems(prev => prev.map(item => {
+      if (item.id === selectedIssueItem.id) {
+        const remaining = item.quantity - issueQuantity;
+        return {
+          ...item,
+          quantity: remaining,
+          status: remaining > item.minLevel ? 'In Stock' : remaining === 0 ? 'Out of Stock' : 'Low Stock',
+        };
+      }
+      return item;
+    }));
+
+    showToast(`✓ Issued ${issueQuantity} ${selectedIssueItem.unitType} of "${selectedIssueItem.name}" to ${issueRecipient}. Stock updated.`);
+    setShowIssueModal(false);
+    setSelectedIssueItem(null);
   };
 
   const filteredItems = items.filter(item => {
     const matchesSearch = item.name.toLowerCase().includes(search.toLowerCase()) || item.code.toLowerCase().includes(search.toLowerCase());
-    const matchesDept = deptFilter === 'All' || item.department === deptFilter;
+    const matchesDept = deptFilter === 'All' || item.department.toLowerCase() === deptFilter.toLowerCase();
     return matchesSearch && matchesDept;
   });
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar role="Store Keeper / Materials Head" userName="Mr. Babatunde Lawal" />
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
+      <Navbar role="Storekeeper & Inventory" userName="Mr. Babatunde Lawal" />
 
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl bg-teal-950 border border-teal-500 text-teal-300 shadow-2xl flex items-center gap-3 animate-in fade-in text-xs font-bold font-sans">
+          <div className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></div>
+          <span>{toast}</span>
+        </div>
+      )}
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        
         {/* Header */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-8">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-800">
           <div>
-            <div className="flex items-center gap-2">
-              <span className="px-3 py-1 bg-teal-100 text-teal-800 text-xs font-bold rounded-full uppercase tracking-wider">
-                Central Materials & Inventory Management
-              </span>
-              <span className="text-xs text-slate-400">AMACREST Hospital Store</span>
+            <div className="flex items-center gap-2 text-xs font-mono text-teal-400 mb-1">
+              <span>NOMA AID NIGERIA INITIATIVE</span>
+              <span>/</span>
+              <span>CENTRAL MEDICAL & OPERATIONAL STORES</span>
             </div>
-            <h1 className="text-2xl font-black text-slate-800 mt-2">Hospital Department Stock & Master Register</h1>
-            <p className="text-slate-500 text-sm mt-1">
-              Live database of consumables, spares, drugs & supplies with CSV batch upload & custom item entry.
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Central Store & Inventory Register
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+              Track surgical consumables, medicines, sanitation chemicals, and issue Internal Store Vouchers with automatic stock deduction.
             </p>
           </div>
 
-          {/* Action buttons */}
-          <div className="flex flex-wrap items-center gap-3">
-            <label className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-700 hover:bg-slate-50 rounded-xl text-sm font-semibold cursor-pointer shadow-sm transition-all">
-              <Upload size={16} className="text-teal-600" />
-              <span>Import CSV File</span>
-              <input type="file" accept=".csv" className="hidden" onChange={handleCsvSimulation} />
-            </label>
-
-            <a 
-              href="/inventory-template.csv" 
-              download 
-              onClick={(e) => {
-                e.preventDefault();
-                const csvContent = "data:text/csv;charset=utf-8,ItemCode,ItemName,Department,Category,Quantity,Unit,UnitPrice,MinLevel\nDRG-101,Amoxicillin 500mg,Pharmacy,Medications,50,Packs,8500,20\nTYR-202,Ambulance Tyres,Transport & Logistics (Drivers),Vehicle,4,Units,42000,2\nSAN-303,Bleach 25L,Environmental & Janitorial,Sanitation,10,JerryCans,14500,5";
-                const encodedUri = encodeURI(csvContent);
-                const link = document.createElement("a");
-                link.setAttribute("href", encodedUri);
-                link.setAttribute("download", "amacrest_inventory_template.csv");
-                document.body.appendChild(link);
-                link.click();
-              }}
-              className="flex items-center gap-2 px-4 py-2.5 bg-white border border-slate-200 text-slate-600 hover:bg-slate-50 rounded-xl text-sm font-semibold shadow-sm transition-all"
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => showToast('Exporting active inventory to CSV / Excel...')}
+              className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 flex items-center gap-2 transition-all"
             >
-              <ArrowDownToLine size={16} />
-              <span>Download CSV Template</span>
-            </a>
+              <FileSpreadsheet size={14} className="text-emerald-400" />
+              <span>Export CSV</span>
+            </button>
 
-            <button 
+            <button
               onClick={() => setShowAddModal(true)}
-              className="flex items-center gap-2 px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white rounded-xl text-sm font-semibold shadow-sm transition-all"
+              className="px-4 py-2.5 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-1.5"
             >
-              <Plus size={16} />
-              <span>Add Custom Item</span>
+              <Plus size={14} strokeWidth={3} />
+              <span>+ Register New Item</span>
             </button>
           </div>
         </div>
 
-        {/* Upload feedback banner */}
-        {uploadSuccess && (
-          <div className="mb-6 p-4 rounded-xl bg-teal-50 border border-teal-200 flex items-center gap-3 text-teal-800 text-sm font-medium animate-fadeIn">
-            <CheckCircle2 size={20} className="text-teal-600 shrink-0" />
-            <span>{uploadSuccess}</span>
-          </div>
-        )}
-
-        {/* Best Practices Banner for CA & Board */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-blue-50 flex items-center justify-center text-blue-600 shrink-0">
-              <FileSpreadsheet size={18} />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">CSV Bulk Onboarding</h4>
-              <p className="text-xs text-slate-500 mt-1">Each department uploads their opening balance spreadsheet in seconds without manual single typing.</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-amber-50 flex items-center justify-center text-amber-600 shrink-0">
-              <Layers size={18} />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">Custom / Unlisted Items</h4>
-              <p className="text-xs text-slate-500 mt-1">Allows staff to requisition non-catalog items with manual quote & justification, subject to HOD & Finance approval.</p>
-            </div>
-          </div>
-
-          <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm flex items-start gap-3">
-            <div className="w-9 h-9 rounded-lg bg-emerald-50 flex items-center justify-center text-emerald-600 shrink-0">
-              <ShieldCheck size={18} />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-slate-800">Par-Level Reorder Thresholds</h4>
-              <p className="text-xs text-slate-500 mt-1">Auto-flags stockouts before clinical procedures or ambulance transfers are disrupted.</p>
-            </div>
-          </div>
-        </div>
-
-        {/* Filter & Search Bar */}
-        <div className="bg-white p-4 rounded-xl border border-slate-200 shadow-sm mb-6 flex flex-col md:flex-row gap-4 justify-between items-center">
-          <div className="relative w-full md:w-96">
-            <Search size={16} className="absolute left-3 top-3 text-slate-400" />
-            <input 
-              type="text" 
-              placeholder="Search by item name or code..."
+        {/* ── Search & Filter Bar ── */}
+        <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="relative w-full sm:w-80">
+            <Search size={14} className="absolute left-3.5 top-3 text-zinc-500" />
+            <input
+              type="text"
+              placeholder="Search by code, drug, or item name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500"
+              className="w-full pl-9 pr-4 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:ring-1 focus:ring-teal-500 focus:outline-none"
             />
           </div>
 
-          <div className="flex items-center gap-3 w-full md:w-auto">
-            <span className="text-xs font-semibold text-slate-500 whitespace-nowrap">Filter Dept:</span>
-            <select 
-              value={deptFilter} 
+          <div className="flex items-center gap-2 w-full sm:w-auto">
+            <span className="text-xs font-bold text-zinc-400">Department:</span>
+            <select
+              value={deptFilter}
               onChange={(e) => setDeptFilter(e.target.value)}
-              className="w-full md:w-64 px-3 py-2 border border-slate-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-teal-500 bg-white"
+              className="px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
             >
-              <option value="All">All Hospital Departments</option>
-              <option value="Pharmacy">Pharmacy</option>
-              <option value="Laboratory">Laboratory</option>
-              <option value="Nursing (Ward 3)">Nursing</option>
-              <option value="Transport & Logistics (Drivers)">Transport & Logistics (Drivers)</option>
-              <option value="Environmental & Janitorial">Environmental & Janitorial</option>
-              <option value="Security & Safety">Security & Safety</option>
-              <option value="Maintenance & Engineering">Maintenance & Engineering</option>
-              <option value="Administration & HR">Administration & HR</option>
+              <option value="All">All Departments</option>
+              <option value="Clinicals">Clinicals</option>
+              <option value="Facility">Facility</option>
+              <option value="Admin">Admin</option>
             </select>
           </div>
         </div>
 
-        {/* Inventory Table */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+        {/* ── Inventory Register Table ── */}
+        <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl">
           <div className="overflow-x-auto">
-            <table className="w-full text-left border-collapse text-sm">
+            <table className="w-full text-left text-xs font-sans">
               <thead>
-                <tr className="bg-slate-50 border-b border-slate-200 text-xs font-bold text-slate-500 uppercase tracking-wider">
-                  <th className="py-3.5 px-4">Item Code</th>
-                  <th className="py-3.5 px-4">Description</th>
-                  <th className="py-3.5 px-4">Department</th>
-                  <th className="py-3.5 px-4">Available Qty</th>
-                  <th className="py-3.5 px-4">Unit Price (₦)</th>
-                  <th className="py-3.5 px-4">Total Value</th>
-                  <th className="py-3.5 px-4">Stock Status</th>
+                <tr className="border-b border-zinc-800 text-zinc-400 font-mono uppercase">
+                  <th className="py-2.5 px-3">Item Code</th>
+                  <th className="py-2.5 px-3 min-w-[220px]">Item Description</th>
+                  <th className="py-2.5 px-3">Department / Unit</th>
+                  <th className="py-2.5 px-3 text-center">Available Stock</th>
+                  <th className="py-2.5 px-3 text-right">Unit Value</th>
+                  <th className="py-2.5 px-3 text-center">Status</th>
+                  <th className="py-2.5 px-3 text-center">Quick Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-100">
-                {filteredItems.map(item => (
-                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
-                    <td className="py-3.5 px-4 font-mono text-xs font-semibold text-slate-600">{item.code}</td>
-                    <td className="py-3.5 px-4 font-bold text-slate-800">{item.name}</td>
-                    <td className="py-3.5 px-4 text-slate-600 text-xs font-medium">
-                      <span className="px-2 py-1 bg-slate-100 rounded-md">{item.department}</span>
+              <tbody className="divide-y divide-zinc-800/60 font-sans">
+                {filteredItems.map((item) => (
+                  <tr key={item.id} className="hover:bg-zinc-800/30 transition-colors">
+                    
+                    {/* Code */}
+                    <td className="py-3 px-3 font-mono font-bold text-teal-400">
+                      {item.code}
                     </td>
-                    <td className="py-3.5 px-4 font-semibold text-slate-700">
-                      {item.quantity} {item.unit}
+
+                    {/* Description */}
+                    <td className="py-3 px-3">
+                      <div className="font-bold text-white text-xs">{item.name}</div>
+                      <span className="text-[10px] text-zinc-500">{item.category}</span>
                     </td>
-                    <td className="py-3.5 px-4 text-slate-600 font-mono">
-                      ₦{item.unitPrice.toLocaleString('en-NG')}
+
+                    {/* Department / Unit */}
+                    <td className="py-3 px-3 font-mono text-zinc-300">
+                      {item.department} <span className="text-zinc-500">({item.unit})</span>
                     </td>
-                    <td className="py-3.5 px-4 font-bold text-slate-800 font-mono">
-                      ₦{(item.quantity * item.unitPrice).toLocaleString('en-NG')}
+
+                    {/* Quantity */}
+                    <td className="py-3 px-3 text-center font-mono">
+                      <span className="text-base font-black text-white">{item.quantity}</span>{' '}
+                      <span className="text-[10px] text-zinc-500">{item.unitType}</span>
                     </td>
-                    <td className="py-3.5 px-4">
-                      <span className={`px-2.5 py-1 rounded-full text-xs font-bold ${
+
+                    {/* Unit Price */}
+                    <td className="py-3 px-3 text-right font-mono font-bold text-zinc-300">
+                      {formatCurrency(item.unitPrice)}
+                    </td>
+
+                    {/* Status Badge */}
+                    <td className="py-3 px-3 text-center">
+                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono ${
                         item.status === 'In Stock' 
-                          ? 'bg-emerald-50 text-emerald-700 border border-emerald-200' 
+                          ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' 
                           : item.status === 'Low Stock'
-                          ? 'bg-amber-50 text-amber-700 border border-amber-200 animate-pulse'
-                          : 'bg-red-50 text-red-700 border border-red-200'
+                          ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
+                          : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'
                       }`}>
                         {item.status}
                       </span>
                     </td>
+
+                    {/* Store Issue Action */}
+                    <td className="py-3 px-3 text-center">
+                      <button
+                        onClick={() => {
+                          setSelectedIssueItem(item);
+                          setIssueQuantity(1);
+                          setShowIssueModal(true);
+                        }}
+                        disabled={item.quantity === 0}
+                        className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 mx-auto"
+                      >
+                        <Send size={12} />
+                        <span>Issue Store Requisition</span>
+                      </button>
+                    </td>
+
                   </tr>
                 ))}
               </tbody>
             </table>
           </div>
         </div>
-      </div>
 
-      {/* Manual Add Custom Item Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-2xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
-            <h3 className="text-lg font-black text-slate-800 mb-1">Add Custom / Unlisted Inventory Item</h3>
-            <p className="text-xs text-slate-500 mb-4">Add a new item specification not found in default hospital master catalog.</p>
+      </main>
 
-            <form onSubmit={handleManualAdd} className="space-y-4">
+      {/* ── Internal Store Issue Modal ── */}
+      {showIssueModal && selectedIssueItem && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
               <div>
-                <label className="block text-xs font-bold text-slate-700 mb-1">Item Name / Description *</label>
-                <input 
-                  type="text" 
-                  required
-                  placeholder="e.g. Special Surgical Clamp 15cm" 
-                  value={newItem.name} 
-                  onChange={(e) => setNewItem({...newItem, name: e.target.value})}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm focus:ring-2 focus:ring-teal-500"
+                <span className="text-[10px] font-mono text-cyan-400 uppercase">INTERNAL STORE ISSUE WORKFLOW</span>
+                <h3 className="text-base font-black text-white mt-0.5">Issue Stock from Central Store</h3>
+              </div>
+              <button onClick={() => setShowIssueModal(false)} className="p-1.5 text-zinc-400 hover:text-white rounded-lg bg-zinc-800">
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleStoreIssue} className="space-y-4 mt-4">
+              <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 font-mono text-xs">
+                <div className="text-zinc-400">Item: <strong className="text-white">{selectedIssueItem.name}</strong></div>
+                <div className="text-zinc-400 mt-1">Available in Store: <strong className="text-teal-400">{selectedIssueItem.quantity} {selectedIssueItem.unitType}</strong></div>
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-zinc-400 mb-1">Quantity to Issue</label>
+                <input
+                  type="number"
+                  min={1}
+                  max={selectedIssueItem.quantity}
+                  value={issueQuantity}
+                  onChange={(e) => setIssueQuantity(parseInt(e.target.value) || 1)}
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
                 />
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Department</label>
-                  <select 
-                    value={newItem.department} 
-                    onChange={(e) => setNewItem({...newItem, department: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm bg-white"
-                  >
-                    <option value="Pharmacy">Pharmacy</option>
-                    <option value="Laboratory">Laboratory</option>
-                    <option value="Nursing (Ward 3)">Nursing</option>
-                    <option value="Transport & Logistics (Drivers)">Transport (Drivers)</option>
-                    <option value="Environmental & Janitorial">Environmental</option>
-                    <option value="Security & Safety">Security</option>
-                    <option value="Maintenance & Engineering">Maintenance</option>
-                    <option value="Administration & HR">Administration</option>
-                  </select>
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Custom Item Code</label>
-                  <input 
-                    type="text" 
-                    placeholder="e.g. CUS-901" 
-                    value={newItem.code} 
-                    onChange={(e) => setNewItem({...newItem, code: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm font-mono"
-                  />
-                </div>
+              <div>
+                <label className="block text-xs font-bold text-zinc-400 mb-1">Receiving Ward / Unit</label>
+                <select
+                  value={issueRecipient}
+                  onChange={(e) => setIssueRecipient(e.target.value)}
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                >
+                  <option value="Post-Op Nursing Ward">Post-Op Nursing Ward (Ward 3)</option>
+                  <option value="Hostel Unit">Hostel Unit (Patient Welfare)</option>
+                  <option value="Pharmacy Dispensary">Pharmacy Dispensary</option>
+                  <option value="Dental Clinic">Dental Clinic</option>
+                  <option value="Kitchen Facility">Kitchen Facility</option>
+                  <option value="Janitorial Cleaning Team">Janitorial Cleaning Team</option>
+                </select>
               </div>
 
-              <div className="grid grid-cols-3 gap-3">
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Initial Qty</label>
-                  <input 
-                    type="number" 
-                    min="1"
-                    value={newItem.quantity} 
-                    onChange={(e) => setNewItem({...newItem, quantity: Number(e.target.value)})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Unit of Measure</label>
-                  <input 
-                    type="text" 
-                    placeholder="Units/Boxes/Sets" 
-                    value={newItem.unit} 
-                    onChange={(e) => setNewItem({...newItem, unit: e.target.value})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
-                  />
-                </div>
-
-                <div>
-                  <label className="block text-xs font-bold text-slate-700 mb-1">Est. Unit Price (₦)</label>
-                  <input 
-                    type="number" 
-                    min="1"
-                    required
-                    value={newItem.unitPrice || ''} 
-                    onChange={(e) => setNewItem({...newItem, unitPrice: Number(e.target.value)})}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg text-sm"
-                  />
-                </div>
-              </div>
-
-              <div className="flex justify-end gap-3 pt-4 border-t border-slate-100">
-                <button 
-                  type="button" 
-                  onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm font-semibold hover:bg-slate-50"
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setShowIssueModal(false)}
+                  className="px-4 py-2 bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold"
                 >
                   Cancel
                 </button>
-                <button 
-                  type="submit" 
-                  className="px-5 py-2 bg-teal-600 text-white rounded-lg text-sm font-bold hover:bg-teal-700 shadow-md"
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black rounded-xl text-xs flex items-center gap-1.5"
                 >
-                  Save to Inventory
+                  <Check size={14} strokeWidth={3} />
+                  <span>Confirm Issue & Deduct Stock</span>
                 </button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* ── Add Custom Item Modal ── */}
+      {showAddModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+              <h3 className="text-base font-black text-white">Register Item in Central Store</h3>
+              <button onClick={() => setShowAddModal(false)} className="p-1.5 text-zinc-400 hover:text-white rounded-lg bg-zinc-800">
+                <X size={16} />
+              </button>
+            </div>
+
+            <form onSubmit={handleManualAdd} className="space-y-4 mt-4 text-xs">
+              <div>
+                <label className="block font-bold text-zinc-400 mb-1">Item Description / Brand</label>
+                <input
+                  type="text"
+                  required
+                  placeholder="e.g. Surgical Suction Tubing (Sterile)"
+                  value={newItem.name}
+                  onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
+                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                />
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-zinc-400 mb-1">Transaction Code</label>
+                  <select
+                    value={newItem.code}
+                    onChange={(e) => setNewItem({ ...newItem, code: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-teal-300 font-mono"
+                  >
+                    <option value="MED-001">MED-001 (Medicines)</option>
+                    <option value="MED-002">MED-002 (Medical Consumables)</option>
+                    <option value="MED-003">MED-003 (Surgical Supplies)</option>
+                    <option value="FAC-001">FAC-001 (Janitorial)</option>
+                    <option value="FAC-004">FAC-004 (Fleet & Fuel)</option>
+                    <option value="ADM-002">ADM-002 (Kitchen Food)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-zinc-400 mb-1">Department</label>
+                  <select
+                    value={newItem.department}
+                    onChange={(e) => setNewItem({ ...newItem, department: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white"
+                  >
+                    <option value="Clinicals">Clinicals</option>
+                    <option value="Facility">Facility</option>
+                    <option value="Admin">Admin</option>
+                    <option value="Human Resources">Human Resources</option>
+                  </select>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-3">
+                <div>
+                  <label className="block font-bold text-zinc-400 mb-1">Initial Qty</label>
+                  <input
+                    type="number"
+                    min={1}
+                    value={newItem.quantity}
+                    onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white font-mono"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-zinc-400 mb-1">Unit</label>
+                  <input
+                    type="text"
+                    value={newItem.unitType}
+                    onChange={(e) => setNewItem({ ...newItem, unitType: e.target.value })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white"
+                  />
+                </div>
+                <div>
+                  <label className="block font-bold text-zinc-400 mb-1">Unit Price (₦)</label>
+                  <input
+                    type="number"
+                    min={0}
+                    value={newItem.unitPrice}
+                    onChange={(e) => setNewItem({ ...newItem, unitPrice: parseInt(e.target.value) || 0 })}
+                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white font-mono"
+                  />
+                </div>
+              </div>
+
+              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+                <button
+                  type="button"
+                  onClick={() => setShowAddModal(false)}
+                  className="px-4 py-2 bg-zinc-800 text-zinc-300 rounded-xl font-bold"
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  className="px-6 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black rounded-xl"
+                >
+                  Save Item
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

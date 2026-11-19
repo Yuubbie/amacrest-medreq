@@ -7,11 +7,12 @@ import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
 import ApprovalTimeline from '@/components/ApprovalTimeline';
 import { mockRequests, formatCurrency, formatDate } from '@/lib/mock-data';
-import { Request, RequestStatus, TimelineEvent } from '@/lib/types';
+import { Request, RequestStatus, TimelineEvent, ApprovalSignature } from '@/lib/types';
 import {
   ArrowLeft, Building2, User, Calendar, Tag, FileText,
   Check, X, MessageSquare, Send, Paperclip, ChevronRight,
-  DollarSign, Package, RotateCcw
+  DollarSign, Package, RotateCcw, Heart, Printer, ShieldCheck,
+  CheckCircle2, AlertTriangle, Users
 } from 'lucide-react';
 
 export default function RequestDetailPage() {
@@ -31,15 +32,15 @@ export default function RequestDetailPage() {
 
   if (!request) {
     return (
-      <div className="min-h-screen bg-slate-50">
+      <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
         <Navbar />
         <div className="max-w-4xl mx-auto px-4 py-16 text-center">
           <div className="text-6xl mb-4">🔍</div>
-          <h2 className="text-xl font-bold text-slate-700">Request Not Found</h2>
-          <p className="text-slate-500 mt-2 mb-6">The request ID "{id}" could not be found.</p>
+          <h2 className="text-xl font-bold text-white">Requisition Voucher Not Found</h2>
+          <p className="text-zinc-500 mt-2 mb-6">The voucher identifier "{id}" could not be retrieved from the ledger.</p>
           <Link href="/dashboard">
-            <button className="bg-teal-600 hover:bg-teal-700 text-white px-6 py-2.5 rounded-xl font-semibold text-sm transition-colors">
-              Back to Dashboard
+            <button className="bg-teal-500 hover:bg-teal-400 text-zinc-950 px-6 py-2.5 rounded-xl font-bold text-xs transition-colors">
+              Return to Portal Dashboard
             </button>
           </Link>
         </div>
@@ -47,282 +48,339 @@ export default function RequestDetailPage() {
     );
   }
 
-  const updateStatus = (status: RequestStatus, action: string, comment?: string) => {
-    const newEvent: TimelineEvent = {
-      id: Date.now().toString(),
-      action,
-      actor: 'Dr. Emmanuel Okafor',
-      role: 'Head of Department',
-      timestamp: new Date().toISOString(),
-      type: status === 'approved' || status === 'finance-review' ? 'approved' :
-            status === 'rejected' ? 'rejected' : 'queried',
-      comment,
-    };
-    setRequest(prev => prev ? { ...prev, status, timeline: [...prev.timeline, newEvent] } : prev);
-  };
-
   const addComment = () => {
     if (!comment.trim()) return;
     setRequest(prev => prev ? {
       ...prev,
       comments: [...prev.comments, {
         id: Date.now().toString(),
-        author: 'Dr. Emmanuel Okafor',
-        role: 'Head of Department',
+        author: 'Dr. Grace Mshelia',
+        role: 'Director of Clinical Services',
         text: comment,
         timestamp: new Date().toISOString(),
       }]
     } : prev);
     setComment('');
-    showToast('Comment added', 'info');
+    showToast('Comment appended to audit trail', 'info');
   };
 
-  const isPending = ['submitted', 'hod-review'].includes(request.status);
-  const isFinancePending = ['finance-review', 'executive-review'].includes(request.status);
+  const isTransport = request.requisitionType === 'transport' || request.unit === 'Hostel';
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar role="Head of Department" userName="Dr. Emmanuel Okafor" />
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
+      <div className="print:hidden">
+        <Navbar role="Staff Reviewer" userName="Nurse Hauwa Bello" />
+      </div>
 
       {toast && (
-        <div className={`fixed top-20 right-4 z-50 px-5 py-3 rounded-xl shadow-lg text-white text-sm font-medium ${
-          toast.type === 'success' ? 'bg-green-600' :
-          toast.type === 'error' ? 'bg-red-600' : 'bg-blue-600'
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl border shadow-2xl flex items-center gap-3 animate-in fade-in text-xs font-bold font-sans ${
+          toast.type === 'success' ? 'bg-teal-950 border-teal-500 text-teal-300' :
+          toast.type === 'error' ? 'bg-rose-950 border-rose-500 text-rose-300' : 'bg-zinc-900 border-zinc-700 text-zinc-300'
         }`}>
-          {toast.msg}
+          <span>{toast.msg}</span>
         </div>
       )}
 
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Breadcrumb */}
-        <div className="flex items-center gap-2 text-sm text-slate-500 mb-6">
-          <Link href="/dashboard" className="hover:text-teal-600 flex items-center gap-1 transition-colors">
-            <ArrowLeft size={14} /> Dashboard
-          </Link>
-          <ChevronRight size={12} />
-          <Link href="/hod" className="hover:text-teal-600 transition-colors">HOD Queue</Link>
-          <ChevronRight size={12} />
-          <span className="text-slate-800 font-medium">{request.id}</span>
-        </div>
+      <main className="max-w-6xl mx-auto px-4 py-8">
+        
+        {/* Breadcrumb & Actions */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 print:hidden">
+          <div className="flex items-center gap-2 text-xs font-mono text-zinc-400">
+            <Link href="/dashboard" className="hover:text-teal-400 flex items-center gap-1 transition-colors">
+              <ArrowLeft size={14} /> Back to Dashboard
+            </Link>
+            <span>/</span>
+            <span className="text-teal-400">{request.id}</span>
+          </div>
 
-        {/* Request header */}
-        <div className="bg-white rounded-xl border border-slate-200 p-6 mb-6">
-          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <span className="text-sm font-mono font-bold text-teal-600 bg-teal-50 px-3 py-1 rounded-lg">
-                  {request.id}
-                </span>
-                <StatusBadge status={request.status} />
-                <UrgencyBadge urgency={request.urgency} />
-              </div>
-              <h1 className="text-xl font-bold text-slate-800">{request.title}</h1>
-              <p className="text-slate-500 text-sm mt-1">{request.department} · {request.category}</p>
-            </div>
-            <div className="text-right">
-              <div className="text-2xl font-black text-slate-800">{formatCurrency(request.totalValue)}</div>
-              <div className="text-xs text-slate-400 mt-0.5">{request.items.length} line item{request.items.length > 1 ? 's' : ''}</div>
-            </div>
+          <div className="flex items-center gap-3">
+            <button
+              onClick={() => window.print()}
+              className="px-4 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 flex items-center gap-1.5 transition-all"
+            >
+              <Printer size={14} className="text-teal-400" />
+              <span>Print Official Voucher</span>
+            </button>
+            <Link
+              href="/hod"
+              className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black rounded-xl text-xs transition-all shadow-lg shadow-teal-500/20"
+            >
+              Supervisor Desk
+            </Link>
           </div>
         </div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-5 gap-6">
-          {/* LEFT COLUMN */}
-          <div className="lg:col-span-3 space-y-6">
-
-            {/* Request details */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-base font-bold text-slate-800 mb-4">Request Details</h2>
-              <div className="grid grid-cols-2 gap-4 mb-5">
-                {[
-                  { icon: Building2, label: 'Department', value: request.department },
-                  { icon: User, label: 'Requested By', value: request.requestedBy },
-                  { icon: Tag, label: 'Category', value: request.category },
-                  { icon: Calendar, label: 'Created', value: formatDate(request.createdAt) },
-                  { icon: FileText, label: 'Budget Code', value: request.budgetCode },
-                  { icon: Calendar, label: 'Last Updated', value: formatDate(request.updatedAt) },
-                ].map(item => {
-                  const Icon = item.icon;
-                  return (
-                    <div key={item.label}>
-                      <div className="flex items-center gap-1.5 mb-1">
-                        <Icon size={12} className="text-slate-400" />
-                        <span className="text-xs text-slate-500 font-medium uppercase tracking-wide">{item.label}</span>
-                      </div>
-                      <p className="text-sm font-semibold text-slate-700">{item.value}</p>
-                    </div>
-                  );
-                })}
+        {/* ── Official Printable Voucher Document ── */}
+        <div className="p-8 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl mb-8 print:bg-white print:text-zinc-950 print:border-zinc-300 print:shadow-none">
+          
+          {/* Header */}
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-zinc-800 print:border-zinc-300 gap-4">
+            <div className="flex items-center gap-3">
+              <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 print:bg-teal-50">
+                <Heart size={24} strokeWidth={2.5} />
               </div>
-
-              {/* Justification */}
-              <div className="bg-slate-50 rounded-lg p-4">
-                <p className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Clinical Justification</p>
-                <p className="text-sm text-slate-700 leading-relaxed">{request.justification}</p>
+              <div>
+                <h1 className="text-xl font-black text-white print:text-zinc-900 tracking-tight">
+                  NOMA AID NIGERIA INITIATIVE (NANI)
+                </h1>
+                <p className="text-xs text-teal-400 print:text-teal-700 font-mono">
+                  OFFICIAL ELECTRONIC REQUISITION VOUCHER
+                </p>
               </div>
             </div>
 
-            {/* Items table */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-base font-bold text-slate-800 mb-4">Requested Items</h2>
+            <div className="text-right font-mono text-xs text-zinc-400 print:text-zinc-600">
+              <div>Voucher Ref: <strong className="text-teal-400 print:text-zinc-900">{request.id}</strong></div>
+              <div>Date Raised: <strong className="text-white print:text-zinc-900">{formatDate(request.createdAt)}</strong></div>
+            </div>
+          </div>
+
+          {/* Metadata Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-b border-zinc-800 print:border-zinc-300 text-xs">
+            <div>
+              <span className="text-zinc-500 font-mono block">DEPARTMENT / UNIT</span>
+              <strong className="text-white print:text-zinc-900 text-sm">{request.department} ({request.unit})</strong>
+            </div>
+            <div>
+              <span className="text-zinc-500 font-mono block">REQUESTER</span>
+              <strong className="text-white print:text-zinc-900 text-sm">{request.requestedBy}</strong>
+              <div className="text-[10px] text-zinc-500">{request.requestedByRole}</div>
+            </div>
+            <div>
+              <span className="text-zinc-500 font-mono block">DONOR GRANT LINE</span>
+              <strong className="text-emerald-400 print:text-emerald-700 text-sm font-mono">{request.donorGrantCode || 'HN-2026-SURG-Q4'}</strong>
+            </div>
+            <div>
+              <span className="text-zinc-500 font-mono block">TOTAL REQUISITION VALUE</span>
+              <strong className="text-teal-400 print:text-teal-700 text-lg font-black font-mono">{formatCurrency(request.totalValue)}</strong>
+            </div>
+          </div>
+
+          {/* Operational Case Memo */}
+          <div className="py-4 border-b border-zinc-800 print:border-zinc-300 text-xs">
+            <span className="text-zinc-500 font-mono block mb-1">OPERATIONAL JUSTIFICATION / CLINICAL CASE MEMO</span>
+            <p className="text-zinc-300 print:text-zinc-800 bg-zinc-950 print:bg-zinc-100 p-3 rounded-xl border border-zinc-800 print:border-zinc-200 italic">
+              "{request.justification}"
+            </p>
+          </div>
+
+          {/* Schedule of Items / Transport Passengers */}
+          <div className="py-6 border-b border-zinc-800 print:border-zinc-300">
+            <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 print:text-zinc-600 mb-3">
+              {isTransport ? 'PASSENGER TRANSPORT SCHEDULE (STATE-RATED)' : 'SCHEDULE OF LINE ITEMS & TRANSACTION CODES'}
+            </h3>
+
+            {isTransport && request.transportPassengers && request.transportPassengers.length > 0 ? (
               <div className="overflow-x-auto">
-                <table className="w-full text-sm">
+                <table className="w-full text-left text-xs font-mono">
                   <thead>
-                    <tr className="border-b border-slate-100">
-                      <th className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wide pb-3">Item Description</th>
-                      <th className="text-center text-xs font-semibold text-slate-500 uppercase tracking-wide pb-3">Qty</th>
-                      <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wide pb-3">Unit Price</th>
-                      <th className="text-right text-xs font-semibold text-slate-500 uppercase tracking-wide pb-3">Total</th>
+                    <tr className="border-b border-zinc-800 print:border-zinc-300 text-zinc-400 uppercase">
+                      <th className="py-2 px-2 text-center w-12">S/N</th>
+                      <th className="py-2 px-3">Passenger Full Name</th>
+                      <th className="py-2 px-3">Role / Status</th>
+                      <th className="py-2 px-3">State of Origin</th>
+                      <th className="py-2 px-3">Direction</th>
+                      <th className="py-2 px-3 text-right">Fixed State Fare</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-50">
-                    {request.items.map(item => (
-                      <tr key={item.id}>
-                        <td className="py-3 font-medium text-slate-700">{item.name}</td>
-                        <td className="py-3 text-center text-slate-600">{item.quantity} {item.unit}</td>
-                        <td className="py-3 text-right text-slate-600">{formatCurrency(item.unitPrice)}</td>
-                        <td className="py-3 text-right font-semibold text-slate-700">{formatCurrency(item.totalPrice)}</td>
+                  <tbody className="divide-y divide-zinc-800/60 print:divide-zinc-200">
+                    {request.transportPassengers.map(p => (
+                      <tr key={p.id}>
+                        <td className="py-2.5 px-2 text-center text-zinc-500">{p.sn}</td>
+                        <td className="py-2.5 px-3 font-sans font-bold text-white print:text-zinc-900">{p.name}</td>
+                        <td className="py-2.5 px-3 uppercase text-zinc-400">{p.type}</td>
+                        <td className="py-2.5 px-3 text-teal-400 print:text-teal-700">{p.stateOfOrigin}</td>
+                        <td className="py-2.5 px-3 text-zinc-300">{p.direction}</td>
+                        <td className="py-2.5 px-3 text-right font-bold text-teal-400 print:text-zinc-900">{formatCurrency(p.transportCost)}</td>
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot>
-                    <tr className="border-t-2 border-teal-200">
-                      <td colSpan={3} className="pt-3 font-bold text-slate-800">Grand Total</td>
-                      <td className="pt-3 text-right font-black text-teal-700 text-base">{formatCurrency(request.totalValue)}</td>
-                    </tr>
-                  </tfoot>
                 </table>
               </div>
-            </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead>
+                    <tr className="border-b border-zinc-800 print:border-zinc-300 text-zinc-400 uppercase">
+                      <th className="py-2 px-2 text-center w-12">S/N</th>
+                      <th className="py-2 px-3">Description</th>
+                      <th className="py-2 px-3">Code</th>
+                      <th className="py-2 px-3 text-center">Qty</th>
+                      <th className="py-2 px-3">Unit</th>
+                      <th className="py-2 px-3 text-right">Unit Price</th>
+                      <th className="py-2 px-3 text-right">Total Price</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60 print:divide-zinc-200">
+                    {request.items.map((item, idx) => (
+                      <tr key={item.id}>
+                        <td className="py-2.5 px-2 text-center text-zinc-500">{item.sn || idx + 1}</td>
+                        <td className="py-2.5 px-3 font-sans font-bold text-white print:text-zinc-900">{item.name}</td>
+                        <td className="py-2.5 px-3 text-teal-400 print:text-teal-700">{item.transactionCode || 'MED-002'}</td>
+                        <td className="py-2.5 px-3 text-center">{item.quantity}</td>
+                        <td className="py-2.5 px-3 text-zinc-400">{item.unit}</td>
+                        <td className="py-2.5 px-3 text-right text-zinc-300">{formatCurrency(item.unitPrice)}</td>
+                        <td className="py-2.5 px-3 text-right font-bold text-teal-400 print:text-zinc-900">{formatCurrency(item.totalPrice)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
 
-            {/* Attachments placeholder */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-base font-bold text-slate-800 mb-3">Attachments</h2>
-              <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
-                <Paperclip size={16} className="text-slate-400" />
-                <div>
-                  <p className="text-sm font-medium text-slate-700">Stock_verification_{request.id}.pdf</p>
-                  <p className="text-xs text-slate-400">48 KB · Uploaded by {request.requestedBy.split(' ')[0]}</p>
+          {/* ── Digital Signature Trail & Watermark Stamps ── */}
+          <div className="pt-6">
+            <h3 className="text-xs font-mono uppercase tracking-wider text-teal-400 print:text-teal-700 mb-4">
+              4-LEVEL APPROVAL CHAIN & DIGITAL SIGNATURE WATERMARKS
+            </h3>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+              
+              {/* Level 1: Requester */}
+              <div className="p-4 rounded-xl bg-teal-950/20 border border-teal-500/40 print:border-zinc-300 print:bg-zinc-50">
+                <div className="flex items-center justify-between mb-2">
+                  <span className="text-[10px] font-mono text-teal-400 font-bold">LEVEL 1 · REQUESTER</span>
+                  <span className="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[9px] font-bold">SIGNED ✓</span>
+                </div>
+                <p className="font-bold text-xs text-white print:text-zinc-900">{request.requestedBy}</p>
+                <p className="text-[10px] text-zinc-500">{request.requestedByRole}</p>
+                <div className="mt-3 pt-2 border-t border-teal-500/20 text-[9px] font-mono text-teal-400/80">
+                  STAMP: {request.requestedBy.split(' ').map(n=>n[0]).join('')}/VOUCH/2026
                 </div>
               </div>
+
+              {/* Level 2: Supervisor */}
+              {request.signatures?.find(s => s.level === 'supervisor') ? (
+                <div className="p-4 rounded-xl bg-teal-950/20 border border-teal-500/40 print:border-zinc-300 print:bg-zinc-50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-mono text-teal-400 font-bold">LEVEL 2 · SUPERVISOR</span>
+                    <span className="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[9px] font-bold">SIGNED ✓</span>
+                  </div>
+                  <p className="font-bold text-xs text-white print:text-zinc-900">
+                    {request.signatures.find(s => s.level === 'supervisor')?.actor}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">
+                    {request.signatures.find(s => s.level === 'supervisor')?.role}
+                  </p>
+                  <div className="mt-3 pt-2 border-t border-teal-500/20 text-[9px] font-mono text-teal-400/80">
+                    STAMP: {request.signatures.find(s => s.level === 'supervisor')?.signatureStamp}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 opacity-60">
+                  <span className="text-[10px] font-mono text-zinc-500 font-bold block mb-1">LEVEL 2 · SUPERVISOR</span>
+                  <p className="font-bold text-xs text-zinc-400">Unit / Dept Head</p>
+                  <p className="text-[10px] text-zinc-600">Pending Review</p>
+                </div>
+              )}
+
+              {/* Level 3: Finance */}
+              {request.signatures?.find(s => s.level === 'finance') ? (
+                <div className="p-4 rounded-xl bg-teal-950/20 border border-teal-500/40 print:border-zinc-300 print:bg-zinc-50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-mono text-teal-400 font-bold">LEVEL 3 · FINANCE</span>
+                    <span className="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[9px] font-bold">LOCKED ✓</span>
+                  </div>
+                  <p className="font-bold text-xs text-white print:text-zinc-900">
+                    {request.signatures.find(s => s.level === 'finance')?.actor}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">Finance & Grant Controller</p>
+                  <div className="mt-3 pt-2 border-t border-teal-500/20 text-[9px] font-mono text-teal-400/80">
+                    STAMP: {request.signatures.find(s => s.level === 'finance')?.signatureStamp}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 opacity-60">
+                  <span className="text-[10px] font-mono text-zinc-500 font-bold block mb-1">LEVEL 3 · FINANCE</span>
+                  <p className="font-bold text-xs text-zinc-400">Grant Controller</p>
+                  <p className="text-[10px] text-zinc-600">Pending Level 2</p>
+                </div>
+              )}
+
+              {/* Level 4: Coordinator */}
+              {request.signatures?.find(s => s.level === 'coordinator') ? (
+                <div className="p-4 rounded-xl bg-teal-950/20 border border-teal-500/40 print:border-zinc-300 print:bg-zinc-50">
+                  <div className="flex items-center justify-between mb-2">
+                    <span className="text-[10px] font-mono text-teal-400 font-bold">LEVEL 4 · COORDINATOR</span>
+                    <span className="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[9px] font-bold">RATIFIED ✓</span>
+                  </div>
+                  <p className="font-bold text-xs text-white print:text-zinc-900">
+                    {request.signatures.find(s => s.level === 'coordinator')?.actor}
+                  </p>
+                  <p className="text-[10px] text-zinc-500">Programme Coordinator</p>
+                  <div className="mt-3 pt-2 border-t border-teal-500/20 text-[9px] font-mono text-teal-400/80">
+                    STAMP: {request.signatures.find(s => s.level === 'coordinator')?.signatureStamp}
+                  </div>
+                </div>
+              ) : (
+                <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 opacity-60">
+                  <span className="text-[10px] font-mono text-zinc-500 font-bold block mb-1">LEVEL 4 · COORDINATOR</span>
+                  <p className="font-bold text-xs text-zinc-400">Programme Coordinator</p>
+                  <p className="text-[10px] text-zinc-600">Pending Level 3</p>
+                </div>
+              )}
+
+            </div>
+          </div>
+
+        </div>
+
+        {/* ── Timeline & Discussion Box ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 print:hidden">
+          
+          {/* Audit Timeline */}
+          <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-xl">
+            <h3 className="text-sm font-black text-white mb-4">Permanent Audit Log Trail</h3>
+            <ApprovalTimeline events={request.timeline} />
+          </div>
+
+          {/* Internal Memo Notes */}
+          <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-xl flex flex-col justify-between">
+            <div>
+              <h3 className="text-sm font-black text-white mb-3">Internal Voucher Notes & Queries</h3>
+              
+              <div className="space-y-2.5 max-h-56 overflow-y-auto pr-1">
+                {request.comments.length === 0 ? (
+                  <p className="text-xs text-zinc-500 italic py-4">No internal audit notes attached to this voucher.</p>
+                ) : (
+                  request.comments.map(c => (
+                    <div key={c.id} className="p-3 rounded-xl bg-zinc-950 border border-zinc-800 text-xs">
+                      <div className="flex items-center justify-between text-zinc-400 mb-1">
+                        <strong className="text-zinc-200">{c.author}</strong>
+                        <span className="text-[10px] font-mono">{formatDate(c.timestamp)}</span>
+                      </div>
+                      <p className="text-zinc-300">{c.text}</p>
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
 
-            {/* Comments */}
-            <div className="bg-white rounded-xl border border-slate-200 p-6">
-              <h2 className="text-base font-bold text-slate-800 mb-4">Comments ({request.comments.length})</h2>
-              <div className="space-y-4 mb-5">
-                {request.comments.length === 0 && (
-                  <p className="text-sm text-slate-400 italic">No comments yet.</p>
-                )}
-                {request.comments.map(c => (
-                  <div key={c.id} className="flex gap-3">
-                    <div className="w-8 h-8 bg-teal-100 rounded-full flex items-center justify-center flex-shrink-0">
-                      <span className="text-xs font-bold text-teal-700">
-                        {c.author.split(' ').map(n => n[0]).join('').slice(0, 2)}
-                      </span>
-                    </div>
-                    <div className="flex-1">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm font-semibold text-slate-700">{c.author}</span>
-                        <span className="text-xs text-slate-400">· {c.role}</span>
-                        <span className="text-xs text-slate-400">· {formatDate(c.timestamp)}</span>
-                      </div>
-                      <p className="text-sm text-slate-600 bg-slate-50 rounded-lg px-3 py-2">{c.text}</p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-              {/* Comment input */}
+            <div className="mt-4 pt-3 border-t border-zinc-800">
               <div className="flex gap-2">
                 <input
                   type="text"
+                  placeholder="Append audit query or note..."
                   value={comment}
-                  onChange={e => setComment(e.target.value)}
-                  onKeyDown={e => e.key === 'Enter' && addComment()}
-                  placeholder="Add a comment..."
-                  className="flex-1 border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400"
+                  onChange={(e) => setComment(e.target.value)}
+                  className="flex-1 px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:outline-none focus:ring-1 focus:ring-teal-500"
                 />
                 <button
                   onClick={addComment}
-                  className="bg-teal-600 hover:bg-teal-700 text-white p-2.5 rounded-lg transition-colors flex-shrink-0"
+                  className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-bold text-xs rounded-xl flex items-center gap-1 transition-all"
                 >
-                  <Send size={16} />
+                  <Send size={13} />
+                  <span>Send</span>
                 </button>
               </div>
             </div>
+
           </div>
 
-          {/* RIGHT COLUMN */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Action bar */}
-            {(isPending || isFinancePending || request.status === 'rejected') && (
-              <div className="bg-white rounded-xl border border-slate-200 p-5">
-                <h2 className="text-base font-bold text-slate-800 mb-4">Actions</h2>
-                {isPending && (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => { updateStatus('finance-review', 'HOD Approved'); showToast(`${request.id} approved ✓`, 'success'); }}
-                      className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors"
-                    >
-                      <Check size={16} /> Approve Request
-                    </button>
-                    <button
-                      onClick={() => { updateStatus('rejected', 'HOD Rejected'); showToast(`${request.id} rejected`, 'error'); }}
-                      className="w-full flex items-center justify-center gap-2 bg-red-50 hover:bg-red-100 text-red-700 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-red-200"
-                    >
-                      <X size={16} /> Reject Request
-                    </button>
-                    <button
-                      onClick={() => { updateStatus('hod-review', 'HOD Queried — Awaiting Clarification'); showToast('Query sent to requester', 'info'); }}
-                      className="w-full flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-amber-200"
-                    >
-                      <MessageSquare size={16} /> Send Query
-                    </button>
-                  </div>
-                )}
-                {isFinancePending && (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => { updateStatus('approved', 'Finance Payment Approved'); showToast('Payment approved ✓', 'success'); }}
-                      className="w-full flex items-center justify-center gap-2 bg-green-600 hover:bg-green-700 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors"
-                    >
-                      <DollarSign size={16} /> Approve Payment
-                    </button>
-                    <button
-                      onClick={() => { showToast('Concern raised — Finance team notified', 'info'); }}
-                      className="w-full flex items-center justify-center gap-2 bg-amber-50 hover:bg-amber-100 text-amber-700 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-amber-200"
-                    >
-                      <MessageSquare size={16} /> Raise Concern
-                    </button>
-                  </div>
-                )}
-                {request.status === 'rejected' && (
-                  <div className="space-y-2">
-                    <button
-                      onClick={() => { updateStatus('submitted', 'Request Resubmitted'); showToast('Request resubmitted ✓', 'success'); }}
-                      className="w-full flex items-center justify-center gap-2 bg-teal-600 hover:bg-teal-700 text-white py-2.5 rounded-xl font-semibold text-sm transition-colors"
-                    >
-                      <RotateCcw size={16} /> Resubmit Request
-                    </button>
-                    <button
-                      onClick={() => { updateStatus('draft', 'Request Cancelled by Staff'); showToast('Request cancelled', 'info'); }}
-                      className="w-full flex items-center justify-center gap-2 bg-slate-50 hover:bg-slate-100 text-slate-600 py-2.5 rounded-xl font-semibold text-sm transition-colors border border-slate-200"
-                    >
-                      <X size={16} /> Cancel Request
-                    </button>
-                  </div>
-                )}
-              </div>
-            )}
-
-            {/* Approval Timeline */}
-            <div className="bg-white rounded-xl border border-slate-200 p-5">
-              <h2 className="text-base font-bold text-slate-800 mb-5">Approval Trail</h2>
-              <ApprovalTimeline events={request.timeline} />
-            </div>
-          </div>
         </div>
-      </div>
+
+      </main>
     </div>
   );
 }

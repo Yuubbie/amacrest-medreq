@@ -4,427 +4,556 @@ import { useState } from 'react';
 import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
-import { mockRequests, formatCurrency, formatDate } from '@/lib/mock-data';
-import { Request, RequestStatus } from '@/lib/types';
+import { mockRequests, formatCurrency, formatDate, naniDepartments } from '@/lib/mock-data';
+import { Request, RequestStatus, ApprovalSignature } from '@/lib/types';
 import {
   Check, X, MessageSquare, AlertCircle, Clock, 
   ArrowRight, ShieldCheck, ChevronRight, Layers,
-  Building2, DollarSign, Package, UserCheck, Send, Bell
+  Building2, DollarSign, Package, UserCheck, Send, Bell,
+  Award, Heart, Users, FileText, CheckCircle2, AlertTriangle, Eye
 } from 'lucide-react';
 
-interface DepartmentGroup {
+interface SupervisorProfile {
   id: string;
-  name: string;
-  hodName: string;
-  hodTitle: string;
-  roleIcon: string;
-  color: string;
+  departmentId: string;
+  departmentName: string;
+  supervisorName: string;
+  supervisorTitle: string;
+  level: string;
+  icon: string;
   description: string;
 }
 
-const departmentGroups: DepartmentGroup[] = [
+const supervisorProfiles: SupervisorProfile[] = [
   {
-    id: 'Pharmacy',
-    name: 'Pharmacy Services',
-    hodName: 'Dr. Chinedu Eze',
-    hodTitle: 'Director of Pharmacy Services',
-    roleIcon: '💊',
-    color: 'border-teal-500 bg-teal-50/50 text-teal-800',
-    description: 'Medications, IV fluids, clinical pharmacy consumables, drug stockouts.',
+    id: 'clinicals',
+    departmentId: 'clinicals',
+    departmentName: 'Clinicals Department',
+    supervisorName: 'Dr. Grace Mshelia',
+    supervisorTitle: 'Director of Clinical Services',
+    level: 'Level 2: Department Head',
+    icon: '🏥',
+    description: 'Pharmacy, Nursing, Hostel Transport, Dental Clinic, Physiotherapy, Social Assistance.',
   },
   {
-    id: 'Nursing (Ward 3)',
-    name: 'Clinical Nursing & Inpatient Wards',
-    hodName: 'Matron Beatrice Alao',
-    hodTitle: 'Chief Nursing Officer / Matron',
-    roleIcon: '🩺',
-    color: 'border-purple-500 bg-purple-50/50 text-purple-800',
-    description: 'Surgical gloves, syringes, catheter tubes, emergency floor stock.',
+    id: 'facility',
+    departmentId: 'facility',
+    departmentName: 'Facility Department',
+    supervisorName: 'Mr. Patrick Adaeze',
+    supervisorTitle: 'Head of Facility & Fleet Operations',
+    level: 'Level 2: Department Head',
+    icon: '🏗️',
+    description: 'Logistics/Fleet fuel, Janitorial supplies, Laundry chemicals, Gardening, Repairs.',
   },
   {
-    id: 'Laboratory',
-    name: 'Laboratory & Diagnostic Services',
-    hodName: 'Dr. Ngozi Okonkwo',
-    hodTitle: 'Chief Medical Lab Scientist',
-    roleIcon: '🧪',
-    color: 'border-blue-500 bg-blue-50/50 text-blue-800',
-    description: 'PCR reagents, sample tubes, rapid test kits, slides & calibration chemicals.',
+    id: 'admin',
+    departmentId: 'admin',
+    departmentName: 'Admin Department',
+    supervisorName: 'Mrs. Stella Eze',
+    supervisorTitle: 'Head of Hospital Administration',
+    level: 'Level 2: Department Head',
+    icon: '🏢',
+    description: 'Kitchen food provisions, Office administrative supplies, Operations.',
   },
   {
-    id: 'Transport & Logistics (Drivers)',
-    name: 'Transport, Ambulance & Logistics',
-    hodName: 'Malam Ibrahim Musa',
-    hodTitle: 'Transport & Fleet Manager',
-    roleIcon: '🚐',
-    color: 'border-amber-500 bg-amber-50/50 text-amber-800',
-    description: 'Ambulance tyres, engine service oils, fuel vouchers, roadside emergency fixes.',
+    id: 'hr',
+    departmentId: 'hr',
+    departmentName: 'Human Resources',
+    supervisorName: 'Mrs. Zainab Aliyu',
+    supervisorTitle: 'Human Resources Manager',
+    level: 'Level 2: Department Head',
+    icon: '👥',
+    description: 'Staff training workshops, Reimbursements, Staff welfare loans.',
   },
   {
-    id: 'Maintenance & Engineering',
-    name: 'Works & Biomedical Engineering',
-    hodName: 'Engr. Bola Adewale',
-    hodTitle: 'Head of Facilities & Engineering',
-    roleIcon: '⚡',
-    color: 'border-orange-500 bg-orange-50/50 text-orange-800',
-    description: 'Industrial generator AGO diesel, theatre AC repairs, plumbing & solar power.',
+    id: 'coordinator',
+    departmentId: 'coordinator',
+    departmentName: 'Programme Coordinator Office',
+    supervisorName: 'Dr. Emmanuel Bawa',
+    supervisorTitle: 'NANI Programme Coordinator',
+    level: 'Level 4: Programme Executive',
+    icon: '⚡',
+    description: 'Cross-departmental executive authorization following Finance grant lock.',
   },
   {
-    id: 'Environmental & Janitorial',
-    name: 'Environmental Sanitation & Infection Control',
-    hodName: 'Mr. Patrick Nwosu',
-    hodTitle: 'Environmental Health Officer',
-    roleIcon: '🧹',
-    color: 'border-emerald-500 bg-emerald-50/50 text-emerald-800',
-    description: 'Clinical waste yellow bags, disinfectant bleach, biohazard suits & mops.',
-  },
-  {
-    id: 'Administration & HR',
-    name: 'Hospital Administration & HR',
-    hodName: 'Barr. Obinna Kalu',
-    hodTitle: 'Director of Administration',
-    roleIcon: '📁',
-    color: 'border-indigo-500 bg-indigo-50/50 text-indigo-800',
-    description: 'A4 reams, patient folder jackets, board meeting stationery & documentation.',
+    id: 'national',
+    departmentId: 'national',
+    departmentName: 'National Coordinator Office',
+    supervisorName: 'Dr. Usman Sani, FWACS',
+    supervisorTitle: 'National Coordinator (NANI Leadership)',
+    level: 'Level 5: National Directorate',
+    icon: '🏛️',
+    description: 'High-value capital expenditures (>₦500,000) & donor compliance ratification.',
   },
 ];
 
 export default function HODHubPage() {
-  const [selectedDeptId, setSelectedDeptId] = useState<string>('Pharmacy');
+  const [selectedProfileId, setSelectedProfileId] = useState<string>('clinicals');
   const [requests, setRequests] = useState<Request[]>(mockRequests);
+  const [activeReqModal, setActiveReqModal] = useState<Request | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'success' | 'info' | 'error' } | null>(null);
 
-  const activeGroup = departmentGroups.find(g => g.id === selectedDeptId) || departmentGroups[0];
+  const activeProfile = supervisorProfiles.find(p => p.id === selectedProfileId) || supervisorProfiles[0];
 
   const showToast = (message: string, type: 'success' | 'info' | 'error') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3500);
   };
 
-  // Filter requests belonging to this HOD's department
-  const deptRequests = requests.filter(r => 
-    r.department === activeGroup.id || 
-    r.department.toLowerCase().includes(activeGroup.id.toLowerCase())
-  );
-
-  const pendingRequests = deptRequests.filter(r => ['submitted', 'hod-review'].includes(r.status));
-  const clearedRequests = deptRequests.filter(r => !['submitted', 'hod-review', 'rejected'].includes(r.status));
-
-  // The Real World Hospital Approval Rule:
-  // Under ₦100,000 Routine Consumable -> HOD sign-off pushes directly to Stores or Cashier
-  // Over ₦100,000 or Cash PO -> Escalates to CA / Finance Head
-  // Over ₦500,000 -> Escalates to Chief Medical Director (CMD)
-  const handleApprove = (req: Request) => {
-    const isMaterial = req.requisitionType === 'material';
-    const isMinor = req.totalValue <= 100000;
-    
-    let nextStatus: RequestStatus;
-    let nextDestination: string;
-
-    if (isMaterial) {
-      nextStatus = 'store-review';
-      nextDestination = 'Central Stores Depot (Material Issuance)';
-    } else if (isMinor) {
-      nextStatus = 'disbursement-ready';
-      nextDestination = 'Accounts Petty Cashier (Disbursement Authorized)';
-    } else if (req.totalValue > 500000) {
-      nextStatus = 'executive-review';
-      nextDestination = 'Chief Medical Director (CMD / Board Approval)';
-    } else {
-      nextStatus = 'finance-review';
-      nextDestination = 'Finance Head & CA (Budget Verification)';
+  // Filter requests based on selected supervisor desk
+  const filteredRequests = requests.filter(r => {
+    if (activeProfile.id === 'coordinator') {
+      return r.status === 'coordinator-review' || r.status === 'finance-review' || r.status === 'approved';
     }
+    if (activeProfile.id === 'national') {
+      return r.totalValue >= 500000;
+    }
+    return r.department.toLowerCase() === activeProfile.departmentName.toLowerCase().replace(' department', '');
+  });
 
-    setRequests(prev => prev.map(r => 
-      r.id === req.id 
-        ? {
-            ...r,
-            status: nextStatus,
-            timeline: [
-              ...r.timeline,
-              {
-                id: Date.now().toString(),
-                action: `HOD Approved (${isMaterial ? 'Store Issue' : isMinor ? 'Disbursement Ready' : 'Finance Escalated'})`,
-                actor: activeGroup.hodName,
-                role: activeGroup.hodTitle,
-                timestamp: new Date().toISOString(),
-                type: 'approved' as const,
-                comment: `Signed off by Line Manager. Automatically forwarded to ${nextDestination}.`,
-              }
-            ]
-          }
-        : r
-    ));
+  const pendingCount = filteredRequests.filter(r => 
+    r.status === 'submitted' || r.status === 'supervisor-review' || r.status === 'coordinator-review'
+  ).length;
 
-    showToast(`✅ ${req.id} approved by ${activeGroup.hodName}! Pushed to: ${nextDestination}`, 'success');
+  // Approve with Automatic Digital Signature Watermark
+  const handleApprove = (reqId: string) => {
+    const timestamp = new Date().toISOString();
+    const stampCode = `${activeProfile.supervisorName.split(' ').map(n => n[0]).join('')}/APPR/${new Date().getFullYear()}`;
+
+    setRequests(prev => prev.map(r => {
+      if (r.id === reqId) {
+        const nextStatus: RequestStatus = 
+          activeProfile.id === 'coordinator' 
+            ? (r.totalValue >= 500000 ? 'national-coordinator-review' : 'approved')
+            : 'finance-review';
+
+        const newSignature: ApprovalSignature = {
+          level: activeProfile.id === 'coordinator' ? 'coordinator' : 'supervisor',
+          actor: activeProfile.supervisorName,
+          role: activeProfile.supervisorTitle,
+          timestamp,
+          signatureStamp: stampCode,
+        };
+
+        return {
+          ...r,
+          status: nextStatus,
+          signatures: [...(r.signatures || []), newSignature],
+          timeline: [
+            ...r.timeline,
+            {
+              id: Date.now().toString(),
+              action: `${activeProfile.supervisorTitle} Approved ✓`,
+              actor: activeProfile.supervisorName,
+              role: activeProfile.supervisorTitle,
+              timestamp,
+              type: 'approved',
+              comment: `Digitally signed [Stamp: ${stampCode}]. Forwarded to ${nextStatus === 'finance-review' ? 'Finance' : 'Next Stage'}.`,
+            }
+          ]
+        };
+      }
+      return r;
+    }));
+
+    showToast(`✓ Digitally Signed & Approved by ${activeProfile.supervisorName}. Forwarded to next level.`, 'success');
   };
 
-  const handleDecline = (id: string) => {
-    setRequests(prev => prev.map(r => 
-      r.id === id 
-        ? {
-            ...r,
-            status: 'rejected' as RequestStatus,
-            timeline: [
-              ...r.timeline,
-              {
-                id: Date.now().toString(),
-                action: 'Declined by Line HOD',
-                actor: activeGroup.hodName,
-                role: activeGroup.hodTitle,
-                timestamp: new Date().toISOString(),
-                type: 'rejected' as const,
-                comment: 'Requisition declined by department line manager.',
-              }
-            ]
-          }
-        : r
-    ));
-    showToast(`❌ ${id} declined by HOD. Returned to requester.`, 'error');
+  const handleDecline = (reqId: string) => {
+    const timestamp = new Date().toISOString();
+    setRequests(prev => prev.map(r => {
+      if (r.id === reqId) {
+        return {
+          ...r,
+          status: 'rejected',
+          timeline: [
+            ...r.timeline,
+            {
+              id: Date.now().toString(),
+              action: `${activeProfile.supervisorTitle} Declined ✗`,
+              actor: activeProfile.supervisorName,
+              role: activeProfile.supervisorTitle,
+              timestamp,
+              type: 'rejected',
+              comment: 'Declined by supervisor. Resubmission required.',
+            }
+          ]
+        };
+      }
+      return r;
+    }));
+
+    showToast(`Requisition ${reqId} rejected. Returned to requester.`, 'error');
   };
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar role={`HOD: ${activeGroup.name}`} userName={activeGroup.hodName} />
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
+      <Navbar role={activeProfile.supervisorTitle} userName={activeProfile.supervisorName} />
 
-      {/* Interactive Toast Notification */}
+      {/* Floating Toast Notification */}
       {toast && (
-        <div className={`fixed top-20 right-4 z-50 px-5 py-3 rounded-xl shadow-2xl text-white text-xs font-bold transition-all flex items-center gap-2 ${
-          toast.type === 'success' ? 'bg-emerald-600' : toast.type === 'error' ? 'bg-rose-600' : 'bg-blue-600'
+        <div className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl border shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300 font-sans text-xs font-bold ${
+          toast.type === 'success' 
+            ? 'bg-teal-950 border-teal-500 text-teal-300' 
+            : toast.type === 'error'
+            ? 'bg-rose-950 border-rose-500 text-rose-300'
+            : 'bg-zinc-900 border-zinc-700 text-zinc-200'
         }`}>
-          <Bell size={14} className="animate-bounce" />
+          <div className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></div>
           <span>{toast.message}</span>
         </div>
       )}
 
-      <div className="max-w-screen-2xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+      <main className="max-w-7xl mx-auto px-4 py-8">
         
-        {/* Top Executive Protocol Banner */}
-        <div className="bg-slate-900 text-white rounded-2xl p-6 mb-8 shadow-xl border border-slate-800">
-          <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-            <div>
-              <div className="flex items-center gap-2 text-teal-400 text-xs font-mono font-bold uppercase tracking-wider">
-                <ShieldCheck size={16} />
-                <span>Hospital Administrative Governance & Line Manager Rule</span>
-              </div>
-              <h1 className="text-xl sm:text-2xl font-black mt-1">
-                Departmental HOD Authorization Desk
-              </h1>
-              <p className="text-slate-400 text-xs sm:text-sm mt-1 max-w-3xl">
-                Every request <strong>must start and be approved by the staff's direct Line HOD</strong>. 
-                Routine items are cleared immediately to Stores or Cashier; higher-threshold expenditures auto-escalate to Finance and the Chief Medical Director.
-              </p>
+        {/* Hub Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-800">
+          <div>
+            <div className="flex items-center gap-2 text-xs font-mono text-teal-400 mb-1">
+              <span>NOMA AID NIGERIA INITIATIVE</span>
+              <span>/</span>
+              <span>LEVEL 2 - 5 APPROVAL WORKSTATION</span>
             </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Supervisor & Coordinator Verification Desk
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+              Review departmental requisitions, verify justification and donor grant alignment, and issue 1-click digital signature approvals.
+            </p>
+          </div>
 
-            <div className="flex items-center gap-2 bg-slate-800 border border-slate-700 px-4 py-2 rounded-xl shrink-0">
-              <span className="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-pulse"></span>
-              <span className="text-xs font-bold text-slate-200">7 Active Hospital Department Silos</span>
-            </div>
+          <div className="flex items-center gap-3">
+            <Link
+              href="/finance"
+              className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5"
+            >
+              <DollarSign size={14} className="text-emerald-400" />
+              <span>Go to Finance & Grants</span>
+            </Link>
+            <Link
+              href="/new-request"
+              className="px-4 py-2.5 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-1.5"
+            >
+              <span>+ Raise New Requisition</span>
+            </Link>
           </div>
         </div>
 
-        {/* 1. The Grouped Department Selector Tabs */}
+        {/* ── Supervisor Desk Switcher Strip ── */}
         <div className="mb-8">
-          <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-3">
-            Select Department Silo (Click to switch between HOD Workstations):
-          </p>
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-xs font-bold uppercase tracking-wider text-teal-400">
+              Select Active Approver Station
+            </span>
+            <span className="text-xs text-zinc-500 font-mono">
+              Simulating: <strong className="text-white">{activeProfile.supervisorName}</strong>
+            </span>
+          </div>
 
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-7 gap-3">
-            {departmentGroups.map(dept => {
-              const isSelected = selectedDeptId === dept.id;
-              const count = requests.filter(r => (r.department === dept.id || r.department.includes(dept.id)) && ['submitted', 'hod-review'].includes(r.status)).length;
-
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-3">
+            {supervisorProfiles.map((p) => {
+              const isSelected = selectedProfileId === p.id;
               return (
-                <button
-                  key={dept.id}
-                  onClick={() => setSelectedDeptId(dept.id)}
-                  className={`p-3.5 rounded-xl border text-left transition-all relative flex flex-col justify-between ${
+                <div
+                  key={p.id}
+                  onClick={() => setSelectedProfileId(p.id)}
+                  className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-white border-teal-600 shadow-md ring-2 ring-teal-500/20'
-                      : 'bg-white/80 border-slate-200 hover:bg-white hover:border-slate-300'
+                      ? 'bg-zinc-900 border-teal-500 shadow-xl shadow-teal-500/10 ring-1 ring-teal-500/30'
+                      : 'bg-zinc-900/40 border-zinc-800/80 hover:bg-zinc-800/50'
                   }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="text-xl">{dept.roleIcon}</span>
-                    {count > 0 && (
-                      <span className="px-1.5 py-0.5 bg-amber-500 text-white text-[10px] font-black rounded-full animate-pulse">
-                        {count} New
-                      </span>
-                    )}
+                  <div>
+                    <div className="text-2xl mb-2">{p.icon}</div>
+                    <h4 className="font-bold text-xs text-white leading-tight">{p.departmentName}</h4>
+                    <p className="text-[10px] text-zinc-400 mt-1">{p.supervisorName}</p>
                   </div>
-
-                  <div className="mt-2">
-                    <h3 className={`text-xs font-black truncate ${isSelected ? 'text-teal-900' : 'text-slate-700'}`}>
-                      {dept.name.split('&')[0]}
-                    </h3>
-                    <p className="text-[10px] text-slate-400 truncate">{dept.hodName.split(' ')[1] || dept.hodName}</p>
+                  <div className="mt-3 pt-2 border-t border-zinc-800/80 text-[9px] font-mono text-teal-400 font-bold">
+                    {p.level}
                   </div>
-                </button>
+                </div>
               );
             })}
           </div>
         </div>
 
-        {/* 2. Active HOD Workstation Banner */}
-        <div className="bg-white rounded-2xl border border-slate-200 p-5 mb-8 shadow-sm flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="flex items-center gap-3">
-            <div className="w-12 h-12 rounded-xl bg-teal-50 border border-teal-200 text-teal-700 flex items-center justify-center text-xl font-bold">
-              {activeGroup.roleIcon}
+        {/* ── Active Approver Card & Overview ── */}
+        <div className="p-6 rounded-2xl bg-zinc-900/80 border border-zinc-800 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <div className="w-14 h-14 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-3xl">
+              {activeProfile.icon}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <span className="text-xs font-bold text-teal-700 uppercase tracking-wider bg-teal-50 px-2 py-0.5 rounded-md">
-                  Active Department Approver
+                <h2 className="text-lg font-black text-white">{activeProfile.supervisorName}</h2>
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20 font-mono">
+                  {activeProfile.level}
                 </span>
-                <span className="text-xs text-slate-400 font-mono">Isolated Queue</span>
               </div>
-              <h2 className="text-lg font-black text-slate-800 mt-0.5">
-                {activeGroup.hodName} <span className="text-xs font-normal text-slate-500">— {activeGroup.hodTitle}</span>
-              </h2>
-              <p className="text-xs text-slate-500">{activeGroup.description}</p>
+              <p className="text-xs text-teal-400 font-medium">{activeProfile.supervisorTitle}</p>
+              <p className="text-xs text-zinc-400 mt-1">{activeProfile.description}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 text-xs font-semibold">
-            <div className="text-right">
-              <span className="text-slate-400 block text-[11px]">Awaiting Your Sign-off:</span>
-              <span className="text-base font-black text-amber-600">{pendingRequests.length} Pending</span>
+          <div className="flex items-center gap-4 bg-zinc-950 p-3 rounded-xl border border-zinc-800 shrink-0">
+            <div className="text-center px-3 border-r border-zinc-800">
+              <span className="text-xl font-black text-amber-400 font-mono">{pendingCount}</span>
+              <p className="text-[10px] text-zinc-500 uppercase font-bold">Pending Review</p>
             </div>
-            <div className="h-8 w-px bg-slate-200"></div>
-            <div className="text-right">
-              <span className="text-slate-400 block text-[11px]">Cleared This Month:</span>
-              <span className="text-base font-black text-emerald-600">{clearedRequests.length} Handled</span>
+            <div className="text-center px-3">
+              <span className="text-xl font-black text-white font-mono">{filteredRequests.length}</span>
+              <p className="text-[10px] text-zinc-500 uppercase font-bold">Total In Desk</p>
             </div>
           </div>
         </div>
 
-        {/* 3. Requisitions Action List */}
-        <div className="space-y-4">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-black text-slate-800 uppercase tracking-wider">
-              {activeGroup.name} · Incoming Staff Requisitions ({deptRequests.length})
-            </h3>
-            <span className="text-xs text-slate-500">
-              Only showing requests raised by {activeGroup.name} personnel
-            </span>
+        {/* ── Requisitions Queue Table ── */}
+        <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-800">
+            <div>
+              <h3 className="text-base font-black text-white">Requisitions Pending Verification</h3>
+              <p className="text-xs text-zinc-400">
+                1-click approval immediately applies your encrypted digital signature stamp and routes to Finance.
+              </p>
+            </div>
+            <span className="text-xs font-mono text-zinc-500">{filteredRequests.length} Vouchers Listed</span>
           </div>
 
-          {deptRequests.map(req => {
-            const isPending = ['submitted', 'hod-review'].includes(req.status);
-            const isMaterial = req.requisitionType === 'material';
-            const isMinor = req.totalValue <= 100000;
+          {filteredRequests.length === 0 ? (
+            <div className="py-16 text-center text-zinc-500">
+              <CheckCircle2 size={36} className="mx-auto text-teal-500/40 mb-3" />
+              <p className="text-sm font-bold text-zinc-300">Desk Cleared</p>
+              <p className="text-xs text-zinc-500 mt-1">No requisitions currently awaiting approval in this department.</p>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              {filteredRequests.map((req) => {
+                const isTransport = req.requisitionType === 'transport' || req.unit === 'Hostel';
+                const isStoreIssue = req.requisitionType === 'store-issue';
+                const isHighValue = req.totalValue >= 500000;
+                const isApproved = req.status === 'approved' || req.status === 'finance-review' || req.status === 'coordinator-review' || req.status === 'national-coordinator-review';
 
-            return (
-              <div 
-                key={req.id} 
-                className={`bg-white rounded-2xl border transition-all p-5 shadow-sm ${
-                  isPending ? 'border-amber-200 ring-1 ring-amber-100/50' : 'border-slate-200'
-                }`}
-              >
-                <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
-                  
-                  {/* Left: Requisition Details */}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 flex-wrap mb-2">
-                      <span className="font-mono text-xs font-bold text-slate-700 bg-slate-100 px-2 py-0.5 rounded">
-                        {req.id}
-                      </span>
-                      <StatusBadge status={req.status} />
-                      <UrgencyBadge urgency={req.urgency} />
-
-                      <span className={`text-[11px] font-bold px-2 py-0.5 rounded border ${
-                        isMaterial 
-                          ? 'bg-emerald-50 text-emerald-800 border-emerald-200' 
-                          : 'bg-amber-50 text-amber-800 border-amber-200'
-                      }`}>
-                        {isMaterial ? '📦 Material Consumable (Stores Issue)' : '💵 Financial Disbursement (Cash PO)'}
-                      </span>
-
-                      <span className="text-xs text-slate-400 font-mono ml-auto">
-                        Budget Code: {req.budgetCode}
-                      </span>
-                    </div>
-
-                    <h4 className="text-base font-black text-slate-900">{req.title}</h4>
-                    
-                    <p className="text-xs text-slate-600 mt-1 leading-relaxed bg-slate-50 p-2.5 rounded-xl border border-slate-100">
-                      <strong>Staff Note:</strong> {req.justification}
-                    </p>
-
-                    <div className="flex items-center gap-4 mt-3 text-xs text-slate-500">
-                      <span>Submitted by: <strong className="text-slate-800">{req.requestedBy}</strong> ({req.requestedByRole})</span>
-                      <span>•</span>
-                      <span>Total: <strong className="text-teal-700 font-mono text-sm">{formatCurrency(req.totalValue)}</strong></span>
-                    </div>
-                  </div>
-
-                  {/* Right: Dynamic Interactive Action Hub */}
-                  <div className="lg:w-80 shrink-0 border-t lg:border-t-0 lg:border-l border-slate-100 pt-3 lg:pt-0 lg:pl-5 flex flex-col justify-between">
-                    <div>
-                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400 block mb-1">
-                        Automated Escalation Rule:
-                      </span>
-                      <p className="text-xs font-medium text-slate-700">
-                        {isMaterial ? (
-                          <span className="text-emerald-700 font-bold">➔ Routes directly to Central Stores for immediate issuance.</span>
-                        ) : isMinor ? (
-                          <span className="text-teal-700 font-bold">➔ Routine under ₦100k: Authorizes direct cashier disbursement.</span>
-                        ) : req.totalValue > 500000 ? (
-                          <span className="text-purple-700 font-bold">➔ Above ₦500k: Escalates to Finance Head & Chief Medical Director.</span>
-                        ) : (
-                          <span className="text-amber-700 font-bold">➔ Pushed to Chartered Accountant for budget allocation.</span>
+                return (
+                  <div
+                    key={req.id}
+                    className="p-5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                  >
+                    <div className="flex-1">
+                      
+                      {/* Top Badges */}
+                      <div className="flex flex-wrap items-center gap-2 mb-2">
+                        <span className="font-mono text-xs font-bold text-teal-400">{req.id}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">
+                          {req.department} · {req.unit}
+                        </span>
+                        {isTransport && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20 font-bold">
+                            🚌 Transport Schedule
+                          </span>
                         )}
+                        {isStoreIssue && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold">
+                            📦 Internal Store Issue
+                          </span>
+                        )}
+                        {isHighValue && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 font-bold flex items-center gap-1">
+                            <Award size={10} /> Nat. Coordinator Escalation
+                          </span>
+                        )}
+                        <UrgencyBadge urgency={req.urgency} />
+                      </div>
+
+                      {/* Title & Requester */}
+                      <h4 className="text-sm font-black text-white">{req.title}</h4>
+                      <p className="text-xs text-zinc-400 mt-0.5">
+                        Requested by <strong className="text-zinc-200">{req.requestedBy}</strong> ({req.requestedByRole}) · {formatDate(req.createdAt)}
+                      </p>
+
+                      {/* Items / Passengers mini-preview */}
+                      <div className="mt-2 text-xs text-zinc-400 line-clamp-1 font-mono">
+                        {isTransport ? (
+                          <span>
+                            Passengers: {req.transportPassengers?.map(p => `${p.name} (${p.stateOfOrigin})`).join(', ') || '3 Passengers'}
+                          </span>
+                        ) : (
+                          <span>
+                            Items: {req.items.map(i => `${i.name} (${i.quantity} ${i.unit})`).join(', ')}
+                          </span>
+                        )}
+                      </div>
+
+                      {/* Justification quote */}
+                      <p className="text-[11px] text-zinc-500 italic mt-1 bg-zinc-900/60 p-2 rounded-lg border border-zinc-900">
+                        "{req.justification}"
                       </p>
                     </div>
 
-                    <div className="mt-4 flex items-center gap-2">
-                      {isPending ? (
-                        <>
-                          <button
-                            onClick={() => handleApprove(req)}
-                            className="flex-1 py-2.5 px-3 bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs rounded-xl shadow-md flex items-center justify-center gap-1.5 transition-all active:scale-95"
-                          >
-                            <Check size={14} />
-                            <span>
-                              {isMaterial ? 'Approve & Send to Store' : isMinor ? 'Approve Disbursement' : 'Approve & Escalate'}
-                            </span>
-                          </button>
-
-                          <button
-                            onClick={() => handleDecline(req.id)}
-                            className="py-2.5 px-3 bg-rose-50 hover:bg-rose-100 text-rose-700 font-bold text-xs rounded-xl border border-rose-200 transition-colors"
-                          >
-                            Decline
-                          </button>
-                        </>
-                      ) : (
-                        <div className="w-full flex items-center justify-between p-2 rounded-xl bg-slate-50 border border-slate-200 text-xs text-slate-600">
-                          <span>Action completed by {activeGroup.hodName.split(' ')[1]}</span>
-                          <Link href={`/request/${req.id}`} className="font-bold text-teal-600 hover:underline flex items-center gap-1">
-                            <span>Audit Trail</span>
-                            <ChevronRight size={12} />
-                          </Link>
+                    {/* Right: Value, Grant Code & Decision Buttons */}
+                    <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-3 shrink-0 lg:w-56 pt-3 lg:pt-0 border-t lg:border-t-0 border-zinc-800">
+                      
+                      <div className="text-left lg:text-right">
+                        <span className="text-base font-black text-teal-400 font-mono block">
+                          {formatCurrency(req.totalValue)}
+                        </span>
+                        <span className="text-[10px] text-emerald-400 font-mono">
+                          Grant: {req.donorGrantCode || 'HN-2026-SURG-Q4'}
+                        </span>
+                        <div className="mt-1">
+                          <StatusBadge status={req.status} />
                         </div>
-                      )}
+                      </div>
+
+                      {/* Action Buttons */}
+                      <div className="flex items-center gap-2 w-full sm:w-auto">
+                        <button
+                          onClick={() => setActiveReqModal(req)}
+                          className="p-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-300 hover:text-white transition-all text-xs flex items-center gap-1"
+                          title="View Full Voucher"
+                        >
+                          <Eye size={14} />
+                          <span className="hidden sm:inline">Details</span>
+                        </button>
+
+                        {!isApproved && (
+                          <>
+                            <button
+                              onClick={() => handleDecline(req.id)}
+                              className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1"
+                            >
+                              <X size={14} />
+                              <span>Decline</span>
+                            </button>
+
+                            <button
+                              onClick={() => handleApprove(req.id)}
+                              className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-1.5 active:scale-95"
+                            >
+                              <Check size={14} strokeWidth={3} />
+                              <span>Sign & Approve</span>
+                            </button>
+                          </>
+                        )}
+                      </div>
+
                     </div>
                   </div>
-
-                </div>
-              </div>
-            );
-          })}
-
-          {deptRequests.length === 0 && (
-            <div className="bg-white rounded-2xl border border-dashed border-slate-300 p-12 text-center">
-              <span className="text-4xl block mb-2">{activeGroup.roleIcon}</span>
-              <h4 className="font-bold text-slate-700 text-base">No Requisitions in {activeGroup.name}</h4>
-              <p className="text-xs text-slate-400 mt-1 max-w-sm mx-auto">
-                No active requests currently pending for {activeGroup.hodName}. Select another department group above to test approval workflows.
-              </p>
+                );
+              })}
             </div>
           )}
         </div>
 
-      </div>
+      </main>
+
+      {/* ── Full Voucher Modal ── */}
+      {activeReqModal && (
+        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
+            
+            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+              <div>
+                <span className="text-[10px] font-mono text-teal-400 uppercase">OFFICIAL VOUCHER INSPECTION</span>
+                <h3 className="text-lg font-black text-white">{activeReqModal.title}</h3>
+                <p className="text-xs text-zinc-400 font-mono">{activeReqModal.id} · {activeReqModal.department} ({activeReqModal.unit})</p>
+              </div>
+              <button
+                onClick={() => setActiveReqModal(null)}
+                className="p-2 text-zinc-400 hover:text-white rounded-lg bg-zinc-800"
+              >
+                <X size={18} />
+              </button>
+            </div>
+
+            {/* Justification & Financial details */}
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono">
+              <div>
+                <span className="text-zinc-500 block">TOTAL VALUE</span>
+                <strong className="text-teal-400 text-sm">{formatCurrency(activeReqModal.totalValue)}</strong>
+              </div>
+              <div>
+                <span className="text-zinc-500 block">GRANT CODE</span>
+                <strong className="text-emerald-400 text-sm">{activeReqModal.donorGrantCode || 'HN-2026-SURG-Q4'}</strong>
+              </div>
+              <div>
+                <span className="text-zinc-500 block">BUDGET CODE</span>
+                <strong className="text-zinc-300 text-sm">{activeReqModal.budgetCode}</strong>
+              </div>
+              <div>
+                <span className="text-zinc-500 block">CURRENT STATUS</span>
+                <StatusBadge status={activeReqModal.status} />
+              </div>
+            </div>
+
+            {/* Line items or Transport Passengers */}
+            <div className="my-4">
+              <h4 className="text-xs font-mono uppercase text-zinc-400 mb-2">Voucher Schedule Breakdown</h4>
+              {activeReqModal.transportPassengers && activeReqModal.transportPassengers.length > 0 ? (
+                <div className="space-y-1.5 text-xs">
+                  {activeReqModal.transportPassengers.map(p => (
+                    <div key={p.id} className="flex justify-between p-2 rounded-lg bg-zinc-950 border border-zinc-800 font-mono">
+                      <span>#{p.sn} {p.name} ({p.type}) — {p.stateOfOrigin} [{p.direction}]</span>
+                      <strong className="text-teal-400">{formatCurrency(p.transportCost)}</strong>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="space-y-1.5 text-xs">
+                  {activeReqModal.items.map(i => (
+                    <div key={i.id} className="flex justify-between p-2 rounded-lg bg-zinc-950 border border-zinc-800 font-mono">
+                      <span>#{i.sn || 1} {i.name} ({i.quantity} {i.unit} @ {formatCurrency(i.unitPrice)})</span>
+                      <strong className="text-teal-400">{formatCurrency(i.totalPrice)}</strong>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* Signatures Applied */}
+            <div className="my-4 pt-4 border-t border-zinc-800">
+              <h4 className="text-xs font-mono uppercase text-teal-400 mb-2">Digital Signature Trail</h4>
+              <div className="space-y-2">
+                {activeReqModal.signatures && activeReqModal.signatures.length > 0 ? (
+                  activeReqModal.signatures.map(s => (
+                    <div key={s.level} className="p-3 rounded-xl bg-teal-950/20 border border-teal-500/30 flex items-center justify-between text-xs">
+                      <div>
+                        <span className="font-bold text-teal-300">{s.actor}</span>
+                        <span className="text-zinc-400 text-[10px] ml-2 font-mono">({s.role})</span>
+                      </div>
+                      <div className="text-right font-mono text-[10px] text-teal-400">
+                        <div>STAMP: {s.signatureStamp}</div>
+                        <div className="text-zinc-500">{formatDate(s.timestamp)}</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-xs text-zinc-500 italic">No supervisor signature applied yet.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="mt-6 pt-4 border-t border-zinc-800 flex justify-end gap-3">
+              <button
+                onClick={() => setActiveReqModal(null)}
+                className="px-4 py-2 bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold"
+              >
+                Close
+              </button>
+              <button
+                onClick={() => {
+                  handleApprove(activeReqModal.id);
+                  setActiveReqModal(null);
+                }}
+                className="px-6 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black rounded-xl text-xs"
+              >
+                Sign & Approve Now
+              </button>
+            </div>
+
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

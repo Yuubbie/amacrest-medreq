@@ -2,41 +2,42 @@
 
 import Link from 'next/link';
 import { 
-  ShieldCheck, ArrowRight, CheckCircle2, Clock, 
-  FileText, TrendingDown, Stethoscope, Building2, 
-  Layers, Lock, Sparkles, Activity, FileSpreadsheet,
-  AlertTriangle, DollarSign, Package, Check, Smartphone
+  ArrowRight, CheckCircle2, Clock, 
+  FileText, Heart, Building2, 
+  Layers, ShieldCheck, Activity, FileSpreadsheet,
+  AlertTriangle, DollarSign, Package, Check, Smartphone,
+  Users, Globe, TrendingUp, Zap
 } from 'lucide-react';
 
 export default function LandingPage() {
   return (
     <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950 relative overflow-hidden font-sans">
       
-      {/* Dynamic Ambient Background Glows */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1000px] h-[450px] bg-teal-500/10 blur-[150px] rounded-full pointer-events-none"></div>
-      <div className="absolute top-1/3 -left-40 w-[500px] h-[500px] bg-emerald-500/5 blur-[160px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-10 right-0 w-[600px] h-[400px] bg-teal-600/10 blur-[140px] rounded-full pointer-events-none"></div>
+      {/* Ambient Glows */}
+      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[1200px] h-[500px] bg-teal-500/8 blur-[180px] rounded-full pointer-events-none"></div>
+      <div className="absolute top-1/3 -left-40 w-[600px] h-[600px] bg-emerald-500/5 blur-[180px] rounded-full pointer-events-none"></div>
+      <div className="absolute bottom-0 right-0 w-[700px] h-[500px] bg-teal-600/8 blur-[160px] rounded-full pointer-events-none"></div>
       
-      {/* Subtle Grid overlay */}
+      {/* Grid overlay */}
       <div 
-        className="absolute inset-0 pointer-events-none opacity-20"
+        className="absolute inset-0 pointer-events-none opacity-[0.07]"
         style={{
-          backgroundImage: `linear-gradient(to right, rgba(255, 255, 255, 0.05) 1px, transparent 1px), linear-gradient(to bottom, rgba(255, 255, 255, 0.05) 1px, transparent 1px)`,
-          backgroundSize: '48px 48px'
+          backgroundImage: `linear-gradient(to right, rgba(255,255,255,0.1) 1px, transparent 1px), linear-gradient(to bottom, rgba(255,255,255,0.1) 1px, transparent 1px)`,
+          backgroundSize: '52px 52px'
         }}
       ></div>
 
-      {/* 1. Sticky Glassmorphic Header */}
-      <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-zinc-950/70 backdrop-blur-md px-6 py-4">
+      {/* ── Sticky Header ── */}
+      <header className="sticky top-0 z-50 border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-xl px-6 py-4">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 font-black shadow-lg shadow-teal-500/10">
-              <Activity size={20} className="animate-pulse" />
+            <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-teal-500/20 to-emerald-500/10 border border-teal-500/30 flex items-center justify-center shadow-lg shadow-teal-500/10">
+              <Heart size={18} className="text-teal-400" strokeWidth={2.5} />
             </div>
             <div>
-              <span className="font-black text-xl tracking-tight text-white">Amacrest</span>
-              <span className="font-black text-xl tracking-tight text-teal-400 ml-1">MedReq</span>
-              <span className="text-[10px] text-zinc-400 ml-2 font-mono hidden sm:inline-block border border-zinc-800 bg-zinc-900 px-2 py-0.5 rounded-full">Hospital OS</span>
+              <span className="font-black text-sm tracking-tight text-teal-400">NANI</span>
+              <span className="font-black text-sm tracking-tight text-white ml-1">ReqFlow</span>
+              <div className="text-[9px] text-zinc-500 font-mono leading-none mt-0.5">Noma Aid Nigeria Initiative · Procurement OS</div>
             </div>
           </div>
 
@@ -44,8 +45,9 @@ export default function LandingPage() {
             <a href="#problem" className="hover:text-zinc-200 transition-colors">The Problem</a>
             <a href="#solution" className="hover:text-zinc-200 transition-colors">How It Works</a>
             <a href="#flow" className="hover:text-zinc-200 transition-colors">Approval Chain</a>
-            <Link href="/inventory" className="hover:text-teal-400 transition-colors flex items-center gap-1.5">
-              <span>Stores & CSV</span>
+            <Link href="/reports" className="hover:text-teal-400 transition-colors flex items-center gap-1.5">
+              <TrendingUp size={13} />
+              <span>Donor Reports</span>
             </Link>
           </nav>
 
@@ -60,42 +62,43 @@ export default function LandingPage() {
               href="/login"
               className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 text-xs font-black rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-1.5 active:scale-95"
             >
-              <span>Launch Workstation</span>
-              <ArrowRight size={14} />
+              <span>Launch Portal</span>
+              <ArrowRight size={13} />
             </Link>
           </div>
         </div>
       </header>
 
-      {/* 2. Hero Section: The Bold Value Proposition */}
-      <section className="relative z-10 max-w-6xl mx-auto px-4 pt-16 pb-12 sm:pt-24 sm:pb-20 text-center">
+      {/* ── Hero Section ── */}
+      <section className="relative z-10 max-w-6xl mx-auto px-4 pt-20 pb-16 sm:pt-28 sm:pb-24 text-center">
         
-        {/* Release badge */}
-        <div className="inline-flex items-center gap-2 border border-zinc-800 bg-zinc-900/80 rounded-full px-4 py-1.5 mb-8 shadow-inner">
+        {/* NGO Badge */}
+        <div className="inline-flex items-center gap-2.5 border border-teal-500/20 bg-teal-500/5 rounded-full px-5 py-2 mb-10 shadow-inner">
           <span className="flex h-2 w-2 rounded-full bg-teal-400 animate-ping"></span>
           <span className="text-xs font-semibold text-zinc-300">
-            AMACREST Hospital & Maternity · Digital Requisition & Approval System
+            NOMA AID NIGERIA INITIATIVE (NANI) · Digital Requisition & Procurement System
           </span>
         </div>
 
-        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white max-w-5xl mx-auto leading-[1.08]">
-          Zero Paper Requisitions. <br />
+        <h1 className="text-4xl sm:text-6xl lg:text-7xl font-black tracking-tight text-white max-w-5xl mx-auto leading-[1.07]">
+          One System. Every Request.<br />
           <span className="text-transparent bg-clip-text bg-gradient-to-r from-teal-400 via-emerald-300 to-teal-200">
-            100% Financial & Clinical Control.
+            Zero Paper. Full Accountability.
           </span>
         </h1>
 
-        <p className="mt-6 text-base sm:text-xl text-zinc-400 max-w-3xl mx-auto leading-relaxed font-normal">
-          End the operational chaos of paper requisition forms, unverified cash requests, lost purchase memos, and delayed patient treatments across wards, pharmacy, laboratories, and transport.
+        <p className="mt-6 text-base sm:text-lg text-zinc-400 max-w-3xl mx-auto leading-relaxed">
+          Built exclusively for NANI's noma treatment operations — from clinical pharmacy and patient transport to facility management and donor grant reporting. 
+          Every requisition, every approval, every naira — tracked.
         </p>
 
-        {/* Action CTAs */}
+        {/* CTA Buttons */}
         <div className="mt-10 flex flex-col sm:flex-row items-center justify-center gap-4">
           <Link
             href="/login"
-            className="w-full sm:w-auto px-8 py-4 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-sm rounded-2xl transition-all shadow-xl shadow-teal-500/25 flex items-center justify-center gap-2 active:scale-95"
+            className="w-full sm:w-auto px-8 py-4 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-sm rounded-2xl transition-all shadow-xl shadow-teal-500/20 flex items-center justify-center gap-2 active:scale-95"
           >
-            <span>Enter Staff Portal & Raise Requisition</span>
+            <span>Enter Staff Portal</span>
             <ArrowRight size={16} />
           </Link>
 
@@ -103,8 +106,8 @@ export default function LandingPage() {
             href="/hod"
             className="w-full sm:w-auto px-8 py-4 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-bold text-sm rounded-2xl transition-all flex items-center justify-center gap-2"
           >
-            <Stethoscope size={16} className="text-teal-400" />
-            <span>HOD Approval Desk</span>
+            <ShieldCheck size={16} className="text-teal-400" />
+            <span>Supervisor Approval Desk</span>
           </Link>
 
           <Link
@@ -112,74 +115,82 @@ export default function LandingPage() {
             className="w-full sm:w-auto px-8 py-4 bg-zinc-900/90 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-bold text-sm rounded-2xl transition-all flex items-center justify-center gap-2"
           >
             <DollarSign size={16} className="text-emerald-400" />
-            <span>CA & Finance Control</span>
+            <span>Finance & Donor Suite</span>
           </Link>
         </div>
 
-        {/* Live Hero Mockup / Command Center Preview */}
-        <div className="mt-16 rounded-2xl border border-zinc-800 bg-zinc-900/60 p-2 sm:p-4 backdrop-blur-xl shadow-2xl relative text-left">
+        {/* Live Command Strip */}
+        <div className="mt-16 rounded-2xl border border-zinc-800 bg-zinc-900/50 p-2 sm:p-3 backdrop-blur-xl shadow-2xl relative text-left">
           
           <div className="flex items-center justify-between border-b border-zinc-800/80 pb-3 px-3">
             <div className="flex items-center gap-2">
-              <div className="w-3 h-3 rounded-full bg-rose-500/80"></div>
-              <div className="w-3 h-3 rounded-full bg-amber-500/80"></div>
-              <div className="w-3 h-3 rounded-full bg-emerald-500/80"></div>
-              <span className="text-xs font-mono text-zinc-400 ml-2">AMACREST Hospital Enterprise Gateway · Live Requisition Pipeline</span>
+              <div className="w-3 h-3 rounded-full bg-rose-500/70"></div>
+              <div className="w-3 h-3 rounded-full bg-amber-500/70"></div>
+              <div className="w-3 h-3 rounded-full bg-emerald-500/70"></div>
+              <span className="text-xs font-mono text-zinc-400 ml-2">NANI ReqFlow · Live Requisition Pipeline · 5 Departments Active</span>
             </div>
             <div className="flex items-center gap-2 text-[11px] font-mono text-teal-400 bg-teal-500/10 border border-teal-500/20 px-2.5 py-0.5 rounded-full">
               <span className="w-1.5 h-1.5 rounded-full bg-teal-400 animate-pulse"></span>
-              <span>12 Hospital Units Active</span>
+              <span>12 Requests In Pipeline</span>
             </div>
           </div>
 
-          {/* Interactive Simulation Strip inside the mockup */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-3 p-3">
+          <div className="grid grid-cols-1 md:grid-cols-5 gap-2 p-3">
             
-            <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col justify-between">
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-teal-400">1. Instant Staff Request</span>
-                <p className="font-bold text-sm text-zinc-200 mt-1">Ambulance Tyres & Oil</p>
-                <p className="text-xs text-zinc-500">Malam Ibrahim (Driver)</p>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-teal-400">1 · Requester</span>
+                <p className="font-bold text-xs text-zinc-200 mt-1">Surgical Dressings</p>
+                <p className="text-[10px] text-zinc-500">Nurse Hauwa · Nursing Unit</p>
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-zinc-900 pt-2 text-xs">
-                <span className="font-mono text-zinc-400">₦246,000</span>
-                <span className="px-2 py-0.5 text-[10px] bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-bold">Priority STAT</span>
+              <div className="mt-3 pt-2 border-t border-zinc-900 flex items-center justify-between text-[10px]">
+                <span className="font-mono text-zinc-400">₦270,000</span>
+                <span className="px-1.5 py-0.5 bg-amber-500/10 text-amber-400 border border-amber-500/20 rounded font-bold">Priority</span>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col justify-between">
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col justify-between">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-purple-400">2. HOD Verification</span>
-                <p className="font-bold text-sm text-zinc-200 mt-1">Dr. Eze (Pharmacy HOD)</p>
-                <p className="text-xs text-zinc-500">Paracetamol Infusion 1000mg</p>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-purple-400">2 · Supervisor</span>
+                <p className="font-bold text-xs text-zinc-200 mt-1">Sr. Blessing Dogo</p>
+                <p className="text-[10px] text-zinc-500">Head of Nursing · Clinicals</p>
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-zinc-900 pt-2 text-xs">
-                <span className="text-emerald-400 font-bold flex items-center gap-1"><Check size={12}/> HOD Approved</span>
-                <span className="text-zinc-500 text-[11px]">08:22 AM</span>
+              <div className="mt-3 pt-2 border-t border-zinc-900 text-[10px]">
+                <span className="text-emerald-400 font-bold flex items-center gap-1"><Check size={10}/> Approved 09:30</span>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col justify-between">
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-teal-500/20 flex flex-col justify-between ring-1 ring-teal-500/10">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-blue-400">3. Finance Budget Lock</span>
-                <p className="font-bold text-sm text-zinc-200 mt-1">Mrs. Grace Obi (CA)</p>
-                <p className="text-xs text-zinc-500">Transport Budget Code #012</p>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-blue-400">3 · Finance</span>
+                <p className="font-bold text-xs text-zinc-200 mt-1">Mrs. Bilkisu Umar</p>
+                <p className="text-[10px] text-zinc-500">HN-2026-SURG-Q4</p>
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-zinc-900 pt-2 text-xs">
-                <span className="text-teal-300 font-mono">₦590,000 Left</span>
-                <span className="text-[10px] text-zinc-500">Within Cap</span>
+              <div className="mt-3 pt-2 border-t border-zinc-900 flex items-center justify-between text-[10px]">
+                <span className="text-teal-300 font-mono">₦2.1M Left</span>
+                <span className="text-[9px] text-amber-400 font-bold">Reviewing</span>
               </div>
             </div>
 
-            <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col justify-between">
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col justify-between opacity-60">
               <div>
-                <span className="text-[10px] font-bold uppercase tracking-wider text-emerald-400">4. Final Disbursement</span>
-                <p className="font-bold text-sm text-zinc-200 mt-1">Dispatched / Issued</p>
-                <p className="text-xs text-zinc-500">Receipt Auto-Retired</p>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-orange-400">4 · Coordinator</span>
+                <p className="font-bold text-xs text-zinc-200 mt-1">Dr. Emmanuel Bawa</p>
+                <p className="text-[10px] text-zinc-500">Programme Coordinator</p>
               </div>
-              <div className="mt-4 flex items-center justify-between border-t border-zinc-900 pt-2 text-xs">
-                <span className="text-zinc-400 text-[10px] font-mono">AUDIT-HASH #994</span>
-                <span className="px-2 py-0.5 text-[10px] bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 rounded font-bold">Closed</span>
+              <div className="mt-3 pt-2 border-t border-zinc-900 text-[10px]">
+                <span className="text-zinc-500 font-bold">Awaiting Finance</span>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800/80 flex flex-col justify-between opacity-40">
+              <div>
+                <span className="text-[9px] font-bold uppercase tracking-wider text-rose-400">5 · Nat. Coordinator</span>
+                <p className="font-bold text-xs text-zinc-200 mt-1">National Office</p>
+                <p className="text-[10px] text-zinc-500">High-value only</p>
+              </div>
+              <div className="mt-3 pt-2 border-t border-zinc-900 text-[10px]">
+                <span className="text-zinc-600 font-bold">Standby</span>
               </div>
             </div>
 
@@ -187,152 +198,146 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 3. The Pain Point Matrix (Why the Chartered Accountant Demanded This) */}
-      <section id="problem" className="py-20 border-t border-zinc-850 bg-zinc-950/90 relative z-10">
+      {/* ── Stats Strip ── */}
+      <section className="border-y border-zinc-800/80 bg-zinc-900/30 py-10 relative z-10">
+        <div className="max-w-6xl mx-auto px-4 grid grid-cols-2 md:grid-cols-4 gap-8">
+          {[
+            { label: 'Departments Covered', value: '5', sub: 'Facility, Finance, Clinicals, Admin, HR' },
+            { label: 'Approval Levels', value: '5', sub: 'From Requester to National Coordinator' },
+            { label: 'Donor Grant Codes', value: '5', sub: 'ECHO, MSF & bilateral grants tracked' },
+            { label: 'Processing Time', value: '<2h', sub: 'vs. 48h+ on paper' },
+          ].map((s) => (
+            <div key={s.label} className="text-center">
+              <div className="text-3xl font-black text-teal-400">{s.value}</div>
+              <div className="text-xs font-bold text-white mt-1">{s.label}</div>
+              <div className="text-[10px] text-zinc-500 mt-0.5">{s.sub}</div>
+            </div>
+          ))}
+        </div>
+      </section>
+
+      {/* ── Pain Point Section ── */}
+      <section id="problem" className="py-24 bg-zinc-950/90 relative z-10">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-wider text-rose-400 bg-rose-500/10 border border-rose-500/20 px-3 py-1 rounded-full">
-              The Reality of Paper in Hospitals
+              The Reality of Paper in a Donor-Funded NGO
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white mt-4 tracking-tight">
-              Why Manual Requisitions Cripple Hospital Operations
+            <h2 className="text-3xl sm:text-4xl font-black text-white mt-5 tracking-tight">
+              Why Manual Requisitions Cripple NANI's Operations
             </h2>
             <p className="text-zinc-400 text-sm sm:text-base mt-3">
-              When doctors, nurses, and staff use paper memos, the hospital bleeds money, loses time, and risks patient lives.
+              When clinical staff, drivers, and administrators use paper memos, donor funds are mismanaged, audits fail, and patients suffer.
             </p>
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-            
-            {/* Pain Point 1 */}
-            <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-rose-500/10 text-rose-400 flex items-center justify-center font-bold mb-4">
-                <Clock size={20} />
+            {[
+              {
+                icon: <Clock size={20} />,
+                color: 'rose',
+                title: 'The "Desk Bottleneck" Delay',
+                body: 'A nurse writes a request for surgical dressings. If the supervisor is in theatre, the paper sits for 48+ hours. Post-surgical noma patients go without proper wound care.',
+                fix: 'ReqFlow: One-click approval from any device, any time',
+              },
+              {
+                icon: <AlertTriangle size={20} />,
+                color: 'amber',
+                title: 'Donor Grant Leakage',
+                body: 'Finance approves spending without knowing the grant code or remaining balance. By month end, ECHO audit finds ₦4M in untracked expenditure across grant lines.',
+                fix: 'ReqFlow: Every request tagged to donor grant code in real-time',
+              },
+              {
+                icon: <FileSpreadsheet size={20} />,
+                color: 'blue',
+                title: 'Transport Records Are a Disaster',
+                body: 'Patient transport from states like Borno and Adamawa is tracked on paper. Names, state rates, and totals are manually calculated — errors cause under/over payment.',
+                fix: 'ReqFlow: State-based auto-rating with auto-totalling per passenger',
+              },
+            ].map((p) => (
+              <div key={p.title} className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 transition-all">
+                <div className={`w-10 h-10 rounded-xl bg-${p.color}-500/10 text-${p.color}-400 flex items-center justify-center mb-4`}>
+                  {p.icon}
+                </div>
+                <h3 className="font-bold text-base text-white">{p.title}</h3>
+                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">{p.body}</p>
+                <div className="mt-4 pt-3 border-t border-zinc-800/80 text-[11px] text-teal-400 font-semibold flex items-center gap-1.5">
+                  <CheckCircle2 size={12} />
+                  <span>{p.fix}</span>
+                </div>
               </div>
-              <h3 className="font-bold text-base text-white">The "Desk Bottleneck" Delay</h3>
-              <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                A surgical nurse or driver writes a paper requisition. If the HOD or Director is in theatre or on ward rounds, the paper sits on their desk for 48 hours. Surgeries are delayed, ambulances grounded.
-              </p>
-              <div className="mt-4 pt-3 border-t border-zinc-800/80 text-[11px] text-teal-400 font-semibold flex items-center gap-1.5">
-                <CheckCircle2 size={13} />
-                <span>MedReq Solution: Instant 1-click approvals from phone</span>
-              </div>
-            </div>
-
-            {/* Pain Point 2 */}
-            <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 text-amber-400 flex items-center justify-center font-bold mb-4">
-                <AlertTriangle size={20} />
-              </div>
-              <h3 className="font-bold text-base text-white">Blind Spending & Budget Leaks</h3>
-              <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                Management approves cash requests without knowing how much budget remains for that department this month. By month-end, the CA discovers ₦4M in unbudgeted expenditures.
-              </p>
-              <div className="mt-4 pt-3 border-t border-zinc-800/80 text-[11px] text-teal-400 font-semibold flex items-center gap-1.5">
-                <CheckCircle2 size={13} />
-                <span>MedReq Solution: Real-time budget lock before submission</span>
-              </div>
-            </div>
-
-            {/* Pain Point 3 */}
-            <div className="p-6 rounded-2xl bg-zinc-900/40 border border-zinc-800 hover:border-zinc-700 transition-all">
-              <div className="w-10 h-10 rounded-xl bg-blue-500/10 text-blue-400 flex items-center justify-center font-bold mb-4">
-                <FileSpreadsheet size={20} />
-              </div>
-              <h3 className="font-bold text-base text-white">Lost Forms & Audit Nightmares</h3>
-              <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                Paper slips get lost or damaged by hospital spills. When external auditors or NHIA arrive, files are missing and proof of purchase is incomplete.
-              </p>
-              <div className="mt-4 pt-3 border-t border-zinc-800/80 text-[11px] text-teal-400 font-semibold flex items-center gap-1.5">
-                <CheckCircle2 size={13} />
-                <span>MedReq Solution: Permanent timestamped digital audit log</span>
-              </div>
-            </div>
-
+            ))}
           </div>
         </div>
       </section>
 
-      {/* 4. Bento Box Architecture: How MedReq Solves It End-to-End */}
-      <section id="solution" className="py-20 border-t border-zinc-800 bg-zinc-950 relative z-10">
+      {/* ── Solution Bento ── */}
+      <section id="solution" className="py-24 border-t border-zinc-800 bg-zinc-950 relative z-10">
         <div className="max-w-6xl mx-auto px-4">
           <div className="text-center max-w-3xl mx-auto mb-16">
             <span className="text-xs font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full">
-              World-Class Hospital Operating System
+              Purpose-Built for NANI's NGO Operations
             </span>
-            <h2 className="text-3xl sm:text-4xl font-black text-white mt-4 tracking-tight">
-              One Unified System Across All Departments
+            <h2 className="text-3xl sm:text-4xl font-black text-white mt-5 tracking-tight">
+              One Unified Platform Across All 5 Departments
             </h2>
             <p className="text-zinc-400 text-sm sm:text-base mt-3">
-              From clinical wards and pharmacy to drivers, security, janitorial, and executive accounting.
+              From clinical pharmacy and hostel transport to facility janitorial, kitchen, and HR reimbursements.
             </p>
           </div>
 
-          {/* Bento Grid */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
             
-            {/* Box 1 (Span 2) */}
-            <div className="md:col-span-2 p-8 rounded-2xl bg-zinc-900/70 border border-zinc-800 flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase text-teal-400 tracking-wider">Dual Pathway Engine</span>
-                <h3 className="text-xl font-black text-white mt-1">Split Routing: Material Consumables vs. Financial Outflow</h3>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-2 leading-relaxed">
-                  The system automatically knows whether an item exists in the central hospital warehouse (Materials) or requires cash out of the hospital bank account (External PO / Cash Disbursement).
-                </p>
-              </div>
-              <div className="mt-6 grid grid-cols-2 gap-3 text-xs">
+            <div className="md:col-span-2 p-8 rounded-2xl bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 transition-all">
+              <span className="text-xs font-bold uppercase text-teal-400 tracking-wider">Special: Hostel Transport Engine</span>
+              <h3 className="text-xl font-black text-white mt-1">Patient & Caregiver Transport — State-Rated & Auto-Totalled</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-2 leading-relaxed">
+                Every state has a fixed transport rate. Hostel staff select incoming or discharge, choose patient or caregiver, pick the state — the system auto-calculates per person and grand total. 20+ names on one requisition with zero manual arithmetic.
+              </p>
+              <div className="mt-5 grid grid-cols-2 gap-3 text-xs">
                 <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
-                  <span className="font-bold text-emerald-400">📦 Store Materials:</span>
-                  <p className="text-zinc-500 mt-0.5">Direct issue from warehouse. No cash disbursed.</p>
+                  <span className="font-bold text-teal-400">🚌 Incoming Transport:</span>
+                  <p className="text-zinc-500 mt-0.5">Patient pickup from state → NANI Centre. Per-state rate auto-applied.</p>
                 </div>
                 <div className="p-3 rounded-xl bg-zinc-950 border border-zinc-800">
-                  <span className="font-bold text-amber-400">💵 Cash PO:</span>
-                  <p className="text-zinc-500 mt-0.5">Budget code check ➔ Accounts Payable sign-off.</p>
+                  <span className="font-bold text-amber-400">🏠 Discharge Transport:</span>
+                  <p className="text-zinc-500 mt-0.5">Post-treatment return home. Different rate per state. Auto-summed.</p>
                 </div>
               </div>
             </div>
 
-            {/* Box 2 */}
-            <div className="p-8 rounded-2xl bg-zinc-900/70 border border-zinc-800 flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase text-purple-400 tracking-wider">Bulk Data Onboarding</span>
-                <h3 className="text-xl font-black text-white mt-1">CSV Batch Upload for Stores</h3>
-                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                  Storekeepers upload their opening inventory in Excel CSV format with zero manual retyping.
-                </p>
-              </div>
-              <Link href="/inventory" className="mt-6 text-xs font-bold text-teal-400 hover:underline flex items-center gap-1">
+            <div className="p-8 rounded-2xl bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 transition-all">
+              <span className="text-xs font-bold uppercase text-purple-400 tracking-wider">5-Level Approval Chain</span>
+              <h3 className="text-xl font-black text-white mt-1">Digital Signatures at Every Level</h3>
+              <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                Requester → Supervisor → Finance → Coordinator → National Coordinator. Each approval stamps a digital signature with name, role, and timestamp.
+              </p>
+              <Link href="/hod" className="mt-6 text-xs font-bold text-purple-400 hover:underline flex items-center gap-1">
+                <span>View Approval Desk</span>
+                <ArrowRight size={13} />
+              </Link>
+            </div>
+
+            <div className="p-8 rounded-2xl bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 transition-all">
+              <span className="text-xs font-bold uppercase text-amber-400 tracking-wider">Internal Store Issue</span>
+              <h3 className="text-xl font-black text-white mt-1">Separate Store Pathway</h3>
+              <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
+                Store issues are tracked independently from cash requisitions. The storekeeper issues items, GRN is recorded, stock is decremented automatically.
+              </p>
+              <Link href="/inventory" className="mt-6 text-xs font-bold text-amber-400 hover:underline flex items-center gap-1">
                 <span>Explore Store Register</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
 
-            {/* Box 3 */}
-            <div className="p-8 rounded-2xl bg-zinc-900/70 border border-zinc-800 flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase text-amber-400 tracking-wider">Mobile-First</span>
-                <h3 className="text-xl font-black text-white mt-1">Smartphones & Ward Tablets</h3>
-                <p className="text-xs text-zinc-400 mt-2 leading-relaxed">
-                  Nurses in scrubs and drivers in fleet vehicles raise requests in 45 seconds right from their smartphones.
-                </p>
-              </div>
-              <div className="mt-6 flex items-center gap-2 text-xs text-zinc-400">
-                <Smartphone size={16} className="text-teal-400" />
-                <span>Responsive & PWA Ready</span>
-              </div>
-            </div>
-
-            {/* Box 4 (Span 2) */}
-            <div className="md:col-span-2 p-8 rounded-2xl bg-zinc-900/70 border border-zinc-800 flex flex-col justify-between">
-              <div>
-                <span className="text-xs font-bold uppercase text-emerald-400 tracking-wider">Chartered Accountant Suite</span>
-                <h3 className="text-xl font-black text-white mt-1">Departmental Budgets & 100% Audit Traceability</h3>
-                <p className="text-xs sm:text-sm text-zinc-400 mt-2 leading-relaxed">
-                  Every requisition is stamped with the user, time, HOD approval note, and financial ledger code. Instant one-click Excel and PDF board reports.
-                </p>
-              </div>
-              <Link href="/finance" className="mt-6 text-xs font-bold text-emerald-400 hover:underline flex items-center gap-1">
-                <span>View Finance Control Center</span>
+            <div className="md:col-span-2 p-8 rounded-2xl bg-zinc-900/70 border border-zinc-800 hover:border-zinc-700 transition-all">
+              <span className="text-xs font-bold uppercase text-emerald-400 tracking-wider">Donor Grant Accountability Suite</span>
+              <h3 className="text-xl font-black text-white mt-1">Monthly, Quarterly & Annual Reports with Projections</h3>
+              <p className="text-xs sm:text-sm text-zinc-400 mt-2 leading-relaxed">
+                Every requisition is mapped to a donor grant code (e.g. HN-2026-SURG-Q4). Finance can generate ECHO/MSF-ready expenditure reports in one click. Budget forecasting and variance analysis built in.
+              </p>
+              <Link href="/reports" className="mt-6 text-xs font-bold text-emerald-400 hover:underline flex items-center gap-1">
+                <span>View Donor Reporting Suite</span>
                 <ArrowRight size={13} />
               </Link>
             </div>
@@ -341,23 +346,72 @@ export default function LandingPage() {
         </div>
       </section>
 
-      {/* 5. Direct Launch Call-to-Action */}
-      <section className="py-20 bg-gradient-to-b from-zinc-950 to-zinc-900 border-t border-zinc-800 text-center relative z-10">
+      {/* ── 5-Level Flow Visual ── */}
+      <section id="flow" className="py-24 border-t border-zinc-800 bg-zinc-950/80 relative z-10">
+        <div className="max-w-5xl mx-auto px-4 text-center">
+          <span className="text-xs font-bold uppercase tracking-wider text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full">
+            5-Level Approval Chain
+          </span>
+          <h2 className="text-3xl sm:text-4xl font-black text-white mt-5 mb-12 tracking-tight">
+            From Requester to National Coordinator
+          </h2>
+          <div className="flex flex-col md:flex-row items-center justify-center gap-0">
+            {[
+              { n: '1', label: 'Requester', sub: 'Submits request', color: 'teal' },
+              { n: '2', label: 'Supervisor', sub: 'Unit / Dept. Head', color: 'purple' },
+              { n: '3', label: 'Finance', sub: 'Budget verification', color: 'blue' },
+              { n: '4', label: 'Coordinator', sub: 'Programme approval', color: 'orange' },
+              { n: '5', label: 'Nat. Coordinator', sub: 'High-value only', color: 'rose' },
+            ].map((step, i) => (
+              <div key={step.n} className="flex flex-col md:flex-row items-center">
+                <div className="flex flex-col items-center">
+                  <div className={`w-14 h-14 rounded-full border-2 border-${step.color}-500/40 bg-${step.color}-500/10 flex items-center justify-center`}>
+                    <span className={`text-lg font-black text-${step.color}-400`}>{step.n}</span>
+                  </div>
+                  <div className="mt-2 text-center">
+                    <div className="text-xs font-black text-white">{step.label}</div>
+                    <div className="text-[10px] text-zinc-500">{step.sub}</div>
+                  </div>
+                </div>
+                {i < 4 && (
+                  <ArrowRight size={20} className="text-zinc-700 mx-4 mt-0 md:-mt-6 rotate-90 md:rotate-0" />
+                )}
+              </div>
+            ))}
+          </div>
+          <p className="mt-10 text-xs text-zinc-500 max-w-2xl mx-auto">
+            Each level issues a digital signature stamp (Name · Role · Timestamp). High-value requests automatically escalate to the National Coordinator. Every step is permanently recorded in the audit trail.
+          </p>
+        </div>
+      </section>
+
+      {/* ── Final CTA ── */}
+      <section className="py-24 bg-gradient-to-b from-zinc-950 to-zinc-900 border-t border-zinc-800 text-center relative z-10">
         <div className="max-w-4xl mx-auto px-4">
+          <div className="inline-flex items-center gap-2 border border-teal-500/20 bg-teal-500/5 rounded-full px-4 py-1.5 mb-6">
+            <Heart size={12} className="text-teal-400" />
+            <span className="text-xs text-zinc-300 font-semibold">Healing Noma. One Transparent Requisition at a Time.</span>
+          </div>
           <h2 className="text-3xl sm:text-5xl font-black text-white tracking-tight">
-            Ready to present to the Hospital Board?
+            Ready to present to the<br />NANI Leadership & Donors?
           </h2>
           <p className="mt-4 text-zinc-400 text-sm sm:text-base max-w-xl mx-auto">
-            Log in as any hospital role to test the complete automated requisition cycle from start to finish.
+            Log in as any NANI role to walk through the full automated requisition cycle — from staff request to national coordinator approval.
           </p>
-
           <div className="mt-8 flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/login"
-              className="px-8 py-4 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-sm rounded-2xl transition-all shadow-xl shadow-teal-500/25 flex items-center gap-2"
+              className="px-8 py-4 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-sm rounded-2xl transition-all shadow-xl shadow-teal-500/25 flex items-center gap-2 active:scale-95"
             >
-              <span>Go to Staff & HOD Login Terminal</span>
+              <span>Enter NANI Staff Portal</span>
               <ArrowRight size={16} />
+            </Link>
+            <Link
+              href="/reports"
+              className="px-8 py-4 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 text-zinc-200 font-bold text-sm rounded-2xl transition-all flex items-center gap-2"
+            >
+              <TrendingUp size={16} className="text-emerald-400" />
+              <span>Donor Reports & Forecasting</span>
             </Link>
           </div>
         </div>
@@ -365,7 +419,8 @@ export default function LandingPage() {
 
       {/* Footer */}
       <footer className="border-t border-zinc-800 bg-zinc-950 px-6 py-6 text-center text-xs text-zinc-500 relative z-10">
-        AMACREST HOSPITAL & MATERNITY · MedReq Enterprise Requisition Platform · Built for Executive Board Approval
+        <div className="font-bold text-zinc-400">NOMA AID NIGERIA INITIATIVE (NANI)</div>
+        <div className="mt-1">NANI ReqFlow · Digital Procurement & Requisition System · Built for Operational Excellence & Donor Accountability</div>
       </footer>
 
     </div>

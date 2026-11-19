@@ -5,237 +5,231 @@ import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { StatusBadge, UrgencyBadge } from '@/components/StatusBadge';
 import {
-  mockRequests, volumeData, categorySpendData, slaData, statusDistribution,
-  formatCurrency, formatDate
+  mockRequests, 
+  volumeData, 
+  categorySpendData, 
+  slaData, 
+  statusDistribution,
+  donorGrantData,
+  formatCurrency, 
+  formatDate
 } from '@/lib/mock-data';
 import {
   LineChart, Line, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip,
-  Legend, ResponsiveContainer, PieChart, Pie, Cell
+  Legend, ResponsiveContainer, PieChart, Pie, Cell, AreaChart, Area
 } from 'recharts';
 import {
   FileText, TrendingUp, CheckCircle, XCircle, Clock, Download,
-  Filter, Calendar, ChevronRight, Shield, Activity
+  Filter, Calendar, ChevronRight, Shield, Activity, Printer,
+  Sparkles, DollarSign, Building2, Heart, Award, ArrowUpRight
 } from 'lucide-react';
 
-const auditLog = [
-  { time: '2026-11-18 15:28', user: 'Mrs. Grace Obi', action: 'Finance Approved', target: 'REQ-002', ip: '192.168.1.45' },
-  { time: '2026-11-18 14:55', user: 'Dr. Emmanuel Okafor', action: 'HOD Approved', target: 'REQ-006', ip: '192.168.1.32' },
-  { time: '2026-11-18 14:12', user: 'Nurse Fatima Aliyu', action: 'Request Submitted', target: 'REQ-011', ip: '192.168.1.78' },
-  { time: '2026-11-18 13:40', user: 'Mr. Rotimi Ojo', action: 'Items Dispatched', target: 'REQ-005', ip: '192.168.1.19' },
-  { time: '2026-11-18 11:00', user: 'Mrs. Grace Obi', action: 'Finance Rejected', target: 'REQ-010', ip: '192.168.1.45' },
-  { time: '2026-11-18 09:15', user: 'System', action: 'SLA Breach Alert Sent', target: 'REQ-007', ip: 'System' },
-  { time: '2026-11-18 08:23', user: 'Dr. Chinedu Eze', action: 'HOD Approved', target: 'REQ-001', ip: '192.168.1.56' },
-  { time: '2026-11-18 07:14', user: 'Pharm. Aisha Bello', action: 'Request Submitted (STAT)', target: 'REQ-001', ip: '192.168.1.90' },
+const forecastData = [
+  { period: 'Q1 2026', actual: 8200000, projected: 8000000, variance: '+2.5%' },
+  { period: 'Q2 2026', actual: 9400000, projected: 9200000, variance: '+2.1%' },
+  { period: 'Q3 2026', actual: 11100000, projected: 10800000, variance: '+2.7%' },
+  { period: 'Q4 2026 (Est)', actual: 12400000, projected: 12000000, variance: '+3.3%' },
+  { period: 'Q1 2027 (Forecast)', actual: null, projected: 14500000, variance: 'Projected' },
+  { period: 'Q2 2027 (Forecast)', actual: null, projected: 15800000, variance: 'Projected' },
 ];
 
 export default function ReportsPage() {
-  const [dateRange, setDateRange] = useState('last-30-days');
+  const [reportCycle, setReportCycle] = useState<'monthly' | 'quarterly' | 'annual'>('monthly');
   const [deptFilter, setDeptFilter] = useState('all');
+  const [isExporting, setIsExporting] = useState(false);
+  const [toast, setToast] = useState<string | null>(null);
 
-  const COLORS = ['#10b981', '#ef4444', '#f59e0b', '#6b7280'];
+  const showToast = (msg: string) => {
+    setToast(msg);
+    setTimeout(() => setToast(null), 3000);
+  };
+
+  const handlePrint = () => {
+    window.print();
+  };
+
+  const handleExportPDF = () => {
+    setIsExporting(true);
+    showToast('Generating high-resolution Executive PDF Report...');
+    setTimeout(() => {
+      setIsExporting(false);
+      window.print();
+    }, 800);
+  };
+
+  const handleExportExcel = () => {
+    showToast('✓ Donor Expenditure Ledger downloaded (.XLSX)');
+  };
+
+  const COLORS = ['#0d9488', '#3b82f6', '#f59e0b', '#10b981', '#8b5cf6', '#6b7280'];
 
   return (
-    <div className="min-h-screen bg-slate-50">
-      <Navbar role="Finance / CA (Reports)" userName="Mrs. Grace Obi" />
+    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950 print:bg-white print:text-zinc-950">
+      <div className="print:hidden">
+        <Navbar role="National Directorate / CA View" userName="Dr. Usman Sani" />
+      </div>
 
-      <div className="max-w-screen-xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* Header */}
-        <div className="mb-8 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+      {toast && (
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl bg-teal-950 border border-teal-500 text-teal-300 shadow-2xl flex items-center gap-3 animate-in fade-in text-xs font-bold font-sans">
+          <div className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></div>
+          <span>{toast}</span>
+        </div>
+      )}
+
+      <main className="max-w-7xl mx-auto px-4 py-8">
+        
+        {/* Header & Controls */}
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-800">
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Reports & Analytics</h1>
-            <p className="text-slate-500 mt-1">Chartered Accountant View — Comprehensive spend and audit analysis</p>
-          </div>
-          <div className="flex items-center gap-2 flex-wrap">
-            <select
-              value={dateRange}
-              onChange={e => setDateRange(e.target.value)}
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 bg-white"
-            >
-              <option value="last-7-days">Last 7 Days</option>
-              <option value="last-30-days">Last 30 Days</option>
-              <option value="last-6-months">Last 6 Months</option>
-              <option value="year-to-date">Year to Date</option>
-            </select>
-            <select
-              value={deptFilter}
-              onChange={e => setDeptFilter(e.target.value)}
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm text-slate-700 focus:outline-none focus:ring-2 focus:ring-teal-500/20 focus:border-teal-400 bg-white"
-            >
-              <option value="all">All Departments</option>
-              <option value="pharmacy">Pharmacy</option>
-              <option value="laboratory">Laboratory</option>
-              <option value="nursing">Nursing</option>
-              <option value="maintenance">Maintenance</option>
-              <option value="it">IT Department</option>
-            </select>
-            <button className="flex items-center gap-2 bg-teal-600 hover:bg-teal-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-              <Download size={14} /> Export PDF
-            </button>
-            <button className="flex items-center gap-2 bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors">
-              <Download size={14} /> Export Excel
-            </button>
-          </div>
-        </div>
-
-        {/* Summary cards */}
-        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
-          {[
-            { label: 'Total Requests', value: '156', icon: FileText, color: 'text-blue-600', bg: 'bg-blue-50', border: 'border-blue-100' },
-            { label: 'Total Value', value: '₦18.4M', icon: TrendingUp, color: 'text-teal-600', bg: 'bg-teal-50', border: 'border-teal-100' },
-            { label: 'Approved', value: '134', icon: CheckCircle, color: 'text-green-600', bg: 'bg-green-50', border: 'border-green-100' },
-            { label: 'Rejected', value: '12', icon: XCircle, color: 'text-red-600', bg: 'bg-red-50', border: 'border-red-100' },
-            { label: 'Avg Processing', value: '18.4h', icon: Clock, color: 'text-purple-600', bg: 'bg-purple-50', border: 'border-purple-100' },
-          ].map(card => {
-            const Icon = card.icon;
-            return (
-              <div key={card.label} className={`bg-white rounded-xl border ${card.border} p-4`}>
-                <div className={`w-9 h-9 ${card.bg} rounded-lg flex items-center justify-center mb-2.5`}>
-                  <Icon size={18} className={card.color} />
-                </div>
-                <div className="text-2xl font-black text-slate-800">{card.value}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{card.label}</div>
-              </div>
-            );
-          })}
-        </div>
-
-        {/* Charts row 1 */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-6">
-          {/* Line chart - Volume */}
-          <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 p-6">
-            <h2 className="text-base font-bold text-slate-800 mb-1">Requisition Volume — Last 6 Months</h2>
-            <p className="text-xs text-slate-400 mb-5">Monthly request count by outcome</p>
-            <ResponsiveContainer width="100%" height={260}>
-              <LineChart data={volumeData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="month" tick={{ fontSize: 12, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <Tooltip contentStyle={{ fontSize: 12, borderRadius: 8, border: '1px solid #e2e8f0' }} />
-                <Legend wrapperStyle={{ fontSize: 12 }} />
-                <Line type="monotone" dataKey="requests" stroke="#3b82f6" strokeWidth={2.5} dot={{ r: 4, fill: '#3b82f6' }} name="Total Requests" />
-                <Line type="monotone" dataKey="approved" stroke="#10b981" strokeWidth={2.5} dot={{ r: 4, fill: '#10b981' }} name="Approved" />
-                <Line type="monotone" dataKey="rejected" stroke="#ef4444" strokeWidth={2} dot={{ r: 3, fill: '#ef4444' }} name="Rejected" strokeDasharray="4 2" />
-              </LineChart>
-            </ResponsiveContainer>
+            <div className="flex items-center gap-2 text-xs font-mono text-teal-400 mb-1">
+              <span>NOMA AID NIGERIA INITIATIVE</span>
+              <span>/</span>
+              <span>EXECUTIVE & DONOR REPORTING SUITE</span>
+            </div>
+            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+              Executive Financial Reports & Budget Forecasting
+            </h1>
+            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+              Monthly, Quarterly & Annual expenditure tracking with donor grant line compliance and 2027 forecast models.
+            </p>
           </div>
 
-          {/* Pie - Status distribution */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h2 className="text-base font-bold text-slate-800 mb-1">Status Distribution</h2>
-            <p className="text-xs text-slate-400 mb-4">All-time request outcomes</p>
-            <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie
-                  data={statusDistribution}
-                  cx="50%"
-                  cy="50%"
-                  innerRadius={55}
-                  outerRadius={85}
-                  paddingAngle={3}
-                  dataKey="value"
+          <div className="flex flex-wrap items-center gap-2 print:hidden">
+            
+            {/* Cycle Selector */}
+            <div className="flex p-1 bg-zinc-900 border border-zinc-800 rounded-xl text-xs font-bold">
+              {[
+                { id: 'monthly', label: 'Monthly' },
+                { id: 'quarterly', label: 'Quarterly' },
+                { id: 'annual', label: 'Annual' },
+              ].map(c => (
+                <button
+                  key={c.id}
+                  onClick={() => setReportCycle(c.id as any)}
+                  className={`px-3 py-1.5 rounded-lg transition-all ${
+                    reportCycle === c.id ? 'bg-teal-500 text-zinc-950 shadow-md font-black' : 'text-zinc-400 hover:text-white'
+                  }`}
                 >
-                  {statusDistribution.map((entry, idx) => (
-                    <Cell key={idx} fill={COLORS[idx % COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip formatter={(v: number) => [v, 'requests']} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-              </PieChart>
-            </ResponsiveContainer>
-            <div className="space-y-2 mt-2">
-              {statusDistribution.map((s, idx) => (
-                <div key={s.name} className="flex items-center justify-between text-xs">
-                  <div className="flex items-center gap-2">
-                    <div className="w-2.5 h-2.5 rounded-full" style={{ backgroundColor: COLORS[idx % COLORS.length] }}></div>
-                    <span className="text-slate-600">{s.name}</span>
-                  </div>
-                  <span className="font-bold text-slate-700">{s.value}</span>
-                </div>
+                  {c.label}
+                </button>
               ))}
             </div>
+
+            <button
+              onClick={handlePrint}
+              className="px-3.5 py-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 flex items-center gap-1.5 transition-all"
+            >
+              <Printer size={14} className="text-teal-400" />
+              <span>Print</span>
+            </button>
+
+            <button
+              onClick={handleExportPDF}
+              className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black rounded-xl text-xs flex items-center gap-1.5 transition-all shadow-lg shadow-teal-500/20"
+            >
+              <Download size={14} />
+              <span>Download PDF</span>
+            </button>
+
+            <button
+              onClick={handleExportExcel}
+              className="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 transition-all"
+            >
+              <FileText size={14} />
+              <span>Excel (XLSX)</span>
+            </button>
           </div>
         </div>
 
-        {/* Charts row 2 */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-          {/* Top spending departments */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h2 className="text-base font-bold text-slate-800 mb-1">Top Spending Departments</h2>
-            <p className="text-xs text-slate-400 mb-5">Total spend (₦ thousands)</p>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart
-                data={[
-                  { dept: 'Pharmacy', spent: 1890 },
-                  { dept: 'Laboratory', spent: 1420 },
-                  { dept: 'IT', spent: 1535 },
-                  { dept: 'Maintenance', spent: 1185 },
-                  { dept: 'Emergency', spent: 890 },
-                  { dept: 'Radiology', spent: 875 },
-                ]}
-                layout="vertical"
-                barSize={16}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" horizontal={false} />
-                <XAxis type="number" tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `₦${v}k`} />
-                <YAxis type="category" dataKey="dept" tick={{ fontSize: 12, fill: '#64748b' }} axisLine={false} tickLine={false} width={80} />
-                <Tooltip formatter={(v: number) => [`₦${(v * 1000).toLocaleString()}`, 'Spent']} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                <Bar dataKey="spent" fill="#0d9488" radius={[0, 4, 4, 0]} />
-              </BarChart>
-            </ResponsiveContainer>
+        {/* ── Executive KPI Summary Strip ── */}
+        <div className="grid grid-cols-2 lg:grid-cols-5 gap-4 mb-8">
+          {[
+            { label: 'Requisitions Cleared', value: '142', sub: '94% Approval SLA', color: 'text-teal-400' },
+            { label: 'Total Value Committed', value: '₦28.45M', sub: 'YTD Donor Outflow', color: 'text-emerald-400' },
+            { label: 'Hostel Transport Fares', value: '₦3.28M', sub: '128 Patients & Escorts', color: 'text-blue-400' },
+            { label: 'Surgical & Medicines', value: '₦14.62M', sub: 'Clinical Reconstructions', color: 'text-purple-400' },
+            { label: '2027 Q1 Projected', value: '₦14.50M', sub: '+17% Capacity Scale', color: 'text-amber-400' },
+          ].map((card) => (
+            <div key={card.label} className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
+              <span className="text-[10px] font-mono text-zinc-400 uppercase tracking-wider block">{card.label}</span>
+              <div className={`text-xl font-black font-mono mt-1 ${card.color}`}>{card.value}</div>
+              <p className="text-[10px] text-zinc-500 mt-0.5">{card.sub}</p>
+            </div>
+          ))}
+        </div>
+
+        {/* ── Section 1: Financial Forecasting & Projections ── */}
+        <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-xl mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-6 pb-4 border-b border-zinc-800">
+            <div>
+              <div className="flex items-center gap-2">
+                <Sparkles size={16} className="text-teal-400" />
+                <h3 className="text-base font-black text-white">Donor Budget Projections & Run-Rate Forecasting</h3>
+              </div>
+              <p className="text-xs text-zinc-400 mt-0.5">
+                Predictive burn model based on historical patient intake from northern states and surgical schedules.
+              </p>
+            </div>
+            <span className="text-xs font-mono text-teal-400 bg-teal-500/10 border border-teal-500/20 px-3 py-1 rounded-full">
+              Linear Projection · Q1-Q2 2027
+            </span>
           </div>
 
-          {/* SLA compliance */}
-          <div className="bg-white rounded-xl border border-slate-200 p-6">
-            <h2 className="text-base font-bold text-slate-800 mb-1">SLA Compliance by Department</h2>
-            <p className="text-xs text-slate-400 mb-5">% of requests processed within 48-hour SLA</p>
-            <ResponsiveContainer width="100%" height={240}>
-              <BarChart data={slaData} barSize={20}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
-                <XAxis dataKey="department" tick={{ fontSize: 10, fill: '#94a3b8' }} axisLine={false} tickLine={false} />
-                <YAxis domain={[0, 100]} tick={{ fontSize: 11, fill: '#94a3b8' }} axisLine={false} tickLine={false} tickFormatter={v => `${v}%`} />
-                <Tooltip formatter={(v: number) => [`${v}%`, 'SLA Compliance']} contentStyle={{ fontSize: 12, borderRadius: 8 }} />
-                <Bar
-                  dataKey="compliance"
-                  radius={[4, 4, 0, 0]}
-                  fill="#3b82f6"
-                  label={{ position: 'top', fontSize: 10, fill: '#64748b', formatter: (v: number) => `${v}%` }}
+          <div className="h-72 w-full">
+            <ResponsiveContainer width="100%" height="100%">
+              <AreaChart data={forecastData}>
+                <defs>
+                  <linearGradient id="actualGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#0d9488" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#0d9488" stopOpacity={0}/>
+                  </linearGradient>
+                  <linearGradient id="projectedGrad" x1="0" y1="0" x2="0" y2="1">
+                    <stop offset="5%" stopColor="#f59e0b" stopOpacity={0.4}/>
+                    <stop offset="95%" stopColor="#f59e0b" stopOpacity={0}/>
+                  </linearGradient>
+                </defs>
+                <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                <XAxis dataKey="period" stroke="#71717a" fontSize={11} />
+                <YAxis stroke="#71717a" fontSize={11} tickFormatter={(v) => `₦${v / 1000000}M`} />
+                <Tooltip 
+                  contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '11px' }}
+                  formatter={(val: any) => val ? formatCurrency(Number(val)) : 'N/A (Future)'}
                 />
-              </BarChart>
+                <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                <Area type="monotone" dataKey="actual" stroke="#0d9488" strokeWidth={2.5} fillOpacity={1} fill="url(#actualGrad)" name="Actual Spend" />
+                <Area type="monotone" dataKey="projected" stroke="#f59e0b" strokeWidth={2} strokeDasharray="5 5" fillOpacity={1} fill="url(#projectedGrad)" name="Projected Budget" />
+              </AreaChart>
             </ResponsiveContainer>
           </div>
-        </div>
 
-        {/* Recent activity table */}
-        <div className="bg-white rounded-xl border border-slate-200 mb-6">
-          <div className="p-5 border-b border-slate-100">
-            <h2 className="text-base font-bold text-slate-800">Recent Activity</h2>
-            <p className="text-sm text-slate-500 mt-0.5">Last 10 requisitions across all departments</p>
-          </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[800px]">
+          {/* Forecast Metric Table */}
+          <div className="mt-6 overflow-x-auto">
+            <table className="w-full text-left text-xs font-mono">
               <thead>
-                <tr className="border-b border-slate-100">
-                  {['REQ ID', 'Department', 'Title', 'Status', 'Urgency', 'Value', 'Requested By', 'Date'].map(h => (
-                    <th key={h} className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-4 py-3">{h}</th>
-                  ))}
+                <tr className="border-b border-zinc-800 text-zinc-400 uppercase">
+                  <th className="py-2 px-3">Period</th>
+                  <th className="py-2 px-3 text-right">Actual Outflow</th>
+                  <th className="py-2 px-3 text-right">Projected Budget</th>
+                  <th className="py-2 px-3 text-right">Variance / Status</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-50">
-                {mockRequests.slice(0, 10).map(req => (
-                  <tr key={req.id} className="hover:bg-slate-50 transition-colors group">
-                    <td className="px-4 py-3">
-                      <Link href={`/request/${req.id}`}>
-                        <span className="text-xs font-mono font-semibold text-teal-600 bg-teal-50 px-2 py-1 rounded cursor-pointer hover:bg-teal-100">
-                          {req.id}
-                        </span>
-                      </Link>
+              <tbody className="divide-y divide-zinc-800/60">
+                {forecastData.map((f) => (
+                  <tr key={f.period} className="hover:bg-zinc-800/30">
+                    <td className="py-2.5 px-3 font-bold text-white">{f.period}</td>
+                    <td className="py-2.5 px-3 text-right text-teal-400 font-bold">
+                      {f.actual ? formatCurrency(f.actual) : '—'}
                     </td>
-                    <td className="px-4 py-3 text-xs text-slate-600">{req.department}</td>
-                    <td className="px-4 py-3 text-xs font-medium text-slate-700 max-w-[160px] truncate">{req.title}</td>
-                    <td className="px-4 py-3"><StatusBadge status={req.status} /></td>
-                    <td className="px-4 py-3"><UrgencyBadge urgency={req.urgency} /></td>
-                    <td className="px-4 py-3 text-xs font-bold text-slate-700">{formatCurrency(req.totalValue)}</td>
-                    <td className="px-4 py-3 text-xs text-slate-500">{req.requestedBy}</td>
-                    <td className="px-4 py-3 text-xs text-slate-500">{formatDate(req.createdAt)}</td>
+                    <td className="py-2.5 px-3 text-right text-zinc-300">
+                      {formatCurrency(f.projected)}
+                    </td>
+                    <td className="py-2.5 px-3 text-right">
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-bold ${
+                        f.actual ? 'bg-teal-500/10 text-teal-300' : 'bg-amber-500/10 text-amber-300'
+                      }`}>
+                        {f.variance}
+                      </span>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -243,45 +237,114 @@ export default function ReportsPage() {
           </div>
         </div>
 
-        {/* Audit trail */}
-        <div className="bg-white rounded-xl border border-slate-200">
-          <div className="p-5 border-b border-slate-100 flex items-center gap-3">
-            <Shield size={18} className="text-teal-600" />
+        {/* ── Section 2: Donor Grant Ledger Reconciliation ── */}
+        <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-xl mb-8">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-800">
             <div>
-              <h2 className="text-base font-bold text-slate-800">System Audit Trail</h2>
-              <p className="text-xs text-slate-400 mt-0.5">Recent system actions — immutable log</p>
+              <span className="text-[10px] font-mono text-emerald-400 uppercase tracking-wider">
+                AUDIT COMPLIANCE MATRIX
+              </span>
+              <h3 className="text-base font-black text-white mt-0.5">
+                Donor Grant Line Allocation & Burn Analysis
+              </h3>
+            </div>
+            <span className="text-xs font-mono text-zinc-500">ECHO / MSF Reporting Standard</span>
+          </div>
+
+          <div className="overflow-x-auto">
+            <table className="w-full text-left text-xs font-sans">
+              <thead>
+                <tr className="border-b border-zinc-800 text-zinc-400 font-mono uppercase">
+                  <th className="py-2.5 px-3">Grant Code</th>
+                  <th className="py-2.5 px-3">Grant Programme Description</th>
+                  <th className="py-2.5 px-3 text-right">Total Grant Allocation</th>
+                  <th className="py-2.5 px-3 text-right">Disbursed YTD</th>
+                  <th className="py-2.5 px-3 text-right">Remaining Balance</th>
+                  <th className="py-2.5 px-3 text-center">Burn %</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-zinc-800/60 font-mono">
+                {donorGrantData.map((grant) => {
+                  const pct = Math.round((grant.spent / grant.allocated) * 100);
+                  const rem = grant.allocated - grant.spent;
+                  return (
+                    <tr key={grant.grant} className="hover:bg-zinc-800/30">
+                      <td className="py-3 px-3 font-bold text-teal-400">{grant.grant}</td>
+                      <td className="py-3 px-3 font-sans text-zinc-300">{grant.description}</td>
+                      <td className="py-3 px-3 text-right text-zinc-300">{formatCurrency(grant.allocated)}</td>
+                      <td className="py-3 px-3 text-right font-bold text-white">{formatCurrency(grant.spent)}</td>
+                      <td className="py-3 px-3 text-right text-emerald-400">{formatCurrency(rem)}</td>
+                      <td className="py-3 px-3 text-center">
+                        <span className={`px-2 py-0.5 rounded-full text-[10px] font-bold ${
+                          pct > 85 ? 'bg-amber-500/10 text-amber-300' : 'bg-teal-500/10 text-teal-300'
+                        }`}>
+                          {pct}%
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* ── Section 3: Spend by Category & SLA Charts ── */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          
+          {/* Category Spend */}
+          <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-xl">
+            <h3 className="text-base font-black text-white mb-1">Expenditure by Operational Category</h3>
+            <p className="text-xs text-zinc-400 mb-4">Patient transport vs medical surgical consumables vs facility fleet.</p>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                  <Pie
+                    data={categorySpendData}
+                    cx="50%"
+                    cy="50%"
+                    outerRadius={85}
+                    innerRadius={45}
+                    paddingAngle={4}
+                    dataKey="value"
+                  >
+                    {categorySpendData.map((entry, index) => (
+                      <Cell key={`cell-${index}`} fill={entry.color} />
+                    ))}
+                  </Pie>
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '11px' }}
+                    formatter={(val: any) => formatCurrency(Number(val))}
+                  />
+                  <Legend wrapperStyle={{ fontSize: '11px', paddingTop: '10px' }} />
+                </PieChart>
+              </ResponsiveContainer>
             </div>
           </div>
-          <div className="overflow-x-auto">
-            <table className="w-full min-w-[700px]">
-              <thead>
-                <tr className="border-b border-slate-100">
-                  {['Timestamp', 'User', 'Action', 'Target', 'IP Address'].map(h => (
-                    <th key={h} className="text-left text-xs font-semibold text-slate-500 uppercase tracking-wider px-5 py-3">{h}</th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-slate-50">
-                {auditLog.map((log, idx) => (
-                  <tr key={idx} className="hover:bg-slate-50 transition-colors">
-                    <td className="px-5 py-3 text-xs font-mono text-slate-500">{log.time}</td>
-                    <td className="px-5 py-3 text-xs font-semibold text-slate-700">{log.user}</td>
-                    <td className="px-5 py-3 text-xs text-slate-600">{log.action}</td>
-                    <td className="px-5 py-3">
-                      <Link href={`/request/${log.target}`}>
-                        <span className="text-xs font-mono font-semibold text-teal-600 bg-teal-50 px-2 py-0.5 rounded cursor-pointer hover:bg-teal-100">
-                          {log.target}
-                        </span>
-                      </Link>
-                    </td>
-                    <td className="px-5 py-3 text-xs font-mono text-slate-400">{log.ip}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
+
+          {/* Department SLA */}
+          <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-xl">
+            <h3 className="text-base font-black text-white mb-1">Approval Velocity & SLA Compliance</h3>
+            <p className="text-xs text-zinc-400 mb-4">% of requisitions approved within the 24h/48h operational benchmark.</p>
+            <div className="h-64 w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart data={slaData} layout="vertical">
+                  <CartesianGrid strokeDasharray="3 3" stroke="#27272a" />
+                  <XAxis type="number" domain={[0, 100]} stroke="#71717a" fontSize={11} tickFormatter={(v) => `${v}%`} />
+                  <YAxis dataKey="department" type="category" width={140} stroke="#71717a" fontSize={10} />
+                  <Tooltip 
+                    contentStyle={{ backgroundColor: '#18181b', borderColor: '#27272a', borderRadius: '12px', fontSize: '11px' }}
+                    formatter={(val: any) => `${val}% SLA`}
+                  />
+                  <Bar dataKey="compliance" fill="#0d9488" radius={[0, 4, 4, 0]} name="SLA Compliance %" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
           </div>
+
         </div>
-      </div>
+
+      </main>
     </div>
   );
 }
