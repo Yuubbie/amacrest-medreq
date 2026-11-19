@@ -7,10 +7,10 @@ import { saveStoredUser } from '@/lib/storage';
 import { 
   Building2, Lock, ArrowRight, ShieldCheck, UserCheck, 
   Heart, Activity, CheckCircle2, ChevronRight,
-  Sparkles, KeyRound, Award, Users, FileText
+  Sparkles, KeyRound, Award, Users, FileText, Check, DollarSign, Package
 } from 'lucide-react';
 
-interface PresetUser {
+interface StaffProfile {
   id: string;
   name: string;
   roleTitle: string;
@@ -23,8 +23,7 @@ interface PresetUser {
   badgeColor: string;
 }
 
-const presetUsers: PresetUser[] = [
-  // 1. Staff Requesters (Level 1)
+const requesterProfiles: StaffProfile[] = [
   {
     id: 'staff-nurse',
     name: 'Nurse Hauwa Bello',
@@ -32,34 +31,10 @@ const presetUsers: PresetUser[] = [
     department: 'Clinicals',
     unit: 'Nursing',
     roleType: 'staff',
-    destination: '/dashboard',
+    destination: '/new-request',
     avatar: 'HB',
-    badge: 'Frontline Clinical Staff',
-    badgeColor: 'bg-teal-500/10 text-teal-300 border-teal-500/20',
-  },
-  {
-    id: 'staff-hostel',
-    name: 'Mr. Samuel Danladi',
-    roleTitle: 'Hostel & Patient Logistics Officer',
-    department: 'Clinicals',
-    unit: 'Hostel',
-    roleType: 'staff',
-    destination: '/dashboard',
-    avatar: 'SD',
-    badge: 'Patient Transport Logistics',
-    badgeColor: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
-  },
-  {
-    id: 'staff-edu',
-    name: 'Malam Ibrahim Musa',
-    roleTitle: 'Social Assistance & Education Officer',
-    department: 'Clinicals',
-    unit: 'Education Welfare',
-    roleType: 'staff',
-    destination: '/dashboard',
-    avatar: 'IM',
-    badge: 'Patient Schooling & Welfare',
-    badgeColor: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+    badge: 'Post-Op Surgical Care',
+    badgeColor: 'bg-teal-50 text-teal-700 border-teal-200',
   },
   {
     id: 'staff-kitchen',
@@ -68,10 +43,34 @@ const presetUsers: PresetUser[] = [
     department: 'Admin',
     unit: 'Kitchen',
     roleType: 'staff',
-    destination: '/dashboard',
+    destination: '/new-request',
     avatar: 'MK',
-    badge: 'Admin / Kitchen Staff',
-    badgeColor: 'bg-amber-500/10 text-amber-300 border-amber-500/20',
+    badge: 'Admin / Patient Kitchen',
+    badgeColor: 'bg-amber-50 text-amber-700 border-amber-200',
+  },
+  {
+    id: 'staff-hostel',
+    name: 'Mr. Samuel Danladi',
+    roleTitle: 'Hostel & Patient Logistics Officer',
+    department: 'Clinicals',
+    unit: 'Hostel',
+    roleType: 'staff',
+    destination: '/new-request',
+    avatar: 'SD',
+    badge: 'Patient Transport Logistics',
+    badgeColor: 'bg-blue-50 text-blue-700 border-blue-200',
+  },
+  {
+    id: 'staff-edu',
+    name: 'Malam Ibrahim Musa',
+    roleTitle: 'Social Assistance & Education Officer',
+    department: 'Clinicals',
+    unit: 'Education Welfare',
+    roleType: 'staff',
+    destination: '/new-request',
+    avatar: 'IM',
+    badge: 'Child Schooling & Welfare',
+    badgeColor: 'bg-emerald-50 text-emerald-700 border-emerald-200',
   },
   {
     id: 'staff-fleet',
@@ -80,25 +79,14 @@ const presetUsers: PresetUser[] = [
     department: 'Facility',
     unit: 'Logistics/Fleet',
     roleType: 'staff',
-    destination: '/dashboard',
+    destination: '/new-request',
     avatar: 'ST',
-    badge: 'Facility & Fleet Staff',
-    badgeColor: 'bg-zinc-500/10 text-zinc-300 border-zinc-500/20',
+    badge: 'Fleet Fuel & Vehicle Repairs',
+    badgeColor: 'bg-slate-100 text-slate-700 border-slate-300',
   },
+];
 
-  // 2. Supervisors / Unit Heads (Level 2)
-  {
-    id: 'supv-clinicals',
-    name: 'Dr. Grace Mshelia',
-    roleTitle: 'Director of Clinical Services',
-    department: 'Clinicals',
-    unit: 'Clinicals',
-    roleType: 'supervisor',
-    destination: '/hod?dept=Clinicals',
-    avatar: 'GM',
-    badge: 'Level 2: Clinicals Supervisor',
-    badgeColor: 'bg-teal-500/10 text-teal-300 border-teal-500/20',
-  },
+const supervisorProfiles: StaffProfile[] = [
   {
     id: 'supv-admin',
     name: 'Mrs. Stella Eze',
@@ -108,8 +96,20 @@ const presetUsers: PresetUser[] = [
     roleType: 'supervisor',
     destination: '/hod?dept=Admin',
     avatar: 'SE',
-    badge: 'Level 2: Admin & Kitchen Supervisor',
-    badgeColor: 'bg-blue-500/10 text-blue-300 border-blue-500/20',
+    badge: 'Admin & Kitchen Supervisor',
+    badgeColor: 'bg-blue-50 text-blue-800 border-blue-200',
+  },
+  {
+    id: 'supv-clinicals',
+    name: 'Dr. Grace Mshelia',
+    roleTitle: 'Director of Clinical Services',
+    department: 'Clinicals',
+    unit: 'Clinicals',
+    roleType: 'supervisor',
+    destination: '/hod?dept=Clinicals',
+    avatar: 'GM',
+    badge: 'Clinicals & Pharmacy Desk',
+    badgeColor: 'bg-teal-50 text-teal-800 border-teal-200',
   },
   {
     id: 'supv-facility',
@@ -120,8 +120,8 @@ const presetUsers: PresetUser[] = [
     roleType: 'supervisor',
     destination: '/hod?dept=Facility',
     avatar: 'PA',
-    badge: 'Level 2: Facility Supervisor',
-    badgeColor: 'bg-orange-500/10 text-orange-300 border-orange-500/20',
+    badge: 'Facility & Fleet Supervisor',
+    badgeColor: 'bg-orange-50 text-orange-800 border-orange-200',
   },
   {
     id: 'supv-hr',
@@ -132,11 +132,12 @@ const presetUsers: PresetUser[] = [
     roleType: 'supervisor',
     destination: '/hod?dept=HR',
     avatar: 'ZA',
-    badge: 'Level 2: HR Supervisor',
-    badgeColor: 'bg-purple-500/10 text-purple-300 border-purple-500/20',
+    badge: 'HR & Staff Welfare Desk',
+    badgeColor: 'bg-purple-50 text-purple-800 border-purple-200',
   },
+];
 
-  // 3. Finance & Grants (Level 3)
+const leadershipProfiles: StaffProfile[] = [
   {
     id: 'finance-head',
     name: 'Mr. AY, FCA',
@@ -147,10 +148,8 @@ const presetUsers: PresetUser[] = [
     destination: '/finance',
     avatar: 'AY',
     badge: 'Level 3: Head of Finance & CA',
-    badgeColor: 'bg-emerald-500/10 text-emerald-300 border-emerald-500/20',
+    badgeColor: 'bg-emerald-50 text-emerald-800 border-emerald-300',
   },
-
-  // 4. Programme & National Coordinators (Level 4 & 5)
   {
     id: 'coordinator-prog',
     name: 'Dr. Emmanuel Bawa',
@@ -161,7 +160,7 @@ const presetUsers: PresetUser[] = [
     destination: '/hod?role=coordinator',
     avatar: 'EB',
     badge: 'Level 4: Programme Coordinator',
-    badgeColor: 'bg-indigo-500/10 text-indigo-300 border-indigo-500/20',
+    badgeColor: 'bg-indigo-50 text-indigo-800 border-indigo-200',
   },
   {
     id: 'coordinator-national',
@@ -173,10 +172,8 @@ const presetUsers: PresetUser[] = [
     destination: '/hod?role=national',
     avatar: 'US',
     badge: 'Level 5: National Directorate',
-    badgeColor: 'bg-rose-500/10 text-rose-300 border-rose-500/20',
+    badgeColor: 'bg-rose-50 text-rose-800 border-rose-200',
   },
-
-  // 5. Stores Officer
   {
     id: 'store-officer',
     name: 'Mr. Babatunde Lawal',
@@ -187,18 +184,18 @@ const presetUsers: PresetUser[] = [
     destination: '/inventory',
     avatar: 'BL',
     badge: 'Internal Store Issues',
-    badgeColor: 'bg-cyan-500/10 text-cyan-300 border-cyan-500/20',
+    badgeColor: 'bg-cyan-50 text-cyan-800 border-cyan-200',
   },
 ];
 
 export default function LoginPage() {
   const router = useRouter();
-  const [selectedUser, setSelectedUser] = useState<PresetUser>(presetUsers[0]);
-  const [password, setPassword] = useState('••••••••••••');
+  const [activeTab, setActiveTab] = useState<'requester' | 'supervisor' | 'finance' | 'coordinator'>('requester');
+  const [selectedRequester, setSelectedRequester] = useState<StaffProfile>(requesterProfiles[0]);
+  const [selectedSupervisor, setSelectedSupervisor] = useState<StaffProfile>(supervisorProfiles[0]);
   const [isLoggingIn, setIsLoggingIn] = useState(false);
-  const [activeFilter, setActiveFilter] = useState<'all' | 'staff' | 'supervisor' | 'finance' | 'coordinator'>('all');
 
-  const handleLogin = (userToLogin: PresetUser) => {
+  const handleLogin = (userToLogin: StaffProfile) => {
     setIsLoggingIn(true);
     saveStoredUser({
       id: userToLogin.id,
@@ -212,211 +209,344 @@ export default function LoginPage() {
     });
     setTimeout(() => {
       router.push(userToLogin.destination);
-    }, 350);
+    }, 250);
   };
 
-  const filteredUsers = activeFilter === 'all' 
-    ? presetUsers 
-    : presetUsers.filter(u => u.roleType === activeFilter);
-
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 flex flex-col justify-between selection:bg-teal-500 selection:text-zinc-950 relative overflow-hidden font-sans">
+    <div className="min-h-screen bg-slate-50 text-slate-900 flex flex-col justify-between font-sans selection:bg-teal-600 selection:text-white">
       
-      {/* Background glow */}
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 w-[800px] h-[350px] bg-teal-500/10 blur-[140px] rounded-full pointer-events-none"></div>
-      <div className="absolute bottom-0 right-10 w-[500px] h-[300px] bg-emerald-500/5 blur-[120px] rounded-full pointer-events-none"></div>
-
       {/* Header */}
-      <header className="border-b border-zinc-800/80 bg-zinc-950/80 backdrop-blur-md px-6 py-4">
+      <header className="border-b border-slate-200 bg-white/95 backdrop-blur-md px-6 py-4 shadow-sm">
         <div className="max-w-7xl mx-auto flex items-center justify-between">
           <Link href="/" className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400 font-black">
-              <Heart size={18} strokeWidth={2.5} />
+            <div className="w-10 h-10 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 font-black shadow-sm">
+              <Heart size={20} strokeWidth={2.5} className="text-teal-600" />
             </div>
             <div>
-              <span className="font-black text-lg tracking-tight text-teal-400">NANI</span>
-              <span className="font-black text-lg tracking-tight text-white ml-1">ReqFlow</span>
-              <span className="text-[10px] text-zinc-500 block">Noma Aid Nigeria Initiative</span>
+              <div className="flex items-center gap-1.5">
+                <span className="font-black text-xl tracking-tight text-teal-700">NANI</span>
+                <span className="font-black text-xl tracking-tight text-slate-900">ReqFlow</span>
+              </div>
+              <span className="text-[11px] text-slate-500 font-medium block">Noma Aid Nigeria Initiative</span>
             </div>
           </Link>
-          <div className="flex items-center gap-2 text-xs font-semibold text-zinc-400 bg-zinc-900 border border-zinc-800 px-3 py-1.5 rounded-full">
-            <ShieldCheck size={14} className="text-teal-400" />
-            <span>NANI Multi-Level Approval Gateway</span>
+          <div className="flex items-center gap-2 text-xs font-semibold text-slate-700 bg-slate-100 border border-slate-200 px-3.5 py-1.5 rounded-full shadow-sm">
+            <ShieldCheck size={15} className="text-teal-700" />
+            <span>Dedicated Role-Based Portals</span>
           </div>
         </div>
       </header>
 
-      {/* Main Login */}
-      <main className="max-w-5xl mx-auto px-4 py-8 w-full flex flex-col lg:flex-row gap-6 items-stretch relative z-10">
+      {/* Main Authentication Card */}
+      <main className="max-w-4xl mx-auto px-4 py-12 w-full">
         
-        {/* Left Column: Role Selector */}
-        <div className="flex-1 bg-zinc-900/60 border border-zinc-800 rounded-2xl p-6 backdrop-blur-md flex flex-col justify-between">
-          <div>
-            <div className="flex items-center justify-between mb-3">
+        {/* Banner Title */}
+        <div className="text-center mb-8">
+          <span className="text-xs font-bold font-mono tracking-widest uppercase text-teal-700 bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
+            SECURE REQUISITION & AUDIT ACCESS
+          </span>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight mt-3">
+            Sign In to Your Operational Station
+          </h1>
+          <p className="text-sm text-slate-600 mt-1 max-w-xl mx-auto">
+            Select your functional role below. Each portal takes you directly to your assigned workspace.
+          </p>
+        </div>
+
+        {/* Portal Category Tabs */}
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 mb-6 bg-slate-200/80 p-1.5 rounded-2xl border border-slate-300/80">
+          {[
+            { id: 'requester', label: '1. Staff Requester', icon: FileText, desc: 'Raise vouchers' },
+            { id: 'supervisor', label: '2. Line Supervisor', icon: ShieldCheck, desc: 'L2 Approval' },
+            { id: 'finance', label: '3. Finance Head', icon: DollarSign, desc: 'Mr. AY, FCA' },
+            { id: 'coordinator', label: '4. Leadership', icon: Award, desc: 'Coordinator' },
+          ].map(t => {
+            const Icon = t.icon;
+            const isActive = activeTab === t.id;
+            return (
+              <button
+                key={t.id}
+                onClick={() => setActiveTab(t.id as any)}
+                className={`py-3 px-3 rounded-xl text-left transition-all flex flex-col justify-between ${
+                  isActive
+                    ? 'bg-white text-slate-900 shadow-md border border-slate-200 ring-2 ring-teal-600/20'
+                    : 'text-slate-600 hover:text-slate-900 hover:bg-slate-100/60'
+                }`}
+              >
+                <div className="flex items-center gap-1.5">
+                  <Icon size={14} className={isActive ? 'text-teal-700' : 'text-slate-500'} />
+                  <span className="font-bold text-xs">{t.label}</span>
+                </div>
+                <span className="text-[10px] text-slate-500 mt-1">{t.desc}</span>
+              </button>
+            );
+          })}
+        </div>
+
+        {/* ── TAB 1: STAFF REQUESTER PORTAL ── */}
+        {activeTab === 'requester' && (
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
               <div>
-                <span className="text-[11px] font-bold uppercase tracking-wider text-teal-400">Step 1: Role Authentication</span>
-                <h1 className="text-xl font-black text-white mt-0.5">Select NANI Staff Profile</h1>
+                <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">
+                  Level 1 · Originating Personnel
+                </span>
+                <h2 className="text-lg font-black text-slate-900 mt-0.5">
+                  Staff Requester Portal
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Signing in as a requester opens the <strong>Electronic Requisition Engine (`/new-request`)</strong> directly.
+                </p>
               </div>
-              <span className="text-xs text-zinc-500 font-mono">1-Click Fast Auth</span>
             </div>
 
-            <p className="text-xs text-zinc-400 mb-4 leading-relaxed">
-              Experience the 4-level approval chain: Requester → Supervisor → Finance → Coordinator → National Coordinator.
-            </p>
-
-            {/* Filter Pills */}
-            <div className="flex flex-wrap gap-1 mb-4 p-1 bg-zinc-950 border border-zinc-800/80 rounded-xl">
-              {[
-                { id: 'all', label: 'All Roles' },
-                { id: 'staff', label: '1. Requesters' },
-                { id: 'supervisor', label: '2. Supervisors' },
-                { id: 'finance', label: '3. Finance' },
-                { id: 'coordinator', label: '4/5. Coordinators' },
-              ].map(f => (
-                <button
-                  key={f.id}
-                  onClick={() => setActiveFilter(f.id as any)}
-                  className={`flex-1 min-w-[90px] py-1.5 text-[11px] font-bold rounded-lg transition-all ${
-                    activeFilter === f.id 
-                      ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' 
-                      : 'text-zinc-400 hover:text-zinc-200'
-                  }`}
-                >
-                  {f.label}
-                </button>
-              ))}
-            </div>
-
-            {/* User Selection List */}
-            <div className="space-y-2 max-h-[400px] overflow-y-auto pr-1">
-              {filteredUsers.map(user => {
-                const isSelected = selectedUser.id === user.id;
-                return (
-                  <div
-                    key={user.id}
-                    onClick={() => setSelectedUser(user)}
-                    className={`p-3 rounded-xl border cursor-pointer transition-all flex items-center justify-between gap-3 ${
-                      isSelected
-                        ? 'bg-zinc-800 border-teal-500/50 shadow-lg shadow-teal-950/40'
-                        : 'bg-zinc-950/40 border-zinc-800/80 hover:bg-zinc-800/40 hover:border-zinc-700'
-                    }`}
-                  >
-                    <div className="flex items-center gap-3">
-                      <div className={`w-9 h-9 rounded-lg font-bold text-xs flex items-center justify-center shrink-0 ${
-                        isSelected ? 'bg-teal-500 text-zinc-950' : 'bg-zinc-800 text-zinc-300'
-                      }`}>
-                        {user.avatar}
-                      </div>
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <span className="font-bold text-sm text-zinc-100">{user.name}</span>
-                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${user.badgeColor}`}>
-                            {user.badge}
+            <div className="space-y-2 mb-6">
+              <label className="block text-xs font-bold text-slate-700 mb-2">
+                Select Your Department Unit / Staff Identity:
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {requesterProfiles.map(staff => {
+                  const isSelected = selectedRequester.id === staff.id;
+                  return (
+                    <div
+                      key={staff.id}
+                      onClick={() => setSelectedRequester(staff)}
+                      className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                        isSelected
+                          ? 'bg-teal-50/70 border-teal-500 shadow-sm ring-1 ring-teal-500'
+                          : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${
+                          isSelected ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-700'
+                        }`}>
+                          {staff.avatar}
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-slate-900">{staff.name}</p>
+                          <p className="text-[11px] text-slate-500">{staff.roleTitle}</p>
+                          <span className="text-[10px] font-mono text-teal-700 font-bold block mt-0.5">
+                            {staff.department} · {staff.unit}
                           </span>
                         </div>
-                        <p className="text-xs text-zinc-400 mt-0.5">{user.roleTitle} · {user.department} ({user.unit})</p>
                       </div>
-                    </div>
-
-                    <div className="shrink-0">
-                      {isSelected ? (
-                        <div className="w-5 h-5 rounded-full bg-teal-500/20 border border-teal-400 flex items-center justify-center text-teal-400">
-                          <CheckCircle2 size={12} />
+                      {isSelected && (
+                        <div className="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center">
+                          <Check size={14} strokeWidth={3} />
                         </div>
-                      ) : (
-                        <ChevronRight size={16} className="text-zinc-600" />
                       )}
                     </div>
-                  </div>
-                );
-              })}
+                  );
+                })}
+              </div>
             </div>
+
+            <button
+              onClick={() => handleLogin(selectedRequester)}
+              disabled={isLoggingIn}
+              className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-black text-sm rounded-2xl shadow-lg shadow-teal-700/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+            >
+              <span>Sign In as {selectedRequester.name} & Go Straight to Requisition Form</span>
+              <ArrowRight size={16} />
+            </button>
           </div>
-        </div>
+        )}
 
-        {/* Right Column: Active Terminal Card */}
-        <div className="w-full lg:w-96 bg-zinc-900 border border-zinc-800 rounded-2xl p-6 flex flex-col justify-between shadow-2xl relative">
-          <div>
-            <div className="flex items-center gap-2 text-xs font-bold text-teal-400 uppercase tracking-wider mb-2">
-              <KeyRound size={14} />
-              <span>Step 2: Sign-in Terminal</span>
+        {/* ── TAB 2: LINE SUPERVISORS PORTAL ── */}
+        {activeTab === 'supervisor' && (
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">
+                  Level 2 · Departmental Line Authority
+                </span>
+                <h2 className="text-lg font-black text-slate-900 mt-0.5">
+                  Line Supervisor Approval Desk
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Signing in takes you straight to your dedicated departmental review queue.
+                </p>
+              </div>
             </div>
 
-            <h2 className="text-xl font-black text-white">Enter Workstation</h2>
-            <p className="text-xs text-zinc-400 mt-1 mb-5">
-              Authenticate as <strong className="text-zinc-200">{selectedUser.name}</strong>
-            </p>
+            <div className="space-y-2 mb-6">
+              <label className="block text-xs font-bold text-slate-700 mb-2">
+                Select Department Supervisor:
+              </label>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                {supervisorProfiles.map(supv => {
+                  const isSelected = selectedSupervisor.id === supv.id;
+                  return (
+                    <div
+                      key={supv.id}
+                      onClick={() => setSelectedSupervisor(supv)}
+                      className={`p-4 rounded-2xl border cursor-pointer transition-all flex items-center justify-between ${
+                        isSelected
+                          ? 'bg-teal-50/70 border-teal-500 shadow-sm ring-1 ring-teal-500'
+                          : 'bg-slate-50 border-slate-200 hover:border-slate-300 hover:bg-slate-100/80'
+                      }`}
+                    >
+                      <div className="flex items-center gap-3">
+                        <div className={`w-10 h-10 rounded-xl flex items-center justify-center font-bold text-xs font-mono ${
+                          isSelected ? 'bg-teal-600 text-white' : 'bg-slate-200 text-slate-700'
+                        }`}>
+                          {supv.avatar}
+                        </div>
+                        <div>
+                          <p className="text-xs font-black text-slate-900">{supv.name}</p>
+                          <p className="text-[11px] text-slate-500">{supv.roleTitle}</p>
+                          <span className={`text-[10px] px-2 py-0.5 rounded-full font-bold border mt-1 inline-block ${supv.badgeColor}`}>
+                            {supv.badge}
+                          </span>
+                        </div>
+                      </div>
+                      {isSelected && (
+                        <div className="w-6 h-6 rounded-full bg-teal-600 text-white flex items-center justify-center">
+                          <Check size={14} strokeWidth={3} />
+                        </div>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
 
-            {/* Profile preview */}
-            <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800 mb-5">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-xl bg-teal-500 text-zinc-950 font-black flex items-center justify-center text-base">
-                  {selectedUser.avatar}
+            <button
+              onClick={() => handleLogin(selectedSupervisor)}
+              disabled={isLoggingIn}
+              className="w-full py-4 bg-teal-600 hover:bg-teal-700 text-white font-black text-sm rounded-2xl shadow-lg shadow-teal-700/20 flex items-center justify-center gap-2 transition-all active:scale-95"
+            >
+              <span>Sign In as {selectedSupervisor.name} & Open Supervisor Desk</span>
+              <ArrowRight size={16} />
+            </button>
+          </div>
+        )}
+
+        {/* ── TAB 3: FINANCE & GRANTS HEAD (MR. AY, FCA) ── */}
+        {activeTab === 'finance' && (
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-emerald-700 font-mono">
+                  Level 3 · Financial Governance & Grants
+                </span>
+                <h2 className="text-lg font-black text-slate-900 mt-0.5">
+                  Finance Directorate Desk
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Verifies budget line availability, locks donor grants, issues Payment Vouchers (PV), and releases funds.
+                </p>
+              </div>
+            </div>
+
+            <div className="p-6 rounded-2xl bg-emerald-50/60 border border-emerald-200 flex flex-col sm:flex-row items-center justify-between gap-4 mb-6">
+              <div className="flex items-center gap-4">
+                <div className="w-14 h-14 rounded-2xl bg-emerald-700 text-white flex items-center justify-center text-lg font-black font-mono shadow-md">
+                  AY
                 </div>
                 <div>
-                  <h4 className="font-black text-sm text-white">{selectedUser.name}</h4>
-                  <p className="text-xs text-teal-400 font-medium">{selectedUser.roleTitle}</p>
-                  <p className="text-[11px] text-zinc-500 mt-0.5 font-mono">{selectedUser.department} · {selectedUser.unit}</p>
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-black text-slate-900">Mr. AY, FCA</h3>
+                    <span className="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800 text-[10px] font-bold border border-emerald-300">
+                      CHARTERED ACCOUNTANT
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-0.5">Head of Finance & Grants Manager</p>
+                  <p className="text-[11px] font-mono text-emerald-800 mt-1">Official Digital Stamp: AY/FIN/2026</p>
                 </div>
               </div>
             </div>
 
-            {/* Form Fields */}
-            <div className="space-y-4">
-              <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">Official NANI Email / ID</label>
-                <input 
-                  type="text" 
-                  disabled 
-                  value={`${selectedUser.id}@nomaaidnigeria.org`}
-                  className="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-zinc-400 font-mono focus:outline-none"
-                />
-              </div>
-
-              <div>
-                <label className="block text-xs font-semibold text-zinc-400 mb-1.5">PIN / Access Key</label>
-                <div className="relative">
-                  <input 
-                    type="password" 
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    className="w-full px-3.5 py-2.5 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-zinc-300 font-mono tracking-widest focus:ring-2 focus:ring-teal-500 focus:outline-none"
-                  />
-                  <Lock size={14} className="absolute right-3.5 top-3 text-zinc-500" />
-                </div>
-              </div>
-            </div>
-          </div>
-
-          <div className="mt-8 pt-5 border-t border-zinc-800">
             <button
-              onClick={() => handleLogin(selectedUser)}
+              onClick={() => handleLogin(leadershipProfiles[0])}
               disabled={isLoggingIn}
-              className="w-full py-3.5 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-sm rounded-xl flex items-center justify-center gap-2 transition-all shadow-lg shadow-teal-500/20 active:scale-[0.98]"
+              className="w-full py-4 bg-emerald-700 hover:bg-emerald-800 text-white font-black text-sm rounded-2xl shadow-lg shadow-emerald-800/20 flex items-center justify-center gap-2 transition-all active:scale-95"
             >
-              {isLoggingIn ? (
-                <>
-                  <div className="w-4 h-4 border-2 border-zinc-950 border-t-transparent rounded-full animate-spin"></div>
-                  <span>Authenticating Station...</span>
-                </>
-              ) : (
-                <>
-                  <span>Sign In as {selectedUser.name.split(' ')[0]}</span>
-                  <ArrowRight size={16} />
-                </>
-              )}
+              <span>Sign In as Mr. AY, FCA & Open Finance Desk</span>
+              <ArrowRight size={16} />
             </button>
-            <p className="text-center text-[11px] text-zinc-500 mt-2 font-mono">
-              Role: {selectedUser.badge}
-            </p>
           </div>
-        </div>
+        )}
+
+        {/* ── TAB 4: EXECUTIVE & COORDINATOR DESK ── */}
+        {activeTab === 'coordinator' && (
+          <div className="bg-white border border-slate-200 rounded-3xl p-6 sm:p-8 shadow-sm">
+            <div className="flex items-center justify-between pb-4 mb-4 border-b border-slate-100">
+              <div>
+                <span className="text-xs font-bold uppercase tracking-wider text-indigo-700 font-mono">
+                  Level 4 & 5 · Executive Leadership
+                </span>
+                <h2 className="text-lg font-black text-slate-900 mt-0.5">
+                  Executive Authorization Desk
+                </h2>
+                <p className="text-xs text-slate-500 mt-0.5">
+                  Programme and National authorization for expenditures, capital projects, and board compliance.
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+              {/* Dr. Emmanuel Bawa */}
+              <div className="p-5 rounded-2xl bg-indigo-50/50 border border-indigo-200 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-700 text-white font-bold text-xs flex items-center justify-center font-mono">
+                      EB
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900">Dr. Emmanuel Bawa</h4>
+                      <p className="text-[11px] text-slate-500">Programme Coordinator</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-1">
+                    Level 4 executive sign-off for operational & surgical disbursements.
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleLogin(leadershipProfiles[1])}
+                  className="mt-4 w-full py-2.5 bg-indigo-700 hover:bg-indigo-800 text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
+                >
+                  <span>Sign In as Programme Coordinator</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+
+              {/* Dr. Usman Sani */}
+              <div className="p-5 rounded-2xl bg-rose-50/50 border border-rose-200 flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center gap-3 mb-2">
+                    <div className="w-10 h-10 rounded-xl bg-rose-700 text-white font-bold text-xs flex items-center justify-center font-mono">
+                      US
+                    </div>
+                    <div>
+                      <h4 className="text-xs font-black text-slate-900">Dr. Usman Sani, FWACS</h4>
+                      <p className="text-[11px] text-slate-500">National Coordinator (Directorate)</p>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-600 mt-1">
+                    Level 5 board-level ratification for high-value items (&gt;₦500,000).
+                  </p>
+                </div>
+                <button
+                  onClick={() => handleLogin(leadershipProfiles[2])}
+                  className="mt-4 w-full py-2.5 bg-rose-700 hover:bg-rose-800 text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center justify-center gap-1.5"
+                >
+                  <span>Sign In as National Coordinator</span>
+                  <ArrowRight size={13} />
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-zinc-800/60 bg-zinc-950/80 px-6 py-4 text-center text-xs text-zinc-500">
-        NOMA AID NIGERIA INITIATIVE (NANI) · ReqFlow Requisition System v3.0 · Powered by Antigravity
+      <footer className="border-t border-slate-200 bg-white py-6 text-center text-xs text-slate-500">
+        <p>NOMA AID NIGERIA INITIATIVE (NANI) · Procurement & Accountability Gateway · 2026</p>
       </footer>
+
     </div>
   );
 }

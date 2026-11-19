@@ -60,41 +60,49 @@ export default function InventoryPage() {
     unit: 'Nursing',
     category: 'Medical Consumables',
     quantity: 10,
-    unitType: 'Units',
-    unitPrice: 1000,
-    minLevel: 5,
+    unitType: 'Packs',
+    unitPrice: 5000,
   });
 
   const handleManualAdd = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!newItem.name || newItem.unitPrice <= 0) return;
+    if (!newItem.name.trim()) return;
 
-    const created: InventoryItem = {
+    const item: InventoryItem = {
       id: Date.now().toString(),
       code: newItem.code,
       name: newItem.name,
       department: newItem.department,
       unit: newItem.unit,
       category: newItem.category,
-      quantity: Number(newItem.quantity),
+      quantity: newItem.quantity,
       unitType: newItem.unitType,
-      unitPrice: Number(newItem.unitPrice),
-      minLevel: Number(newItem.minLevel),
-      status: Number(newItem.quantity) > Number(newItem.minLevel) ? 'In Stock' : Number(newItem.quantity) === 0 ? 'Out of Stock' : 'Low Stock',
+      unitPrice: newItem.unitPrice,
+      minLevel: 10,
+      status: newItem.quantity > 10 ? 'In Stock' : newItem.quantity > 0 ? 'Low Stock' : 'Out of Stock',
     };
 
-    setItems([created, ...items]);
+    setItems([item, ...items]);
+    showToast(`✓ "${item.name}" registered in Central Store under ${item.department} (${item.unit})`);
     setShowAddModal(false);
-    showToast(`✓ Registered "${created.name}" in Central Store Register.`);
+    setNewItem({
+      code: 'MED-002',
+      name: '',
+      department: 'Clinicals',
+      unit: 'Nursing',
+      category: 'Medical Consumables',
+      quantity: 10,
+      unitType: 'Packs',
+      unitPrice: 5000,
+    });
   };
 
-  // Internal Store Issue Execution
   const handleStoreIssue = (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedIssueItem) return;
 
     if (issueQuantity > selectedIssueItem.quantity) {
-      showToast(`Error: Requested ${issueQuantity} exceeds available stock of ${selectedIssueItem.quantity}.`);
+      alert('Cannot issue more items than currently in stock!');
       return;
     }
 
@@ -122,12 +130,12 @@ export default function InventoryPage() {
   });
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
+    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-teal-500 selection:text-white">
       <Navbar role="Storekeeper & Inventory" userName="Mr. Babatunde Lawal" />
 
       {toast && (
-        <div className="fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl bg-teal-950 border border-teal-500 text-teal-300 shadow-2xl flex items-center gap-3 animate-in fade-in text-xs font-bold font-sans">
-          <div className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></div>
+        <div className="fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl bg-teal-50 border border-teal-300 text-teal-900 shadow-2xl flex items-center gap-3 animate-in fade-in text-xs font-bold font-sans">
+          <div className="w-2 h-2 rounded-full bg-teal-600 animate-ping"></div>
           <span>{toast}</span>
         </div>
       )}
@@ -135,17 +143,17 @@ export default function InventoryPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         
         {/* Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-800">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-teal-400 mb-1">
+            <div className="flex items-center gap-2 text-xs font-mono text-teal-700 font-bold mb-1">
               <span>NOMA AID NIGERIA INITIATIVE</span>
               <span>/</span>
               <span>CENTRAL MEDICAL & OPERATIONAL STORES</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Central Store & Inventory Register
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Track surgical consumables, medicines, sanitation chemicals, and issue Internal Store Vouchers with automatic stock deduction.
             </p>
           </div>
@@ -153,15 +161,15 @@ export default function InventoryPage() {
           <div className="flex flex-wrap items-center gap-2">
             <button
               onClick={() => showToast('Exporting active inventory to CSV / Excel...')}
-              className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 flex items-center gap-2 transition-all"
+              className="px-4 py-2.5 bg-white hover:bg-slate-50 border border-slate-200 rounded-xl text-xs font-bold text-slate-700 flex items-center gap-2 transition-all shadow-sm"
             >
-              <FileSpreadsheet size={14} className="text-emerald-400" />
+              <FileSpreadsheet size={14} className="text-emerald-700" />
               <span>Export CSV</span>
             </button>
 
             <button
               onClick={() => setShowAddModal(true)}
-              className="px-4 py-2.5 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-1.5"
+              className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5"
             >
               <Plus size={14} strokeWidth={3} />
               <span>+ Register New Item</span>
@@ -170,24 +178,24 @@ export default function InventoryPage() {
         </div>
 
         {/* ── Search & Filter Bar ── */}
-        <div className="p-4 rounded-2xl bg-zinc-900 border border-zinc-800 mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
+        <div className="p-4 rounded-2xl bg-white border border-slate-200 shadow-sm mb-6 flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="relative w-full sm:w-80">
-            <Search size={14} className="absolute left-3.5 top-3 text-zinc-500" />
+            <Search size={14} className="absolute left-3.5 top-3 text-slate-400" />
             <input
               type="text"
               placeholder="Search by code, drug, or item name..."
               value={search}
               onChange={(e) => setSearch(e.target.value)}
-              className="w-full pl-9 pr-4 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-500 focus:ring-1 focus:ring-teal-500 focus:outline-none"
+              className="w-full pl-9 pr-4 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:ring-1 focus:ring-teal-500 focus:outline-none"
             />
           </div>
 
           <div className="flex items-center gap-2 w-full sm:w-auto">
-            <span className="text-xs font-bold text-zinc-400">Department:</span>
+            <span className="text-xs font-bold text-slate-600">Department:</span>
             <select
               value={deptFilter}
               onChange={(e) => setDeptFilter(e.target.value)}
-              className="px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
+              className="px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
             >
               <option value="All">All Departments</option>
               <option value="Clinicals">Clinicals</option>
@@ -198,11 +206,11 @@ export default function InventoryPage() {
         </div>
 
         {/* ── Inventory Register Table ── */}
-        <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl">
-          <div className="overflow-x-auto">
+        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm">
+          <div className="overflow-x-auto border border-slate-200 rounded-xl">
             <table className="w-full text-left text-xs font-sans">
-              <thead>
-                <tr className="border-b border-zinc-800 text-zinc-400 font-mono uppercase">
+              <thead className="bg-slate-100 text-slate-700">
+                <tr className="border-b border-slate-200 font-mono uppercase">
                   <th className="py-2.5 px-3">Item Code</th>
                   <th className="py-2.5 px-3 min-w-[220px]">Item Description</th>
                   <th className="py-2.5 px-3">Department / Unit</th>
@@ -212,34 +220,34 @@ export default function InventoryPage() {
                   <th className="py-2.5 px-3 text-center">Quick Action</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-zinc-800/60 font-sans">
+              <tbody className="divide-y divide-slate-100 font-sans bg-white">
                 {filteredItems.map((item) => (
-                  <tr key={item.id} className="hover:bg-zinc-800/30 transition-colors">
+                  <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                     
                     {/* Code */}
-                    <td className="py-3 px-3 font-mono font-bold text-teal-400">
+                    <td className="py-3 px-3 font-mono font-bold text-teal-700">
                       {item.code}
                     </td>
 
                     {/* Description */}
                     <td className="py-3 px-3">
-                      <div className="font-bold text-white text-xs">{item.name}</div>
-                      <span className="text-[10px] text-zinc-500">{item.category}</span>
+                      <div className="font-bold text-slate-900 text-xs">{item.name}</div>
+                      <span className="text-[10px] text-slate-500">{item.category}</span>
                     </td>
 
                     {/* Department / Unit */}
-                    <td className="py-3 px-3 font-mono text-zinc-300">
-                      {item.department} <span className="text-zinc-500">({item.unit})</span>
+                    <td className="py-3 px-3 font-mono text-slate-700">
+                      {item.department} <span className="text-slate-500">({item.unit})</span>
                     </td>
 
                     {/* Quantity */}
                     <td className="py-3 px-3 text-center font-mono">
-                      <span className="text-base font-black text-white">{item.quantity}</span>{' '}
-                      <span className="text-[10px] text-zinc-500">{item.unitType}</span>
+                      <span className="text-base font-black text-slate-900">{item.quantity}</span>{' '}
+                      <span className="text-[10px] text-slate-500">{item.unitType}</span>
                     </td>
 
                     {/* Unit Price */}
-                    <td className="py-3 px-3 text-right font-mono font-bold text-zinc-300">
+                    <td className="py-3 px-3 text-right font-mono font-bold text-slate-700">
                       {formatCurrency(item.unitPrice)}
                     </td>
 
@@ -247,10 +255,10 @@ export default function InventoryPage() {
                     <td className="py-3 px-3 text-center">
                       <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-bold font-mono ${
                         item.status === 'In Stock' 
-                          ? 'bg-emerald-500/10 text-emerald-300 border border-emerald-500/20' 
+                          ? 'bg-emerald-100 text-emerald-800 border border-emerald-200' 
                           : item.status === 'Low Stock'
-                          ? 'bg-amber-500/10 text-amber-300 border border-amber-500/20'
-                          : 'bg-rose-500/10 text-rose-300 border border-rose-500/20'
+                          ? 'bg-amber-100 text-amber-800 border border-amber-200'
+                          : 'bg-rose-100 text-rose-800 border border-rose-200'
                       }`}>
                         {item.status}
                       </span>
@@ -265,7 +273,7 @@ export default function InventoryPage() {
                           setShowIssueModal(true);
                         }}
                         disabled={item.quantity === 0}
-                        className="px-3 py-1.5 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 mx-auto"
+                        className="px-3 py-1.5 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-xs font-bold transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-1 mx-auto"
                       >
                         <Send size={12} />
                         <span>Issue Store Requisition</span>
@@ -283,42 +291,42 @@ export default function InventoryPage() {
 
       {/* ── Internal Store Issue Modal ── */}
       {showIssueModal && selectedIssueItem && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
               <div>
-                <span className="text-[10px] font-mono text-cyan-400 uppercase">INTERNAL STORE ISSUE WORKFLOW</span>
-                <h3 className="text-base font-black text-white mt-0.5">Issue Stock from Central Store</h3>
+                <span className="text-[10px] font-mono text-teal-700 font-bold uppercase">INTERNAL STORE ISSUE WORKFLOW</span>
+                <h3 className="text-base font-black text-slate-900 mt-0.5">Issue Stock from Central Store</h3>
               </div>
-              <button onClick={() => setShowIssueModal(false)} className="p-1.5 text-zinc-400 hover:text-white rounded-lg bg-zinc-800">
+              <button onClick={() => setShowIssueModal(false)} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg bg-slate-100 hover:bg-slate-200">
                 <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleStoreIssue} className="space-y-4 mt-4">
-              <div className="p-3.5 rounded-xl bg-zinc-950 border border-zinc-800 font-mono text-xs">
-                <div className="text-zinc-400">Item: <strong className="text-white">{selectedIssueItem.name}</strong></div>
-                <div className="text-zinc-400 mt-1">Available in Store: <strong className="text-teal-400">{selectedIssueItem.quantity} {selectedIssueItem.unitType}</strong></div>
+              <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200 font-mono text-xs">
+                <div className="text-slate-600">Item: <strong className="text-slate-900">{selectedIssueItem.name}</strong></div>
+                <div className="text-slate-600 mt-1">Available in Store: <strong className="text-teal-700">{selectedIssueItem.quantity} {selectedIssueItem.unitType}</strong></div>
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-400 mb-1">Quantity to Issue</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Quantity to Issue</label>
                 <input
                   type="number"
                   min={1}
                   max={selectedIssueItem.quantity}
                   value={issueQuantity}
                   onChange={(e) => setIssueQuantity(parseInt(e.target.value) || 1)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
                 />
               </div>
 
               <div>
-                <label className="block text-xs font-bold text-zinc-400 mb-1">Receiving Ward / Unit</label>
+                <label className="block text-xs font-bold text-slate-700 mb-1">Receiving Ward / Unit</label>
                 <select
                   value={issueRecipient}
                   onChange={(e) => setIssueRecipient(e.target.value)}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-xs text-slate-900 focus:ring-1 focus:ring-teal-500 focus:outline-none"
                 >
                   <option value="Post-Op Nursing Ward">Post-Op Nursing Ward (Ward 3)</option>
                   <option value="Hostel Unit">Hostel Unit (Patient Welfare)</option>
@@ -329,17 +337,17 @@ export default function InventoryPage() {
                 </select>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setShowIssueModal(false)}
-                  className="px-4 py-2 bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold"
+                  className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl text-xs font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black rounded-xl text-xs flex items-center gap-1.5"
+                  className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs flex items-center gap-1.5 shadow-sm"
                 >
                   <Check size={14} strokeWidth={3} />
                   <span>Confirm Issue & Deduct Stock</span>
@@ -352,35 +360,35 @@ export default function InventoryPage() {
 
       {/* ── Add Custom Item Modal ── */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-lg w-full p-6 shadow-2xl">
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
-              <h3 className="text-base font-black text-white">Register Item in Central Store</h3>
-              <button onClick={() => setShowAddModal(false)} className="p-1.5 text-zinc-400 hover:text-white rounded-lg bg-zinc-800">
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-lg w-full p-6 shadow-2xl">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
+              <h3 className="text-base font-black text-slate-900">Register Item in Central Store</h3>
+              <button onClick={() => setShowAddModal(false)} className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg bg-slate-100 hover:bg-slate-200">
                 <X size={16} />
               </button>
             </div>
 
             <form onSubmit={handleManualAdd} className="space-y-4 mt-4 text-xs">
               <div>
-                <label className="block font-bold text-zinc-400 mb-1">Item Description / Brand</label>
+                <label className="block font-bold text-slate-700 mb-1">Item Description / Brand</label>
                 <input
                   type="text"
                   required
                   placeholder="e.g. Surgical Suction Tubing (Sterile)"
                   value={newItem.name}
                   onChange={(e) => setNewItem({ ...newItem, name: e.target.value })}
-                  className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                  className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 focus:ring-1 focus:ring-teal-500 focus:outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block font-bold text-zinc-400 mb-1">Transaction Code</label>
+                  <label className="block font-bold text-slate-700 mb-1">Transaction Code</label>
                   <select
                     value={newItem.code}
                     onChange={(e) => setNewItem({ ...newItem, code: e.target.value })}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-teal-300 font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-teal-700 font-mono font-bold"
                   >
                     <option value="MED-001">MED-001 (Medicines)</option>
                     <option value="MED-002">MED-002 (Medical Consumables)</option>
@@ -392,11 +400,11 @@ export default function InventoryPage() {
                 </div>
 
                 <div>
-                  <label className="block font-bold text-zinc-400 mb-1">Department</label>
+                  <label className="block font-bold text-slate-700 mb-1">Department</label>
                   <select
                     value={newItem.department}
                     onChange={(e) => setNewItem({ ...newItem, department: e.target.value })}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900"
                   >
                     <option value="Clinicals">Clinicals</option>
                     <option value="Facility">Facility</option>
@@ -408,47 +416,47 @@ export default function InventoryPage() {
 
               <div className="grid grid-cols-3 gap-3">
                 <div>
-                  <label className="block font-bold text-zinc-400 mb-1">Initial Qty</label>
+                  <label className="block font-bold text-slate-700 mb-1">Initial Qty</label>
                   <input
                     type="number"
                     min={1}
                     value={newItem.quantity}
                     onChange={(e) => setNewItem({ ...newItem, quantity: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-zinc-400 mb-1">Unit</label>
+                  <label className="block font-bold text-slate-700 mb-1">Unit</label>
                   <input
                     type="text"
                     value={newItem.unitType}
                     onChange={(e) => setNewItem({ ...newItem, unitType: e.target.value })}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900"
                   />
                 </div>
                 <div>
-                  <label className="block font-bold text-zinc-400 mb-1">Unit Price (₦)</label>
+                  <label className="block font-bold text-slate-700 mb-1">Unit Price (₦)</label>
                   <input
                     type="number"
                     min={0}
                     value={newItem.unitPrice}
                     onChange={(e) => setNewItem({ ...newItem, unitPrice: parseInt(e.target.value) || 0 })}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-white font-mono"
+                    className="w-full px-3 py-2 bg-slate-50 border border-slate-200 rounded-xl text-slate-900 font-mono"
                   />
                 </div>
               </div>
 
-              <div className="flex justify-end gap-3 pt-4 border-t border-zinc-800">
+              <div className="flex justify-end gap-3 pt-4 border-t border-slate-200">
                 <button
                   type="button"
                   onClick={() => setShowAddModal(false)}
-                  className="px-4 py-2 bg-zinc-800 text-zinc-300 rounded-xl font-bold"
+                  className="px-4 py-2 bg-slate-100 text-slate-700 hover:bg-slate-200 rounded-xl font-bold"
                 >
                   Cancel
                 </button>
                 <button
                   type="submit"
-                  className="px-6 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black rounded-xl"
+                  className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl shadow-sm"
                 >
                   Save Item
                 </button>

@@ -382,23 +382,23 @@ export default function NewRequestPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
+    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-teal-600 selection:text-white font-sans">
       <Navbar />
 
       <main className="max-w-6xl mx-auto px-4 py-8">
         
         {/* Breadcrumb & Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-teal-400 mb-1">
+            <div className="flex items-center gap-2 text-xs font-mono text-teal-700 mb-1 font-bold">
               <span>NOMA AID NIGERIA INITIATIVE</span>
               <span>/</span>
               <span>ELECTRONIC REQUISITION VOUCHER</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Raise Departmental Requisition
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Complete the structured voucher. Auto-coded, auto-totalled, and routed through the 4-level approval chain.
             </p>
           </div>
@@ -413,16 +413,16 @@ export default function NewRequestPage() {
               <div 
                 key={s.n}
                 onClick={() => setStep(s.n)}
-                className={`flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
+                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
                   step === s.n
-                    ? 'bg-teal-500/20 text-teal-300 border border-teal-500/40'
+                    ? 'bg-teal-50 text-teal-800 border border-teal-300 shadow-sm'
                     : step > s.n
-                    ? 'bg-zinc-900 text-zinc-300 border border-zinc-800'
-                    : 'bg-zinc-950 text-zinc-600 border border-zinc-900'
+                    ? 'bg-slate-100 text-slate-700 border border-slate-200'
+                    : 'bg-white text-slate-400 border border-slate-200'
                 }`}
               >
                 <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
-                  step === s.n ? 'bg-teal-500 text-zinc-950' : step > s.n ? 'bg-zinc-800 text-teal-400' : 'bg-zinc-900 text-zinc-600'
+                  step === s.n ? 'bg-teal-600 text-white' : step > s.n ? 'bg-slate-300 text-slate-800' : 'bg-slate-100 text-slate-400'
                 }`}>
                   {step > s.n ? <Check size={12} strokeWidth={3} /> : s.n}
                 </div>
@@ -442,10 +442,10 @@ export default function NewRequestPage() {
             <div>
               <div className="flex items-center justify-between mb-3">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-teal-400">Step 1.1</span>
-                  <h2 className="text-lg font-black text-white mt-0.5">Select Originating Department</h2>
+                  <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">Step 1.1</span>
+                  <h2 className="text-lg font-black text-slate-900 mt-0.5">Select Originating Department</h2>
                 </div>
-                <span className="text-xs text-zinc-500 font-mono">5 NANI Departments</span>
+                <span className="text-xs text-slate-500 font-mono">5 NANI Departments</span>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
@@ -458,33 +458,33 @@ export default function NewRequestPage() {
                       onClick={() => handleSelectDept(dept.id)}
                       className={`p-4 rounded-2xl border cursor-pointer transition-all relative overflow-hidden flex flex-col justify-between ${
                         isSelected
-                          ? 'bg-zinc-900 border-teal-500 shadow-xl shadow-teal-500/10 ring-1 ring-teal-500/30'
-                          : 'bg-zinc-900/40 border-zinc-800/80 hover:bg-zinc-900/80 hover:border-zinc-700'
+                          ? 'bg-teal-50 border-teal-500 shadow-md ring-2 ring-teal-500/20'
+                          : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm'
                       }`}
                     >
                       {isSelected && (
-                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-teal-400 animate-ping"></div>
+                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-teal-600 animate-ping"></div>
                       )}
                       <div>
                         <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-3 ${
-                          isSelected ? 'bg-teal-500/20 text-teal-300 border border-teal-500/30' : 'bg-zinc-800 text-zinc-400'
+                          isSelected ? 'bg-teal-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600'
                         }`}>
                           {dept.icon}
                         </div>
-                        <h3 className="font-black text-base text-white">{dept.name}</h3>
-                        <p className="text-[11px] text-zinc-400 mt-1 line-clamp-1">
+                        <h3 className="font-black text-base text-slate-900">{dept.name}</h3>
+                        <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
                           {dept.units.join(', ')}
                         </p>
                       </div>
 
-                      <div className="mt-4 pt-3 border-t border-zinc-800/80 flex items-center justify-between text-[11px]">
-                        <span className="text-zinc-500 font-mono">{dept.units.length} Units</span>
+                      <div className="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px]">
+                        <span className="text-slate-500 font-mono">{dept.units.length} Units</span>
                         {isSelected ? (
-                          <span className="text-teal-400 font-bold flex items-center gap-1">
-                            Selected <Check size={12} />
+                          <span className="text-teal-700 font-bold flex items-center gap-1">
+                            Selected <Check size={12} strokeWidth={3} />
                           </span>
                         ) : (
-                          <span className="text-zinc-600">Click to choose</span>
+                          <span className="text-slate-400">Click to choose</span>
                         )}
                       </div>
                     </div>
@@ -494,15 +494,15 @@ export default function NewRequestPage() {
             </div>
 
             {/* 1.2 Unit Selector */}
-            <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800">
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
               <div className="flex items-center justify-between mb-4">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-teal-400">Step 1.2</span>
-                  <h3 className="text-base font-black text-white mt-0.5">
+                  <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">Step 1.2</span>
+                  <h3 className="text-base font-black text-slate-900 mt-0.5">
                     Select Unit under {currentDept.name}
                   </h3>
                 </div>
-                <span className="text-xs text-zinc-500 font-mono">
+                <span className="text-xs text-slate-500 font-mono">
                   {currentDept.name} Department
                 </span>
               </div>
@@ -518,20 +518,20 @@ export default function NewRequestPage() {
                       onClick={() => handleSelectUnit(unit)}
                       className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
                         isSelected
-                          ? 'bg-teal-500 text-zinc-950 shadow-lg shadow-teal-500/20 ring-2 ring-teal-400'
-                          : 'bg-zinc-950 border border-zinc-800 text-zinc-300 hover:border-zinc-700 hover:text-white'
+                          ? 'bg-teal-600 text-white shadow-md shadow-teal-700/20 ring-2 ring-teal-500'
+                          : 'bg-slate-50 border border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
                       }`}
                     >
                       {isHostel && <span>🚌</span>}
                       {isEdu && <span>🎓</span>}
                       <span>{unit}</span>
                       {isHostel && (
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-zinc-950 text-teal-300' : 'bg-teal-500/10 text-teal-400'}`}>
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-teal-800 text-white' : 'bg-teal-50 text-teal-700'}`}>
                           Patient Transport
                         </span>
                       )}
                       {isEdu && (
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-zinc-950 text-teal-300' : 'bg-teal-500/10 text-teal-400'}`}>
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-teal-800 text-white' : 'bg-teal-50 text-teal-700'}`}>
                           Schooling Roster
                         </span>
                       )}
@@ -546,9 +546,9 @@ export default function NewRequestPage() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               
               {/* Pathway */}
-              <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800">
-                <span className="text-xs font-bold uppercase tracking-wider text-teal-400">Step 1.3</span>
-                <h3 className="text-base font-black text-white mt-0.5 mb-3">Requisition Pathway</h3>
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">Step 1.3</span>
+                <h3 className="text-base font-black text-slate-900 mt-0.5 mb-3">Requisition Pathway</h3>
                 
                 <div className="space-y-2">
                   {[
@@ -585,15 +585,15 @@ export default function NewRequestPage() {
                         onClick={() => setRequisitionType(p.id as any)}
                         className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
                           isSelected
-                            ? 'bg-teal-500/10 border-teal-500/60 text-white'
-                            : 'bg-zinc-950 border-zinc-800/80 text-zinc-400 hover:border-zinc-700'
+                            ? 'bg-teal-50/80 border-teal-500 text-slate-900 shadow-sm'
+                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100/60'
                         }`}
                       >
                         <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-zinc-200">{p.title}</span>
-                          {isSelected && <CheckCircle2 size={16} className="text-teal-400" />}
+                          <span className="font-bold text-xs text-slate-900">{p.title}</span>
+                          {isSelected && <CheckCircle2 size={16} className="text-teal-600" />}
                         </div>
-                        <p className="text-[11px] text-zinc-500 mt-1">{p.desc}</p>
+                        <p className="text-[11px] text-slate-500 mt-1">{p.desc}</p>
                       </div>
                     );
                   })}
@@ -601,10 +601,10 @@ export default function NewRequestPage() {
               </div>
 
               {/* Urgency & Priority */}
-              <div className="p-6 rounded-2xl bg-zinc-900/60 border border-zinc-800 flex flex-col justify-between">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
                 <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-teal-400">Step 1.4</span>
-                  <h3 className="text-base font-black text-white mt-0.5 mb-3">Priority Level</h3>
+                  <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">Step 1.4</span>
+                  <h3 className="text-base font-black text-slate-900 mt-0.5 mb-3">Priority Level</h3>
 
                   <div className="space-y-2.5">
                     {[
@@ -619,25 +619,25 @@ export default function NewRequestPage() {
                           onClick={() => setUrgency(u.id as any)}
                           className={`p-3 rounded-xl border cursor-pointer transition-all ${
                             isSelected
-                              ? 'bg-zinc-900 border-teal-500 text-white ring-1 ring-teal-500/40'
-                              : 'bg-zinc-950 border-zinc-800 text-zinc-400 hover:border-zinc-700'
+                              ? 'bg-teal-50/80 border-teal-500 text-slate-900 ring-1 ring-teal-500'
+                              : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
                           }`}
                         >
                           <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-zinc-200">{u.label}</span>
-                            {isSelected && <CheckCircle2 size={16} className="text-teal-400" />}
+                            <span className="font-bold text-xs text-slate-900">{u.label}</span>
+                            {isSelected && <CheckCircle2 size={16} className="text-teal-600" />}
                           </div>
-                          <p className="text-[11px] text-zinc-500 mt-0.5">{u.desc}</p>
+                          <p className="text-[11px] text-slate-500 mt-0.5">{u.desc}</p>
                         </div>
                       );
                     })}
                   </div>
                 </div>
 
-                <div className="mt-4 pt-4 border-t border-zinc-800 flex justify-end">
+                <div className="mt-4 pt-4 border-t border-slate-200 flex justify-end">
                   <button
                     onClick={() => setStep(2)}
-                    className="px-6 py-3 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-2 active:scale-95"
+                    className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-teal-700/20 flex items-center gap-2 active:scale-95"
                   >
                     <span>Proceed to Line Items</span>
                     <ArrowRight size={14} />
@@ -657,21 +657,21 @@ export default function NewRequestPage() {
           <div className="space-y-6 animate-in fade-in duration-200">
             
             {/* Voucher Header Info Card */}
-            <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-zinc-800">
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div>
-                  <span className="text-[10px] font-mono uppercase tracking-wider text-teal-400">
+                  <span className="text-[10px] font-mono uppercase tracking-wider text-teal-700 font-bold">
                     Official Voucher Header
                   </span>
-                  <h3 className="text-lg font-black text-white mt-0.5">
+                  <h3 className="text-lg font-black text-slate-900 mt-0.5">
                     {currentDept.name} Requisition — {selectedUnit} Unit
                   </h3>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/10 text-teal-300 border border-teal-500/30">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200">
                     {requisitionType === 'transport' ? '🚌 Transport Requisition' : requisitionType === 'education' ? '🎓 Education Welfare' : requisitionType === 'store-issue' ? '📦 Store Issue' : '💵 Cash Requisition'}
                   </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 uppercase">
+                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase">
                     {urgency}
                   </span>
                 </div>
@@ -682,42 +682,42 @@ export default function NewRequestPage() {
                 
                 {/* Date */}
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-400 mb-1 flex items-center gap-1.5">
-                    <Calendar size={12} className="text-teal-400" />
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Calendar size={12} className="text-teal-700" />
                     <span>Requisition Date</span>
                   </label>
                   <input
                     type="text"
                     value={reqDate}
                     onChange={(e) => setReqDate(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-mono focus:ring-2 focus:ring-teal-600 focus:outline-none"
                   />
                 </div>
 
                 {/* Name of requester */}
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-400 mb-1 flex items-center gap-1.5">
-                    <UserCheck size={12} className="text-teal-400" />
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <UserCheck size={12} className="text-teal-700" />
                     <span>Name of Requester</span>
                   </label>
                   <input
                     type="text"
                     value={requesterName}
                     onChange={(e) => setRequesterName(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-semibold focus:ring-2 focus:ring-teal-600 focus:outline-none"
                   />
                 </div>
 
                 {/* Transaction Code */}
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-400 mb-1 flex items-center gap-1.5">
-                    <FileText size={12} className="text-teal-400" />
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <FileText size={12} className="text-teal-700" />
                     <span>Item Transaction Code</span>
                   </label>
                   <select
                     value={defaultTransCode}
                     onChange={(e) => setDefaultTransCode(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-teal-300 font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-teal-800 font-mono font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
                   >
                     {transactionCodes.map(tc => (
                       <option key={tc.code} value={tc.code}>
@@ -729,14 +729,14 @@ export default function NewRequestPage() {
 
                 {/* Donor Grant Code */}
                 <div>
-                  <label className="block text-[11px] font-bold text-zinc-400 mb-1 flex items-center gap-1.5">
-                    <DollarSign size={12} className="text-emerald-400" />
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <DollarSign size={12} className="text-emerald-700" />
                     <span>Donor Grant Code</span>
                   </label>
                   <select
                     value={donorGrantCode}
                     onChange={(e) => setDonorGrantCode(e.target.value)}
-                    className="w-full px-3 py-2 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-emerald-300 font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-emerald-800 font-mono font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
                   >
                     <option value="HN-2026-SURG-Q4">HN-2026-SURG-Q4 (Surgical & Clinical)</option>
                     <option value="HN-2026-HOSP-Q4">HN-2026-HOSP-Q4 (Hostel & Patient Transport)</option>
@@ -753,22 +753,22 @@ export default function NewRequestPage() {
                 CASE A: HOSTEL PATIENT & CAREGIVER TRANSPORT REQUISITION
                ───────────────────────────────────────────────────────────── */}
             {isTransportMode ? (
-              <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-800">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
                   <div>
-                    <span className="text-xs font-bold text-teal-400 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-teal-700 uppercase tracking-wider font-mono">
                       Hostel Unit Logistics System
                     </span>
-                    <h3 className="text-base font-black text-white mt-0.5">
+                    <h3 className="text-base font-black text-slate-900 mt-0.5">
                       Patient & Caregiver Transport Fare Schedule
                     </h3>
-                    <p className="text-xs text-zinc-400 mt-0.5">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Select incoming or discharge, pick patient/caregiver, and choose state. Cost is auto-calculated per official state rate.
                     </p>
                   </div>
                   <button
                     onClick={addTransportRow}
-                    className="px-3.5 py-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto"
+                    className="px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto shadow-sm"
                   >
                     <Plus size={14} />
                     <span>+ Add Passenger</span>
@@ -779,7 +779,7 @@ export default function NewRequestPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-zinc-800 text-zinc-400 uppercase tracking-wider font-mono">
+                      <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider font-mono border-b border-slate-200">
                         <th className="py-2.5 px-2 w-12 text-center">S/N</th>
                         <th className="py-2.5 px-3 min-w-[180px]">Passenger Full Name</th>
                         <th className="py-2.5 px-3 w-40">Role / Category</th>
@@ -789,10 +789,10 @@ export default function NewRequestPage() {
                         <th className="py-2.5 px-2 w-12 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800/60 font-sans">
+                    <tbody className="divide-y divide-slate-100 font-sans">
                       {transportRows.map((row) => (
-                        <tr key={row.id} className="hover:bg-zinc-800/30 transition-colors">
-                          <td className="py-3 px-2 text-center font-mono text-zinc-500">{row.sn}</td>
+                        <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-3 px-2 text-center font-mono text-slate-500">{row.sn}</td>
                           
                           {/* Name */}
                           <td className="py-3 px-3">
@@ -801,7 +801,7 @@ export default function NewRequestPage() {
                               value={row.name}
                               placeholder="e.g. Fatima Abubakar"
                               onChange={(e) => updateTransportRow(row.id, 'name', e.target.value)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
@@ -810,7 +810,7 @@ export default function NewRequestPage() {
                             <select
                               value={row.type}
                               onChange={(e) => updateTransportRow(row.id, 'type', e.target.value)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-semibold text-zinc-300 focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             >
                               <option value="patient">🏥 Patient</option>
                               <option value="caregiver">🤝 Caregiver / Escort</option>
@@ -822,7 +822,7 @@ export default function NewRequestPage() {
                             <select
                               value={row.stateOfOrigin}
                               onChange={(e) => updateTransportRow(row.id, 'stateOfOrigin', e.target.value)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-teal-300 font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-teal-800 font-mono font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             >
                               {stateTransportRates.map(s => (
                                 <option key={s.state} value={s.state}>
@@ -837,7 +837,7 @@ export default function NewRequestPage() {
                             <select
                               value={row.direction}
                               onChange={(e) => updateTransportRow(row.id, 'direction', e.target.value)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-semibold text-zinc-300 focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             >
                               <option value="incoming">Incoming (Arrival)</option>
                               <option value="discharge">Discharge (Return)</option>
@@ -845,7 +845,7 @@ export default function NewRequestPage() {
                           </td>
 
                           {/* Rate (Auto-Calculated) */}
-                          <td className="py-3 px-3 text-right font-mono font-bold text-teal-400">
+                          <td className="py-3 px-3 text-right font-mono font-bold text-teal-700">
                             {formatCurrency(row.cost)}
                           </td>
 
@@ -854,7 +854,7 @@ export default function NewRequestPage() {
                             <button
                               onClick={() => removeTransportRow(row.id)}
                               disabled={transportRows.length <= 1}
-                              className="p-1 text-zinc-500 hover:text-rose-400 disabled:opacity-30 transition-colors"
+                              className="p-1 text-slate-400 hover:text-rose-600 disabled:opacity-30 transition-colors"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -866,14 +866,14 @@ export default function NewRequestPage() {
                 </div>
 
                 {/* Transport Grand Total Bar */}
-                <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-zinc-950/60 p-4 rounded-xl">
-                  <div className="text-xs text-zinc-400">
-                    Total Passengers: <strong className="text-white font-mono">{transportRows.length}</strong> (
+                <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <div className="text-xs text-slate-600">
+                    Total Passengers: <strong className="text-slate-900 font-mono">{transportRows.length}</strong> (
                     {transportRows.filter(r => r.type === 'patient').length} Patients, {transportRows.filter(r => r.type === 'caregiver').length} Caregivers)
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-zinc-400 uppercase">Auto-Calculated Total:</span>
-                    <span className="text-xl font-black text-teal-400 font-mono">
+                    <span className="text-xs font-bold text-slate-600 uppercase">Auto-Calculated Total:</span>
+                    <span className="text-xl font-black text-teal-700 font-mono">
                       {formatCurrency(transportTotal)}
                     </span>
                   </div>
@@ -883,23 +883,23 @@ export default function NewRequestPage() {
               /* ─────────────────────────────────────────────────────────────
                   CASE B: PATIENT EDUCATIONAL WELFARE & SCHOOLING SCHEDULE
                  ───────────────────────────────────────────────────────────── */
-              <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-800">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
                   <div>
-                    <span className="text-xs font-bold text-teal-400 uppercase tracking-wider flex items-center gap-1.5">
+                    <span className="text-xs font-bold text-teal-700 uppercase tracking-wider font-mono flex items-center gap-1.5">
                       <GraduationCap size={15} />
                       <span>Patient Educational Rehabilitation System</span>
                     </span>
-                    <h3 className="text-base font-black text-white mt-0.5">
+                    <h3 className="text-base font-black text-slate-900 mt-0.5">
                       Noma Survivors Schooling Sponsorship Schedule
                     </h3>
-                    <p className="text-xs text-zinc-400 mt-0.5">
+                    <p className="text-xs text-slate-500 mt-0.5">
                       Enter patient names, schooling institutions, class level, and support package. Auto-sums for Finance & Donor verification.
                     </p>
                   </div>
                   <button
                     onClick={addEducationRow}
-                    className="px-3.5 py-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto"
+                    className="px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto shadow-sm"
                   >
                     <Plus size={14} />
                     <span>+ Add Student</span>
@@ -910,7 +910,7 @@ export default function NewRequestPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-zinc-800 text-zinc-400 uppercase tracking-wider font-mono">
+                      <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider font-mono border-b border-slate-200">
                         <th className="py-2.5 px-2 w-12 text-center">S/N</th>
                         <th className="py-2.5 px-3 min-w-[200px]">Patient Full Name</th>
                         <th className="py-2.5 px-3 min-w-[200px]">School / Institution</th>
@@ -920,10 +920,10 @@ export default function NewRequestPage() {
                         <th className="py-2.5 px-2 w-12 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800/60 font-sans">
+                    <tbody className="divide-y divide-slate-100 font-sans">
                       {educationRows.map((row) => (
-                        <tr key={row.id} className="hover:bg-zinc-800/30 transition-colors">
-                          <td className="py-3 px-2 text-center font-mono text-zinc-500">{row.sn}</td>
+                        <tr key={row.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-3 px-2 text-center font-mono text-slate-500">{row.sn}</td>
                           
                           {/* Patient Name */}
                           <td className="py-3 px-3">
@@ -932,7 +932,7 @@ export default function NewRequestPage() {
                               value={row.patientName}
                               placeholder="e.g. Maryam Sani"
                               onChange={(e) => updateEducationRow(row.id, 'patientName', e.target.value)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
@@ -943,7 +943,7 @@ export default function NewRequestPage() {
                               value={row.schoolName}
                               placeholder="e.g. NOMA Model Primary School, Sokoto"
                               onChange={(e) => updateEducationRow(row.id, 'schoolName', e.target.value)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
@@ -952,7 +952,7 @@ export default function NewRequestPage() {
                             <select
                               value={row.classLevel}
                               onChange={(e) => updateEducationRow(row.id, 'classLevel', e.target.value)}
-                              className="w-full px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-semibold text-zinc-300 focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             >
                               <option value="Nursery 1">Nursery 1</option>
                               <option value="Nursery 2">Nursery 2</option>
@@ -977,7 +977,7 @@ export default function NewRequestPage() {
                             <select
                               value={row.supportType}
                               onChange={(e) => updateEducationRow(row.id, 'supportType', e.target.value as any)}
-                              className="w-full px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-teal-300 font-semibold focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-teal-800 font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             >
                               <option value="School Fees / Tuition">📚 School Fees / Tuition</option>
                               <option value="Uniform & Footwear">👔 Uniform & Footwear</option>
@@ -993,7 +993,7 @@ export default function NewRequestPage() {
                               min={0}
                               value={row.cost}
                               onChange={(e) => updateEducationRow(row.id, 'cost', parseInt(e.target.value) || 0)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white font-mono text-right focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 font-mono text-right font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
@@ -1002,7 +1002,7 @@ export default function NewRequestPage() {
                             <button
                               onClick={() => removeEducationRow(row.id)}
                               disabled={educationRows.length <= 1}
-                              className="p-1 text-zinc-500 hover:text-rose-400 disabled:opacity-30 transition-colors"
+                              className="p-1 text-slate-400 hover:text-rose-600 disabled:opacity-30 transition-colors"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -1014,13 +1014,13 @@ export default function NewRequestPage() {
                 </div>
 
                 {/* Education Grand Total Bar */}
-                <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-zinc-950/60 p-4 rounded-xl">
-                  <div className="text-xs text-zinc-400">
-                    Total Patients Sponsored: <strong className="text-white font-mono">{educationRows.length}</strong> Children
+                <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <div className="text-xs text-slate-600">
+                    Total Patients Sponsored: <strong className="text-slate-900 font-mono">{educationRows.length}</strong> Children
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-zinc-400 uppercase">Auto-Calculated Total:</span>
-                    <span className="text-xl font-black text-teal-400 font-mono">
+                    <span className="text-xs font-bold text-slate-600 uppercase">Auto-Calculated Total:</span>
+                    <span className="text-xl font-black text-teal-700 font-mono">
                       {formatCurrency(educationTotal)}
                     </span>
                   </div>
@@ -1030,19 +1030,19 @@ export default function NewRequestPage() {
               /* ─────────────────────────────────────────────────────────────
                   CASE C: STANDARD VOUCHER ITEMS TABLE (PER AY SPECIFICATIONS)
                  ───────────────────────────────────────────────────────────── */
-              <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-800">
+              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
                   <div>
-                    <span className="text-xs font-bold text-teal-400 uppercase tracking-wider">
+                    <span className="text-xs font-bold text-teal-700 uppercase tracking-wider font-mono">
                       Requisition Line Items Schedule
                     </span>
-                    <h3 className="text-base font-black text-white mt-0.5">
+                    <h3 className="text-base font-black text-slate-900 mt-0.5">
                       Itemized Description, Quantity, Unit Price & Code
                     </h3>
                   </div>
                   <button
                     onClick={addStandardRow}
-                    className="px-3.5 py-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto"
+                    className="px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto shadow-sm"
                   >
                     <Plus size={14} />
                     <span>+ Add Line Item</span>
@@ -1053,7 +1053,7 @@ export default function NewRequestPage() {
                 <div className="overflow-x-auto">
                   <table className="w-full text-left text-xs">
                     <thead>
-                      <tr className="border-b border-zinc-800 text-zinc-400 uppercase tracking-wider font-mono">
+                      <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider font-mono border-b border-slate-200">
                         <th className="py-2.5 px-2 w-12 text-center">S/N</th>
                         <th className="py-2.5 px-3 min-w-[240px]">Description</th>
                         <th className="py-2.5 px-3 w-36">Code</th>
@@ -1064,10 +1064,10 @@ export default function NewRequestPage() {
                         <th className="py-2.5 px-2 w-12 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-zinc-800/60 font-sans">
+                    <tbody className="divide-y divide-slate-100 font-sans">
                       {items.map((item) => (
-                        <tr key={item.id} className="hover:bg-zinc-800/30 transition-colors">
-                          <td className="py-3 px-2 text-center font-mono text-zinc-500">{item.sn}</td>
+                        <tr key={item.id} className="hover:bg-slate-50 transition-colors">
+                          <td className="py-3 px-2 text-center font-mono text-slate-500">{item.sn}</td>
                           
                           {/* Description */}
                           <td className="py-3 px-3">
@@ -1076,7 +1076,7 @@ export default function NewRequestPage() {
                               value={item.name}
                               placeholder="e.g. Paracetamol Infusion 1000mg"
                               onChange={(e) => updateStandardRow(item.id, 'name', e.target.value)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
@@ -1085,7 +1085,7 @@ export default function NewRequestPage() {
                             <select
                               value={item.transactionCode}
                               onChange={(e) => updateStandardRow(item.id, 'transactionCode', e.target.value)}
-                              className="w-full px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-teal-300 font-mono focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-teal-800 font-mono font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             >
                               {transactionCodes.map(tc => (
                                 <option key={tc.code} value={tc.code}>{tc.code}</option>
@@ -1100,7 +1100,7 @@ export default function NewRequestPage() {
                               min={1}
                               value={item.quantity}
                               onChange={(e) => updateStandardRow(item.id, 'quantity', parseInt(e.target.value) || 0)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white font-mono text-center focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 font-mono text-center focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
@@ -1110,7 +1110,7 @@ export default function NewRequestPage() {
                               type="text"
                               value={item.unit}
                               onChange={(e) => updateStandardRow(item.id, 'unit', e.target.value)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-zinc-300 focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
@@ -1121,12 +1121,12 @@ export default function NewRequestPage() {
                               min={0}
                               value={item.unitPrice}
                               onChange={(e) => updateStandardRow(item.id, 'unitPrice', parseInt(e.target.value) || 0)}
-                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white font-mono text-right focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 font-mono text-right focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
                           {/* Total Row */}
-                          <td className="py-3 px-3 text-right font-mono font-bold text-teal-400">
+                          <td className="py-3 px-3 text-right font-mono font-bold text-teal-700">
                             {formatCurrency(item.quantity * item.unitPrice)}
                           </td>
 
@@ -1135,7 +1135,7 @@ export default function NewRequestPage() {
                             <button
                               onClick={() => removeStandardRow(item.id)}
                               disabled={items.length <= 1}
-                              className="p-1 text-zinc-500 hover:text-rose-400 disabled:opacity-30 transition-colors"
+                              className="p-1 text-slate-400 hover:text-rose-600 disabled:opacity-30 transition-colors"
                             >
                               <Trash2 size={14} />
                             </button>
@@ -1147,13 +1147,13 @@ export default function NewRequestPage() {
                 </div>
 
                 {/* Grand Total Bar */}
-                <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-zinc-950/60 p-4 rounded-xl">
-                  <div className="text-xs text-zinc-400">
-                    Total Line Items: <strong className="text-white font-mono">{items.length}</strong>
+                <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
+                  <div className="text-xs text-slate-600">
+                    Total Line Items: <strong className="text-slate-900 font-mono">{items.length}</strong>
                   </div>
                   <div className="flex items-center gap-3">
-                    <span className="text-xs font-bold text-zinc-400 uppercase">Auto-Calculated Total:</span>
-                    <span className="text-xl font-black text-teal-400 font-mono">
+                    <span className="text-xs font-bold text-slate-600 uppercase">Auto-Calculated Total:</span>
+                    <span className="text-xl font-black text-teal-700 font-mono">
                       {formatCurrency(standardTotal)}
                     </span>
                   </div>
@@ -1162,8 +1162,8 @@ export default function NewRequestPage() {
             )}
 
             {/* Justification & Clinical Note */}
-            <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800">
-              <label className="block text-xs font-bold text-white mb-2">
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <label className="block text-xs font-bold text-slate-800 mb-2">
                 Operational Justification / Clinical Case Memo
               </label>
               <textarea
@@ -1171,7 +1171,7 @@ export default function NewRequestPage() {
                 value={justification}
                 onChange={(e) => setJustification(e.target.value)}
                 placeholder="State clearly why these items are required, patient volume affected, or urgency justification..."
-                className="w-full p-3 bg-zinc-950 border border-zinc-800 rounded-xl text-xs text-white placeholder-zinc-600 focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                className="w-full p-3 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-teal-600 focus:outline-none"
               />
             </div>
 
@@ -1179,7 +1179,7 @@ export default function NewRequestPage() {
             <div className="flex items-center justify-between pt-4">
               <button
                 onClick={() => setStep(1)}
-                className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all"
+                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all border border-slate-300"
               >
                 <ChevronLeft size={14} />
                 <span>Back to Department</span>
@@ -1187,7 +1187,7 @@ export default function NewRequestPage() {
 
               <button
                 onClick={() => setStep(3)}
-                className="px-7 py-3.5 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-2 active:scale-95"
+                className="px-7 py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-teal-700/20 flex items-center gap-2 active:scale-95"
               >
                 <span>Preview Official Voucher & Signatures</span>
                 <ChevronRight size={14} />
@@ -1205,51 +1205,51 @@ export default function NewRequestPage() {
             
             {submitted ? (
               /* Success Screen */
-              <div className="p-10 rounded-3xl bg-zinc-900 border border-teal-500/40 text-center max-w-2xl mx-auto shadow-2xl relative overflow-hidden">
-                <div className="w-16 h-16 rounded-2xl bg-teal-500/20 text-teal-400 border border-teal-500/40 flex items-center justify-center mx-auto mb-4">
+              <div className="p-10 rounded-3xl bg-white border border-teal-300 text-center max-w-2xl mx-auto shadow-xl relative overflow-hidden">
+                <div className="w-16 h-16 rounded-2xl bg-teal-100 text-teal-700 border border-teal-300 flex items-center justify-center mx-auto mb-4 shadow-sm">
                   <Check size={32} strokeWidth={3} />
                 </div>
-                <span className="text-xs font-mono uppercase tracking-widest text-teal-400">
+                <span className="text-xs font-mono uppercase tracking-widest text-teal-800 font-bold bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
                   VOUCHER TRANSMITTED TO SUPERVISOR DESK
                 </span>
-                <h2 className="text-2xl font-black text-white mt-1">
+                <h2 className="text-2xl font-black text-slate-900 mt-3">
                   Requisition {createdReqId} Created
                 </h2>
-                <p className="text-xs text-zinc-400 mt-2 max-w-md mx-auto leading-relaxed">
-                  Your requisition has been digitally signed and routed to <strong className="text-white">{currentSupervisor.name}</strong> ({currentSupervisor.title}) for Level 2 line verification. You will receive an alert once Finance clears the grant allocation.
+                <p className="text-xs text-slate-600 mt-2 max-w-md mx-auto leading-relaxed">
+                  Your requisition has been digitally signed and routed to <strong className="text-slate-900 font-bold">{currentSupervisor.name}</strong> ({currentSupervisor.title}) for Level 2 line verification. You will receive an alert once Finance clears the grant allocation.
                 </p>
 
-                <div className="mt-6 p-4 rounded-xl bg-zinc-950 border border-zinc-800 max-w-sm mx-auto text-left text-xs font-mono">
-                  <div className="flex justify-between py-1 text-zinc-400">
+                <div className="mt-6 p-5 rounded-2xl bg-slate-50 border border-slate-200 max-w-sm mx-auto text-left text-xs font-mono">
+                  <div className="flex justify-between py-1 text-slate-600">
                     <span>Voucher No:</span>
-                    <strong className="text-teal-400">{createdReqId}</strong>
+                    <strong className="text-teal-700">{createdReqId}</strong>
                   </div>
-                  <div className="flex justify-between py-1 text-zinc-400">
+                  <div className="flex justify-between py-1 text-slate-600">
                     <span>Department:</span>
-                    <strong className="text-white">{currentDept.name} ({selectedUnit})</strong>
+                    <strong className="text-slate-900">{currentDept.name} ({selectedUnit})</strong>
                   </div>
-                  <div className="flex justify-between py-1 text-zinc-400">
+                  <div className="flex justify-between py-1 text-slate-600">
                     <span>Assigned Supervisor:</span>
-                    <strong className="text-teal-300">{currentSupervisor.name}</strong>
+                    <strong className="text-teal-800 font-bold">{currentSupervisor.name}</strong>
                   </div>
-                  <div className="flex justify-between py-1 text-zinc-400">
+                  <div className="flex justify-between py-1 text-slate-600">
                     <span>Total Value:</span>
-                    <strong className="text-teal-400">{formatCurrency(grandTotal)}</strong>
+                    <strong className="text-teal-700 font-black">{formatCurrency(grandTotal)}</strong>
                   </div>
-                  <div className="flex justify-between py-1 text-zinc-400">
+                  <div className="flex justify-between py-1 text-slate-600">
                     <span>Grant Code:</span>
-                    <strong className="text-emerald-400">{donorGrantCode}</strong>
+                    <strong className="text-emerald-800 font-bold">{donorGrantCode}</strong>
                   </div>
-                  <div className="flex justify-between py-1 text-zinc-400 border-t border-zinc-900 mt-1 pt-1">
+                  <div className="flex justify-between py-1 text-slate-600 border-t border-slate-200 mt-1 pt-1">
                     <span>Current Stage:</span>
-                    <strong className="text-amber-400">Level 2: {currentSupervisor.name} Review</strong>
+                    <strong className="text-amber-800 font-bold">Level 2: {currentSupervisor.name} Review</strong>
                   </div>
                 </div>
 
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
                   <button
                     onClick={() => router.push(`/hod?dept=${selectedDeptId}`)}
-                    className="px-6 py-3 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-2"
+                    className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-teal-700/20 flex items-center gap-2"
                   >
                     <span>Open {currentSupervisor.name}&apos;s Approval Desk</span>
                     <ArrowRight size={14} />
@@ -1257,9 +1257,9 @@ export default function NewRequestPage() {
 
                   <button
                     onClick={() => router.push(`/request/${createdReqId}`)}
-                    className="px-5 py-3 bg-zinc-800 hover:bg-zinc-700 text-zinc-200 font-bold text-xs rounded-xl transition-all flex items-center gap-2"
+                    className="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center gap-2 border border-slate-300"
                   >
-                    <FileText size={14} className="text-teal-400" />
+                    <FileText size={14} className="text-teal-700" />
                     <span>View Printable Voucher</span>
                   </button>
                 </div>
@@ -1267,75 +1267,75 @@ export default function NewRequestPage() {
             ) : (
               /* Voucher Verification Preview */
               <>
-                <div className="p-8 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl relative">
+                <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-md relative">
                   
                   {/* Top Seal */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-zinc-800 gap-4">
+                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4">
                     <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-teal-400">
-                        <Heart size={24} strokeWidth={2.5} />
+                      <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 shadow-sm">
+                        <Heart size={24} strokeWidth={2.5} className="text-teal-600" />
                       </div>
                       <div>
-                        <h2 className="text-xl font-black text-white tracking-tight">NOMA AID NIGERIA INITIATIVE (NANI)</h2>
-                        <p className="text-xs text-teal-400 font-mono">OFFICIAL REQUISITION VOUCHER · AUDIT PRE-FLIGHT</p>
+                        <h2 className="text-xl font-black text-slate-900 tracking-tight">NOMA AID NIGERIA INITIATIVE (NANI)</h2>
+                        <p className="text-xs text-teal-700 font-mono font-bold">OFFICIAL REQUISITION VOUCHER · AUDIT PRE-FLIGHT</p>
                       </div>
                     </div>
-                    <div className="text-right font-mono text-xs text-zinc-400">
-                      <div>Date: <strong className="text-white">{reqDate}</strong></div>
-                      <div>Voucher ID: <strong className="text-teal-400">NANI-REQ-PENDING</strong></div>
+                    <div className="text-right font-mono text-xs text-slate-600">
+                      <div>Date: <strong className="text-slate-900">{reqDate}</strong></div>
+                      <div>Voucher ID: <strong className="text-teal-700 font-bold">NANI-REQ-PENDING</strong></div>
                     </div>
                   </div>
 
                   {/* Voucher Summary Strip */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-b border-zinc-800 text-xs">
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-b border-slate-200 text-xs">
                     <div>
-                      <span className="text-zinc-500 font-mono block">DEPARTMENT</span>
-                      <strong className="text-white text-sm">{currentDept.name}</strong>
+                      <span className="text-slate-500 font-mono block">DEPARTMENT</span>
+                      <strong className="text-slate-900 text-sm">{currentDept.name}</strong>
                     </div>
                     <div>
-                      <span className="text-zinc-500 font-mono block">UNIT</span>
-                      <strong className="text-white text-sm">{selectedUnit}</strong>
+                      <span className="text-slate-500 font-mono block">UNIT</span>
+                      <strong className="text-slate-900 text-sm">{selectedUnit}</strong>
                     </div>
                     <div>
-                      <span className="text-zinc-500 font-mono block">DONOR GRANT LINE</span>
-                      <strong className="text-emerald-400 text-sm font-mono">{donorGrantCode}</strong>
+                      <span className="text-slate-500 font-mono block">DONOR GRANT LINE</span>
+                      <strong className="text-emerald-800 text-sm font-mono font-bold">{donorGrantCode}</strong>
                     </div>
                     <div>
-                      <span className="text-zinc-500 font-mono block">TOTAL ESTIMATED DISBURSEMENT</span>
-                      <strong className="text-teal-400 text-lg font-black font-mono">{formatCurrency(grandTotal)}</strong>
+                      <span className="text-slate-500 font-mono block">TOTAL ESTIMATED DISBURSEMENT</span>
+                      <strong className="text-teal-700 text-lg font-black font-mono">{formatCurrency(grandTotal)}</strong>
                     </div>
                   </div>
 
                   {/* Items Preview Table */}
-                  <div className="py-6 border-b border-zinc-800">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 mb-3">
+                  <div className="py-6 border-b border-slate-200">
+                    <h4 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold mb-3">
                       {isTransportMode ? 'PASSENGER TRANSPORT SCHEDULE' : isEducationMode ? 'PATIENT SCHOOLING & EDUCATION WELFARE SCHEDULE' : 'SCHEDULE OF LINE ITEMS'}
                     </h4>
 
                     {isTransportMode ? (
                       <div className="space-y-1 text-xs">
                         {transportRows.map(r => (
-                          <div key={r.id} className="flex justify-between py-1.5 px-3 rounded-lg bg-zinc-950 border border-zinc-800/80 font-mono">
+                          <div key={r.id} className="flex justify-between py-2 px-3 rounded-lg bg-slate-50 border border-slate-200 font-mono text-slate-800">
                             <span>#{r.sn} {r.name} ({r.type.toUpperCase()}) — {r.stateOfOrigin} [{r.direction}]</span>
-                            <span className="font-bold text-teal-400">{formatCurrency(r.cost)}</span>
+                            <span className="font-bold text-teal-700">{formatCurrency(r.cost)}</span>
                           </div>
                         ))}
                       </div>
                     ) : isEducationMode ? (
                       <div className="space-y-1 text-xs">
                         {educationRows.map(e => (
-                          <div key={e.id} className="flex justify-between py-1.5 px-3 rounded-lg bg-zinc-950 border border-zinc-800/80 font-mono">
+                          <div key={e.id} className="flex justify-between py-2 px-3 rounded-lg bg-slate-50 border border-slate-200 font-mono text-slate-800">
                             <span>#{e.sn} {e.patientName} — {e.schoolName} ({e.classLevel}) [{e.supportType}]</span>
-                            <span className="font-bold text-teal-400">{formatCurrency(e.cost)}</span>
+                            <span className="font-bold text-teal-700">{formatCurrency(e.cost)}</span>
                           </div>
                         ))}
                       </div>
                     ) : (
                       <div className="space-y-1 text-xs">
                         {items.map(i => (
-                          <div key={i.id} className="flex justify-between py-1.5 px-3 rounded-lg bg-zinc-950 border border-zinc-800/80 font-mono">
+                          <div key={i.id} className="flex justify-between py-2 px-3 rounded-lg bg-slate-50 border border-slate-200 font-mono text-slate-800">
                             <span>#{i.sn} {i.name} ({i.quantity} {i.unit} @ {formatCurrency(i.unitPrice)}) [Code: {i.transactionCode}]</span>
-                            <span className="font-bold text-teal-400">{formatCurrency(i.quantity * i.unitPrice)}</span>
+                            <span className="font-bold text-teal-700">{formatCurrency(i.quantity * i.unitPrice)}</span>
                           </div>
                         ))}
                       </div>
@@ -1344,69 +1344,69 @@ export default function NewRequestPage() {
 
                   {/* ── 4-Level Approval Chain & Digital Signature Preview ── */}
                   <div className="pt-6">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-teal-400 mb-4">
+                    <h4 className="text-xs font-mono uppercase tracking-wider text-teal-700 font-bold mb-4">
                       4-LEVEL APPROVAL CHAIN & DIGITAL SIGNATURE WATERMARKS
                     </h4>
 
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                       
                       {/* Level 1: Requester (Active / Auto-Signed) */}
-                      <div className="p-4 rounded-xl bg-teal-950/20 border border-teal-500/40 relative">
+                      <div className="p-4 rounded-xl bg-teal-50 border border-teal-300 relative shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-teal-400 font-bold">LEVEL 1 · REQUESTER</span>
-                          <span className="px-1.5 py-0.5 rounded bg-teal-500/20 text-teal-300 text-[10px] font-bold">
+                          <span className="text-[10px] font-mono text-teal-800 font-bold">LEVEL 1 · REQUESTER</span>
+                          <span className="px-1.5 py-0.5 rounded bg-teal-200/60 text-teal-900 text-[10px] font-bold">
                             SIGNED ✓
                           </span>
                         </div>
-                        <p className="font-bold text-xs text-white">{requesterName}</p>
-                        <p className="text-[10px] text-zinc-400">{selectedUnit} Unit Staff</p>
-                        <div className="mt-3 pt-2 border-t border-teal-500/20 text-[9px] font-mono text-teal-400/80">
+                        <p className="font-bold text-xs text-slate-900">{requesterName}</p>
+                        <p className="text-[10px] text-slate-500">{selectedUnit} Unit Staff</p>
+                        <div className="mt-3 pt-2 border-t border-teal-200 text-[9px] font-mono text-teal-800">
                           DIGITAL SIGNATURE STAMP:<br />
                           {requesterName.replace(/\s+/g, '').toUpperCase()}/VOUCH/{new Date().getFullYear()}
                         </div>
                       </div>
 
                       {/* Level 2: Supervisor (Pending) */}
-                      <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+                      <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-300 shadow-sm">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-zinc-400 font-bold">LEVEL 2 · LINE SUPERVISOR</span>
-                          <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[10px] font-bold">
+                          <span className="text-[10px] font-mono text-amber-800 font-bold">LEVEL 2 · LINE SUPERVISOR</span>
+                          <span className="px-1.5 py-0.5 rounded bg-amber-200/60 text-amber-900 text-[10px] font-bold">
                             NEXT IN QUEUE
                           </span>
                         </div>
-                        <p className="font-bold text-xs text-white">{currentSupervisor.name}</p>
-                        <p className="text-[10px] text-zinc-400">{currentSupervisor.title}</p>
-                        <div className="mt-3 pt-2 border-t border-zinc-900 text-[9px] font-mono text-teal-400">
+                        <p className="font-bold text-xs text-slate-900">{currentSupervisor.name}</p>
+                        <p className="text-[10px] text-slate-500">{currentSupervisor.title}</p>
+                        <div className="mt-3 pt-2 border-t border-amber-200 text-[9px] font-mono text-amber-800">
                           TARGET STAMP: {currentSupervisor.stamp}
                         </div>
                       </div>
 
                       {/* Level 3: Finance (Pending) */}
-                      <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-zinc-400 font-bold">LEVEL 3 · FINANCE</span>
-                          <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[10px]">
+                          <span className="text-[10px] font-mono text-slate-500 font-bold">LEVEL 3 · FINANCE</span>
+                          <span className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 text-[10px]">
                             AWAITING L2
                           </span>
                         </div>
-                        <p className="font-bold text-xs text-zinc-200">Mr. AY, FCA</p>
-                        <p className="text-[10px] text-zinc-500">Head of Finance & CA</p>
-                        <div className="mt-3 pt-2 border-t border-zinc-900 text-[9px] font-mono text-zinc-600">
+                        <p className="font-bold text-xs text-slate-900">Mr. AY, FCA</p>
+                        <p className="text-[10px] text-slate-500">Head of Finance & CA</p>
+                        <div className="mt-3 pt-2 border-t border-slate-200 text-[9px] font-mono text-slate-500">
                           Locks {donorGrantCode}
                         </div>
                       </div>
 
                       {/* Level 4: Coordinator (Pending) */}
-                      <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
+                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-zinc-400 font-bold">LEVEL 4 · COORDINATOR</span>
-                          <span className="px-1.5 py-0.5 rounded bg-zinc-800 text-zinc-400 text-[10px]">
+                          <span className="text-[10px] font-mono text-slate-500 font-bold">LEVEL 4 · COORDINATOR</span>
+                          <span className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 text-[10px]">
                             AWAITING L3
                           </span>
                         </div>
-                        <p className="font-bold text-xs text-zinc-200">Dr. Emmanuel Bawa</p>
-                        <p className="text-[10px] text-zinc-500">Programme Coordinator</p>
-                        <div className="mt-3 pt-2 border-t border-zinc-900 text-[9px] font-mono text-zinc-600">
+                        <p className="font-bold text-xs text-slate-900">Dr. Emmanuel Bawa</p>
+                        <p className="text-[10px] text-slate-500">Programme Coordinator</p>
+                        <div className="mt-3 pt-2 border-t border-slate-200 text-[9px] font-mono text-slate-500">
                           Executive authorization
                         </div>
                       </div>
@@ -1420,7 +1420,7 @@ export default function NewRequestPage() {
                 <div className="flex items-center justify-between pt-4">
                   <button
                     onClick={() => setStep(2)}
-                    className="px-5 py-2.5 bg-zinc-900 hover:bg-zinc-800 text-zinc-300 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all"
+                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all border border-slate-300"
                   >
                     <ChevronLeft size={14} />
                     <span>Edit Line Items</span>
@@ -1428,7 +1428,7 @@ export default function NewRequestPage() {
 
                   <button
                     onClick={handleSubmit}
-                    className="px-8 py-4 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-sm rounded-xl transition-all shadow-xl shadow-teal-500/25 flex items-center gap-2 active:scale-95"
+                    className="px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-black text-sm rounded-xl transition-all shadow-lg shadow-teal-700/25 flex items-center gap-2 active:scale-95"
                   >
                     <span>Apply Signature & Submit to Supervisor</span>
                     <ArrowRight size={16} />

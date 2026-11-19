@@ -241,17 +241,17 @@ export default function HODHubPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 text-zinc-100 selection:bg-teal-500 selection:text-zinc-950">
+    <div className="min-h-screen bg-slate-50 text-slate-900 selection:bg-teal-600 selection:text-white font-sans">
       <Navbar role={activeProfile.supervisorTitle} userName={activeProfile.supervisorName} />
 
       {/* Floating Toast Notification */}
       {toast && (
         <div className={`fixed bottom-6 right-6 z-50 px-5 py-3.5 rounded-2xl border shadow-2xl flex items-center gap-3 animate-in fade-in slide-in-from-bottom-4 duration-300 font-sans text-xs font-bold ${
           toast.type === 'success' 
-            ? 'bg-teal-950 border-teal-500 text-teal-300' 
+            ? 'bg-teal-900 text-white border-teal-700' 
             : toast.type === 'error'
-            ? 'bg-rose-950 border-rose-500 text-rose-300'
-            : 'bg-zinc-900 border-zinc-700 text-zinc-200'
+            ? 'bg-rose-900 text-white border-rose-700'
+            : 'bg-slate-900 text-white border-slate-700'
         }`}>
           <div className="w-2 h-2 rounded-full bg-teal-400 animate-ping"></div>
           <span>{toast.message}</span>
@@ -261,17 +261,17 @@ export default function HODHubPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         
         {/* Hub Header */}
-        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 pb-6 border-b border-zinc-800">
+        <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
           <div>
-            <div className="flex items-center gap-2 text-xs font-mono text-teal-400 mb-1">
+            <div className="flex items-center gap-2 text-xs font-mono text-teal-700 font-bold mb-1">
               <span>NOMA AID NIGERIA INITIATIVE</span>
               <span>/</span>
               <span>LEVEL 2 - 5 APPROVAL WORKSTATION</span>
             </div>
-            <h1 className="text-2xl sm:text-3xl font-black text-white tracking-tight">
+            <h1 className="text-2xl sm:text-3xl font-black text-slate-900 tracking-tight">
               Supervisor & Coordinator Verification Desk
             </h1>
-            <p className="text-xs sm:text-sm text-zinc-400 mt-1">
+            <p className="text-xs sm:text-sm text-slate-500 mt-1">
               Review departmental requisitions, verify justification and donor grant alignment, and issue 1-click digital signature approvals.
             </p>
           </div>
@@ -279,14 +279,14 @@ export default function HODHubPage() {
           <div className="flex items-center gap-3">
             <Link
               href="/finance"
-              className="px-4 py-2.5 bg-zinc-900 hover:bg-zinc-800 border border-zinc-800 rounded-xl text-xs font-bold text-zinc-300 transition-all flex items-center gap-1.5"
+              className="px-4 py-2.5 bg-white hover:bg-slate-100 border border-slate-300 rounded-xl text-xs font-bold text-slate-700 transition-all flex items-center gap-1.5 shadow-sm"
             >
-              <DollarSign size={14} className="text-emerald-400" />
+              <DollarSign size={14} className="text-emerald-700" />
               <span>Go to Finance & Grants</span>
             </Link>
             <Link
               href="/new-request"
-              className="px-4 py-2.5 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-1.5"
+              className="px-4 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-teal-700/20 flex items-center gap-1.5"
             >
               <span>+ Raise New Requisition</span>
             </Link>
@@ -296,11 +296,11 @@ export default function HODHubPage() {
         {/* ── Supervisor Desk Switcher Strip ── */}
         <div className="mb-8">
           <div className="flex items-center justify-between mb-3">
-            <span className="text-xs font-bold uppercase tracking-wider text-teal-400">
+            <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">
               Select Active Approver Station
             </span>
-            <span className="text-xs text-zinc-500 font-mono">
-              Simulating: <strong className="text-white">{activeProfile.supervisorName}</strong>
+            <span className="text-xs text-slate-500 font-mono">
+              Viewing as: <strong className="text-slate-900 font-bold">{activeProfile.supervisorName}</strong>
             </span>
           </div>
 
@@ -313,16 +313,16 @@ export default function HODHubPage() {
                   onClick={() => setSelectedProfileId(p.id)}
                   className={`p-3.5 rounded-2xl border cursor-pointer transition-all flex flex-col justify-between ${
                     isSelected
-                      ? 'bg-zinc-900 border-teal-500 shadow-xl shadow-teal-500/10 ring-1 ring-teal-500/30'
-                      : 'bg-zinc-900/40 border-zinc-800/80 hover:bg-zinc-800/50'
+                      ? 'bg-teal-50 border-teal-500 shadow-sm ring-2 ring-teal-500/20'
+                      : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm'
                   }`}
                 >
                   <div>
                     <div className="text-2xl mb-2">{p.icon}</div>
-                    <h4 className="font-bold text-xs text-white leading-tight">{p.departmentName}</h4>
-                    <p className="text-[10px] text-zinc-400 mt-1">{p.supervisorName}</p>
+                    <h4 className="font-bold text-xs text-slate-900 leading-tight">{p.departmentName}</h4>
+                    <p className="text-[10px] text-slate-500 mt-1">{p.supervisorName}</p>
                   </div>
-                  <div className="mt-3 pt-2 border-t border-zinc-800/80 text-[9px] font-mono text-teal-400 font-bold">
+                  <div className="mt-3 pt-2 border-t border-slate-100 text-[9px] font-mono text-teal-700 font-bold">
                     {p.level}
                   </div>
                 </div>
@@ -332,47 +332,47 @@ export default function HODHubPage() {
         </div>
 
         {/* ── Active Approver Card & Overview ── */}
-        <div className="p-6 rounded-2xl bg-zinc-900/80 border border-zinc-800 mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm mb-8 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
           <div className="flex items-center gap-4">
-            <div className="w-14 h-14 rounded-2xl bg-teal-500/10 border border-teal-500/30 flex items-center justify-center text-3xl">
+            <div className="w-14 h-14 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-3xl shadow-sm">
               {activeProfile.icon}
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h2 className="text-lg font-black text-white">{activeProfile.supervisorName}</h2>
-                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-teal-500/10 text-teal-300 border border-teal-500/20 font-mono">
+                <h2 className="text-lg font-black text-slate-900">{activeProfile.supervisorName}</h2>
+                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-teal-50 text-teal-800 border border-teal-200 font-mono">
                   {activeProfile.level}
                 </span>
               </div>
-              <p className="text-xs text-teal-400 font-medium">{activeProfile.supervisorTitle}</p>
-              <p className="text-xs text-zinc-400 mt-1">{activeProfile.description}</p>
+              <p className="text-xs text-teal-700 font-bold">{activeProfile.supervisorTitle}</p>
+              <p className="text-xs text-slate-500 mt-1">{activeProfile.description}</p>
             </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-zinc-950 p-3 rounded-xl border border-zinc-800 shrink-0">
-            <div className="text-center px-3 border-r border-zinc-800">
-              <span className="text-xl font-black text-amber-400 font-mono">{pendingCount}</span>
-              <p className="text-[10px] text-zinc-500 uppercase font-bold">Pending Review</p>
+          <div className="flex items-center gap-4 bg-slate-50 p-3 rounded-xl border border-slate-200 shrink-0">
+            <div className="text-center px-3 border-r border-slate-200">
+              <span className="text-xl font-black text-amber-700 font-mono">{pendingCount}</span>
+              <p className="text-[10px] text-slate-500 uppercase font-bold">Pending Review</p>
             </div>
             <div className="text-center px-3">
-              <span className="text-xl font-black text-white font-mono">{filteredRequests.length}</span>
-              <p className="text-[10px] text-zinc-500 uppercase font-bold">Total In Desk</p>
+              <span className="text-xl font-black text-slate-900 font-mono">{filteredRequests.length}</span>
+              <p className="text-[10px] text-slate-500 uppercase font-bold">Total In Desk</p>
             </div>
           </div>
         </div>
 
         {/* ── Requisitions Queue Table ── */}
-        <div className="p-6 rounded-3xl bg-zinc-900 border border-zinc-800 shadow-2xl">
-          <div className="flex items-center justify-between mb-4 pb-3 border-b border-zinc-800">
+        <div className="p-6 rounded-3xl bg-white border border-slate-200 shadow-sm">
+          <div className="flex items-center justify-between mb-4 pb-3 border-b border-slate-200">
             <div>
-              <h3 className="text-base font-black text-white">
+              <h3 className="text-base font-black text-slate-900">
                 {activeProfile.id === 'coordinator' 
                   ? 'Programme Coordinator Executive Authorization Queue'
                   : activeProfile.id === 'national'
                   ? 'National Directorate Ratification Queue'
                   : 'Departmental Requisitions Pending Verification'}
               </h3>
-              <p className="text-xs text-zinc-400">
+              <p className="text-xs text-slate-500">
                 {activeProfile.id === 'coordinator'
                   ? 'Final executive approval following Finance Head (Mr. AY, FCA) budget and grant lock.'
                   : activeProfile.id === 'national'
@@ -380,14 +380,14 @@ export default function HODHubPage() {
                   : '1-click approval immediately applies your encrypted digital signature stamp and routes to Mr. AY (Finance Head).'}
               </p>
             </div>
-            <span className="text-xs font-mono text-zinc-500">{filteredRequests.length} Vouchers Listed</span>
+            <span className="text-xs font-mono text-slate-500">{filteredRequests.length} Vouchers Listed</span>
           </div>
 
           {filteredRequests.length === 0 ? (
-            <div className="py-16 text-center text-zinc-500">
-              <CheckCircle2 size={36} className="mx-auto text-teal-500/40 mb-3" />
-              <p className="text-sm font-bold text-zinc-300">Desk Cleared</p>
-              <p className="text-xs text-zinc-500 mt-1">No requisitions currently awaiting approval in this workstation.</p>
+            <div className="py-16 text-center text-slate-400">
+              <CheckCircle2 size={36} className="mx-auto text-teal-600 mb-3" />
+              <p className="text-sm font-bold text-slate-800">Desk Cleared</p>
+              <p className="text-xs text-slate-500 mt-1">No requisitions currently awaiting approval in this workstation.</p>
             </div>
           ) : (
             <div className="space-y-3">
@@ -409,33 +409,33 @@ export default function HODHubPage() {
                 return (
                   <div
                     key={req.id}
-                    className="p-5 rounded-2xl bg-zinc-950/60 border border-zinc-800/80 hover:border-zinc-700 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4"
+                    className="p-5 rounded-2xl bg-white border border-slate-200 hover:border-teal-400 hover:bg-slate-50/60 transition-all flex flex-col lg:flex-row lg:items-center justify-between gap-4 shadow-sm"
                   >
                     <div className="flex-1">
                       
                       {/* Top Badges */}
                       <div className="flex flex-wrap items-center gap-2 mb-2">
-                        <span className="font-mono text-xs font-bold text-teal-400">{req.id}</span>
-                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-zinc-800 text-zinc-300 border border-zinc-700 font-mono">
+                        <span className="font-mono text-xs font-bold text-teal-700">{req.id}</span>
+                        <span className="text-[10px] px-2 py-0.5 rounded-full bg-slate-100 text-slate-700 border border-slate-200 font-mono">
                           {req.department} · {req.unit}
                         </span>
                         {isTransport && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-500/10 text-blue-300 border border-blue-500/20 font-bold">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-blue-50 text-blue-700 border border-blue-200 font-bold">
                             🚌 Transport Schedule
                           </span>
                         )}
                         {isEducation && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-800 border border-emerald-200 font-bold">
                             🎓 Education Welfare
                           </span>
                         )}
                         {isStoreIssue && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-50 text-cyan-800 border border-cyan-200 font-bold">
                             📦 Internal Store Issue
                           </span>
                         )}
                         {isHighValue && (
-                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-500/10 text-purple-300 border border-purple-500/20 font-bold flex items-center gap-1">
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-purple-50 text-purple-800 border border-purple-200 font-bold flex items-center gap-1">
                             <Award size={10} /> Nat. Coordinator Escalation
                           </span>
                         )}
@@ -443,13 +443,13 @@ export default function HODHubPage() {
                       </div>
 
                       {/* Title & Requester */}
-                      <h4 className="text-sm font-black text-white">{req.title}</h4>
-                      <p className="text-xs text-zinc-400 mt-0.5">
-                        Requested by <strong className="text-zinc-200">{req.requestedBy}</strong> ({req.requestedByRole}) · {formatDate(req.createdAt)}
+                      <h4 className="text-sm font-black text-slate-900">{req.title}</h4>
+                      <p className="text-xs text-slate-500 mt-0.5">
+                        Requested by <strong className="text-slate-800">{req.requestedBy}</strong> ({req.requestedByRole}) · {formatDate(req.createdAt)}
                       </p>
 
                       {/* Items / Passengers / Education mini-preview */}
-                      <div className="mt-2 text-xs text-zinc-400 line-clamp-1 font-mono">
+                      <div className="mt-2 text-xs text-slate-600 line-clamp-1 font-mono">
                         {isTransport ? (
                           <span>
                             Passengers: {req.transportPassengers?.map(p => `${p.name} (${p.stateOfOrigin})`).join(', ') || 'Passengers Roster'}
@@ -466,19 +466,19 @@ export default function HODHubPage() {
                       </div>
 
                       {/* Justification quote */}
-                      <p className="text-[11px] text-zinc-500 italic mt-1 bg-zinc-900/60 p-2 rounded-lg border border-zinc-900">
+                      <p className="text-[11px] text-slate-600 italic mt-1.5 bg-slate-50 p-2.5 rounded-lg border border-slate-200">
                         "{req.justification}"
                       </p>
                     </div>
 
                     {/* Right: Value, Grant Code & Decision Buttons */}
-                    <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-3 shrink-0 lg:w-56 pt-3 lg:pt-0 border-t lg:border-t-0 border-zinc-800">
+                    <div className="flex flex-col sm:flex-row lg:flex-col items-start lg:items-end justify-between gap-3 shrink-0 lg:w-56 pt-3 lg:pt-0 border-t lg:border-t-0 border-slate-200">
                       
                       <div className="text-left lg:text-right">
-                        <span className="text-base font-black text-teal-400 font-mono block">
+                        <span className="text-base font-black text-teal-700 font-mono block">
                           {formatCurrency(req.totalValue)}
                         </span>
-                        <span className="text-[10px] text-emerald-400 font-mono">
+                        <span className="text-[10px] text-emerald-800 font-mono font-bold">
                           Grant: {req.donorGrantCode || 'HN-2026-SURG-Q4'}
                         </span>
                         <div className="mt-1">
@@ -490,7 +490,7 @@ export default function HODHubPage() {
                       <div className="flex items-center gap-2 w-full sm:w-auto">
                         <button
                           onClick={() => setActiveReqModal(req)}
-                          className="p-2 bg-zinc-900 hover:bg-zinc-800 border border-zinc-700 rounded-xl text-zinc-300 hover:text-white transition-all text-xs flex items-center gap-1"
+                          className="p-2 bg-slate-100 hover:bg-slate-200 border border-slate-300 rounded-xl text-slate-700 transition-all text-xs flex items-center gap-1 shadow-sm"
                           title="View Full Voucher"
                         >
                           <Eye size={14} />
@@ -501,7 +501,7 @@ export default function HODHubPage() {
                           <>
                             <button
                               onClick={() => handleDecline(req.id)}
-                              className="px-3 py-2 bg-rose-500/10 hover:bg-rose-500/20 text-rose-300 border border-rose-500/30 rounded-xl text-xs font-bold transition-all flex items-center gap-1"
+                              className="px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-300 rounded-xl text-xs font-bold transition-all flex items-center gap-1 shadow-sm"
                             >
                               <X size={14} />
                               <span>Decline</span>
@@ -509,18 +509,18 @@ export default function HODHubPage() {
 
                             <button
                               onClick={() => handleApprove(req.id)}
-                              className="px-4 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-1.5 active:scale-95"
+                              className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl transition-all shadow-md shadow-teal-700/20 flex items-center gap-1.5 active:scale-95"
                             >
                               <Check size={14} strokeWidth={3} />
                               <span>Sign & Authorize</span>
                             </button>
                           </>
                         ) : hasAlreadySigned ? (
-                          <span className="px-3 py-1.5 rounded-xl bg-teal-500/10 text-teal-300 border border-teal-500/20 text-[10px] font-mono font-bold flex items-center gap-1">
+                          <span className="px-3 py-1.5 rounded-xl bg-teal-50 text-teal-800 border border-teal-300 text-[10px] font-mono font-bold flex items-center gap-1">
                             <Check size={12} strokeWidth={3} /> Signed & Stamped
                           </span>
                         ) : (
-                          <span className="px-3 py-1.5 rounded-xl bg-zinc-800 text-zinc-400 text-[10px] font-mono">
+                          <span className="px-3 py-1.5 rounded-xl bg-slate-100 text-slate-600 text-[10px] font-mono border border-slate-200">
                             {req.status === 'finance-review' ? 'At Finance (Mr. AY)' : req.status === 'disbursement-ready' ? 'Ready to Disburse' : req.status.replace('-', ' ')}
                           </span>
                         )}
@@ -538,70 +538,70 @@ export default function HODHubPage() {
 
       {/* ── Full Voucher Modal ── */}
       {activeReqModal && (
-        <div className="fixed inset-0 z-50 bg-black/80 backdrop-blur-sm flex items-center justify-center p-4">
-          <div className="bg-zinc-900 border border-zinc-800 rounded-3xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl">
+        <div className="fixed inset-0 z-50 bg-slate-900/50 backdrop-blur-sm flex items-center justify-center p-4">
+          <div className="bg-white border border-slate-200 rounded-3xl max-w-3xl w-full p-6 max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in-95 duration-200">
             
-            <div className="flex items-center justify-between pb-4 border-b border-zinc-800">
+            <div className="flex items-center justify-between pb-4 border-b border-slate-200">
               <div>
-                <span className="text-[10px] font-mono text-teal-400 uppercase">OFFICIAL VOUCHER INSPECTION</span>
-                <h3 className="text-lg font-black text-white">{activeReqModal.title}</h3>
-                <p className="text-xs text-zinc-400 font-mono">{activeReqModal.id} · {activeReqModal.department} ({activeReqModal.unit})</p>
+                <span className="text-[10px] font-mono text-teal-700 uppercase font-bold">OFFICIAL VOUCHER INSPECTION</span>
+                <h3 className="text-lg font-black text-slate-900">{activeReqModal.title}</h3>
+                <p className="text-xs text-slate-500 font-mono">{activeReqModal.id} · {activeReqModal.department} ({activeReqModal.unit})</p>
               </div>
               <button
                 onClick={() => setActiveReqModal(null)}
-                className="p-2 text-zinc-400 hover:text-white rounded-lg bg-zinc-800"
+                className="p-1.5 text-slate-400 hover:text-slate-700 rounded-lg bg-slate-100"
               >
                 <X size={18} />
               </button>
             </div>
 
             {/* Justification & Financial details */}
-            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 p-4 rounded-xl bg-zinc-950 border border-zinc-800 text-xs font-mono">
+            <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 my-4 p-4 rounded-xl bg-slate-50 border border-slate-200 text-xs font-mono">
               <div>
-                <span className="text-zinc-500 block">TOTAL VALUE</span>
-                <strong className="text-teal-400 text-sm">{formatCurrency(activeReqModal.totalValue)}</strong>
+                <span className="text-slate-500 block font-bold">TOTAL VALUE</span>
+                <strong className="text-teal-700 text-sm font-black">{formatCurrency(activeReqModal.totalValue)}</strong>
               </div>
               <div>
-                <span className="text-zinc-500 block">GRANT CODE</span>
-                <strong className="text-emerald-400 text-sm">{activeReqModal.donorGrantCode || 'HN-2026-SURG-Q4'}</strong>
+                <span className="text-slate-500 block font-bold">GRANT CODE</span>
+                <strong className="text-emerald-800 text-sm font-bold">{activeReqModal.donorGrantCode || 'HN-2026-SURG-Q4'}</strong>
               </div>
               <div>
-                <span className="text-zinc-500 block">BUDGET CODE</span>
-                <strong className="text-zinc-300 text-sm">{activeReqModal.budgetCode}</strong>
+                <span className="text-slate-500 block font-bold">BUDGET CODE</span>
+                <strong className="text-slate-700 text-sm">{activeReqModal.budgetCode}</strong>
               </div>
               <div>
-                <span className="text-zinc-500 block">CURRENT STATUS</span>
+                <span className="text-slate-500 block font-bold">CURRENT STATUS</span>
                 <StatusBadge status={activeReqModal.status} />
               </div>
             </div>
 
             {/* Line items, Transport Passengers, or Education Students */}
             <div className="my-4">
-              <h4 className="text-xs font-mono uppercase text-zinc-400 mb-2">Voucher Schedule Breakdown</h4>
+              <h4 className="text-xs font-mono uppercase text-slate-600 font-bold mb-2">Voucher Schedule Breakdown</h4>
               {activeReqModal.transportPassengers && activeReqModal.transportPassengers.length > 0 ? (
                 <div className="space-y-1.5 text-xs">
                   {activeReqModal.transportPassengers.map(p => (
-                    <div key={p.id} className="flex justify-between p-2 rounded-lg bg-zinc-950 border border-zinc-800 font-mono">
+                    <div key={p.id} className="flex justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 font-mono text-slate-800">
                       <span>#{p.sn} {p.name} ({p.type}) — {p.stateOfOrigin} [{p.direction}]</span>
-                      <strong className="text-teal-400">{formatCurrency(p.transportCost)}</strong>
+                      <strong className="text-teal-700">{formatCurrency(p.transportCost)}</strong>
                     </div>
                   ))}
                 </div>
               ) : activeReqModal.educationStudents && activeReqModal.educationStudents.length > 0 ? (
                 <div className="space-y-1.5 text-xs">
                   {activeReqModal.educationStudents.map(s => (
-                    <div key={s.id} className="flex justify-between p-2 rounded-lg bg-zinc-950 border border-zinc-800 font-mono">
+                    <div key={s.id} className="flex justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 font-mono text-slate-800">
                       <span>#{s.sn} {s.patientName} — {s.schoolName} ({s.classLevel}) [{s.supportType}]</span>
-                      <strong className="text-teal-400">{formatCurrency(s.cost)}</strong>
+                      <strong className="text-teal-700">{formatCurrency(s.cost)}</strong>
                     </div>
                   ))}
                 </div>
               ) : (
                 <div className="space-y-1.5 text-xs">
                   {activeReqModal.items?.map(i => (
-                    <div key={i.id} className="flex justify-between p-2 rounded-lg bg-zinc-950 border border-zinc-800 font-mono">
+                    <div key={i.id} className="flex justify-between p-2.5 rounded-lg bg-slate-50 border border-slate-200 font-mono text-slate-800">
                       <span>#{i.sn || 1} {i.name} ({i.quantity} {i.unit} @ {formatCurrency(i.unitPrice)})</span>
-                      <strong className="text-teal-400">{formatCurrency(i.totalPrice)}</strong>
+                      <strong className="text-teal-700">{formatCurrency(i.totalPrice)}</strong>
                     </div>
                   ))}
                 </div>
@@ -609,32 +609,32 @@ export default function HODHubPage() {
             </div>
 
             {/* Signatures Applied */}
-            <div className="my-4 pt-4 border-t border-zinc-800">
-              <h4 className="text-xs font-mono uppercase text-teal-400 mb-2">Digital Signature Trail</h4>
+            <div className="my-4 pt-4 border-t border-slate-200">
+              <h4 className="text-xs font-mono uppercase text-teal-700 font-bold mb-2">Digital Signature Trail</h4>
               <div className="space-y-2">
                 {activeReqModal.signatures && activeReqModal.signatures.length > 0 ? (
                   activeReqModal.signatures.map(s => (
-                    <div key={s.level} className="p-3 rounded-xl bg-teal-950/20 border border-teal-500/30 flex items-center justify-between text-xs">
+                    <div key={s.level} className="p-3 rounded-xl bg-teal-50 border border-teal-200 flex items-center justify-between text-xs">
                       <div>
-                        <span className="font-bold text-teal-300">{s.actor}</span>
-                        <span className="text-zinc-400 text-[10px] ml-2 font-mono">({s.role})</span>
+                        <span className="font-bold text-teal-800">{s.actor}</span>
+                        <span className="text-slate-500 text-[10px] ml-2 font-mono">({s.role})</span>
                       </div>
-                      <div className="text-right font-mono text-[10px] text-teal-400">
+                      <div className="text-right font-mono text-[10px] text-teal-800">
                         <div>STAMP: {s.signatureStamp}</div>
-                        <div className="text-zinc-500">{formatDate(s.timestamp)}</div>
+                        <div className="text-slate-500">{formatDate(s.timestamp)}</div>
                       </div>
                     </div>
                   ))
                 ) : (
-                  <p className="text-xs text-zinc-500 italic">No supervisor signature applied yet.</p>
+                  <p className="text-xs text-slate-400 italic">No supervisor signature applied yet.</p>
                 )}
               </div>
             </div>
 
-            <div className="mt-6 pt-4 border-t border-zinc-800 flex justify-end gap-3">
+            <div className="mt-6 pt-4 border-t border-slate-200 flex justify-end gap-3">
               <button
                 onClick={() => setActiveReqModal(null)}
-                className="px-4 py-2 bg-zinc-800 text-zinc-300 rounded-xl text-xs font-bold"
+                className="px-4 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-xl text-xs font-bold border border-slate-300"
               >
                 Close
               </button>
@@ -643,7 +643,7 @@ export default function HODHubPage() {
                   handleApprove(activeReqModal.id);
                   setActiveReqModal(null);
                 }}
-                className="px-6 py-2 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black rounded-xl text-xs"
+                className="px-6 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-xl text-xs shadow-md shadow-teal-700/20"
               >
                 Sign & Approve Now
               </button>
