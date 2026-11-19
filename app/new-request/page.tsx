@@ -2,6 +2,7 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
+import Link from 'next/link';
 import Navbar from '@/components/Navbar';
 import { 
   naniDepartments, 
@@ -17,7 +18,8 @@ import {
   Building2, ShieldCheck, Heart, DollarSign, Users, 
   Check, ChevronRight, ChevronLeft, AlertTriangle, Plus, 
   Trash2, Info, Sparkles, FileText, Bus, Package, Calendar, 
-  UserCheck, CheckCircle2, ArrowRight, Printer, GraduationCap
+  UserCheck, CheckCircle2, ArrowRight, Printer, GraduationCap,
+  Layers, Clock, Send
 } from 'lucide-react';
 
 interface LineItem {
@@ -60,203 +62,133 @@ const deptIcons: Record<string, any> = {
 
 export default function NewRequestPage() {
   const router = useRouter();
-  const [step, setStep] = useState(1);
   const [submitted, setSubmitted] = useState(false);
   const [createdReqId, setCreatedReqId] = useState('NANI-REQ-088');
 
-  // ── Step 1 State: Department, Unit, Pathway ──────────────────────────────
+  // ── Active Department & Unit State (Defaults automatically to logged-in user) ──
   const [selectedDeptId, setSelectedDeptId] = useState('clinicals');
-  const [selectedUnit, setSelectedUnit] = useState('Nursing');
-  const [requisitionType, setRequisitionType] = useState<RequisitionType>('cash');
+  const [selectedUnit, setSelectedUnit] = useState('Hostel');
+  const [requisitionType, setRequisitionType] = useState<RequisitionType>('transport');
   const [urgency, setUrgency] = useState<'routine' | 'priority' | 'stat'>('routine');
 
-  // ── Step 2 State: Requisition Header & Items ─────────────────────────────
+  // ── Requisition Header Metadata ──
   const todayFormatted = new Date().toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
   const [reqDate, setReqDate] = useState(todayFormatted);
-  const [requesterName, setRequesterName] = useState('Nurse Hauwa Bello');
-  const [defaultTransCode, setDefaultTransCode] = useState('MED-002');
-  const [donorGrantCode, setDonorGrantCode] = useState('HN-2026-SURG-Q4');
+  const [requesterName, setRequesterName] = useState('Mr. Samuel Danladi');
+  const [requesterRole, setRequesterRole] = useState('Hostel & Patient Logistics Officer');
+  const [defaultTransCode, setDefaultTransCode] = useState('TRN-001');
+  const [donorGrantCode, setDonorGrantCode] = useState('HN-2026-HOSP-Q4');
   const [justification, setJustification] = useState('');
 
-  // Standard line items
+  // ── Standard Line Items ──
   const [items, setItems] = useState<LineItem[]>([
     { id: '1', sn: 1, name: 'Sterile Wound Dressing Packs (10x10cm)', quantity: 50, unit: 'Packs', unitPrice: 1200, transactionCode: 'MED-002' },
     { id: '2', sn: 2, name: 'Povidone-Iodine Antiseptic (500ml)', quantity: 20, unit: 'Bottles', unitPrice: 1500, transactionCode: 'MED-001' },
   ]);
 
-  // Special Hostel Transport Rows
+  // ── Special Hostel Transport Rows ──
   const [transportRows, setTransportRows] = useState<TransportPassengerRow[]>([
     { id: '1', sn: 1, name: 'Musa Abubakar', type: 'patient', stateOfOrigin: 'Borno', direction: 'incoming', cost: 22000 },
     { id: '2', sn: 2, name: 'Aisha Musa', type: 'caregiver', stateOfOrigin: 'Borno', direction: 'incoming', cost: 22000 },
     { id: '3', sn: 3, name: 'Ibrahim Hassan', type: 'patient', stateOfOrigin: 'Adamawa', direction: 'incoming', cost: 25000 },
   ]);
 
-  // Special Education Welfare & Patient Schooling Rows
+  // ── Special Education Welfare Rows ──
   const [educationRows, setEducationRows] = useState<EducationStudentRowState[]>([
     { id: '1', sn: 1, patientName: 'Maryam Sani (Noma survivor)', schoolName: 'NOMA Model Primary School, Sokoto', classLevel: 'Primary 3', supportType: 'School Fees / Tuition', cost: 45000 },
     { id: '2', sn: 2, patientName: 'Aliyu Garba (Post-reconstruction)', schoolName: 'Community Islamic Academy', classLevel: 'Primary 1', supportType: 'Uniform & Footwear', cost: 18000 },
     { id: '3', sn: 3, patientName: 'Bilkisu Danjuma', schoolName: 'NOMA Model Primary School, Sokoto', classLevel: 'Primary 2', supportType: 'Textbooks & Stationery', cost: 22000 },
   ]);
 
-  const addEducationRow = () => {
-    setEducationRows(prev => [
-      ...prev,
-      {
-        id: `edu-${Date.now()}`,
-        sn: prev.length + 1,
-        patientName: '',
-        schoolName: 'NOMA Model Primary School, Sokoto',
-        classLevel: 'Primary 1',
-        supportType: 'School Fees / Tuition',
-        cost: 35000,
-      }
-    ]);
-  };
-
-  const updateEducationRow = (id: string, field: keyof EducationStudentRowState, value: any) => {
-    setEducationRows(prev => prev.map(row => row.id === id ? { ...row, [field]: value } : row));
-  };
-
-  const removeEducationRow = (id: string) => {
-    if (educationRows.length <= 1) return;
-    setEducationRows(prev => prev.filter(r => r.id !== id).map((r, idx) => ({ ...r, sn: idx + 1 })));
-  };
-
+  // Auto-detect logged-in user and configure form directly
   useEffect(() => {
     const user = getStoredUser();
     if (user && user.name) {
       setRequesterName(user.name);
+      if (user.roleTitle) setRequesterRole(user.roleTitle);
     }
+
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
       const deptParam = params.get('dept');
       const unitParam = params.get('unit');
+
       if (deptParam) {
         const found = naniDepartments.find(d => d.id.toLowerCase() === deptParam.toLowerCase() || d.name.toLowerCase() === deptParam.toLowerCase());
         if (found) {
           setSelectedDeptId(found.id);
           if (unitParam) {
-            setSelectedUnit(unitParam);
-            if (unitParam === 'Hostel') {
-              setRequisitionType('transport');
-              setDefaultTransCode('TRN-001');
-            } else if (unitParam === 'Education Welfare') {
-              setRequisitionType('education');
-              setDefaultTransCode('ADM-003');
-            } else if (unitParam === 'Logistics/Fleet') {
-              setRequisitionType('cash');
-              setDefaultTransCode('FAC-004');
-            }
+            applyUnitSelection(found.id, unitParam);
+            return;
           }
         }
-      } else if (user && user.department) {
+      }
+
+      if (user && user.department) {
         const found = naniDepartments.find(d => d.name.toLowerCase() === user.department.toLowerCase());
         if (found) {
           setSelectedDeptId(found.id);
           if (user.unit) {
-            setSelectedUnit(user.unit);
-            if (user.unit === 'Hostel') {
-              setRequisitionType('transport');
-              setDefaultTransCode('TRN-001');
-            } else if (user.unit === 'Education Welfare') {
-              setRequisitionType('education');
-              setDefaultTransCode('ADM-003');
-            } else if (user.unit === 'Logistics/Fleet') {
-              setRequisitionType('cash');
-              setDefaultTransCode('FAC-004');
-            }
+            applyUnitSelection(found.id, user.unit);
+            return;
           }
         }
       }
     }
   }, []);
 
+  const applyUnitSelection = (deptId: string, unitName: string) => {
+    setSelectedUnit(unitName);
+    if (unitName === 'Hostel') {
+      setRequisitionType('transport');
+      setDefaultTransCode('TRN-001');
+      setDonorGrantCode('HN-2026-HOSP-Q4');
+    } else if (unitName === 'Education Welfare') {
+      setRequisitionType('education');
+      setDefaultTransCode('ADM-003');
+      setDonorGrantCode('HN-2026-CAP-Q4');
+    } else if (unitName === 'Logistics/Fleet') {
+      setRequisitionType('cash');
+      setDefaultTransCode('FAC-004');
+      setDonorGrantCode('HN-2026-OPS-Q4');
+    } else if (unitName === 'Kitchen') {
+      setRequisitionType('cash');
+      setDefaultTransCode('ADM-002');
+      setDonorGrantCode('HN-2026-OPS-Q4');
+    } else if (deptId === 'clinicals') {
+      setRequisitionType('cash');
+      setDefaultTransCode('MED-002');
+      setDonorGrantCode('HN-2026-SURG-Q4');
+    }
+  };
+
+  const handleDeptChange = (deptId: string) => {
+    setSelectedDeptId(deptId);
+    const dept = naniDepartments.find(d => d.id === deptId);
+    if (dept && dept.units.length > 0) {
+      applyUnitSelection(deptId, dept.units[0]);
+    }
+  };
+
+  const handleUnitChange = (unitName: string) => {
+    applyUnitSelection(selectedDeptId, unitName);
+  };
+
   const isTransportMode = requisitionType === 'transport' || selectedUnit === 'Hostel';
   const isEducationMode = requisitionType === 'education' || selectedUnit === 'Education Welfare';
   const currentSupervisor = departmentSupervisors[selectedDeptId] || departmentSupervisors.clinicals;
 
-  // Selected department details
   const currentDept = useMemo(() => {
     return naniDepartments.find(d => d.id === selectedDeptId) || naniDepartments[2];
   }, [selectedDeptId]);
 
-  // Calculations
+  // Totals
   const standardTotal = items.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
   const transportTotal = transportRows.reduce((acc, row) => acc + row.cost, 0);
   const educationTotal = educationRows.reduce((acc, row) => acc + row.cost, 0);
   const grandTotal = isTransportMode ? transportTotal : isEducationMode ? educationTotal : standardTotal;
 
-  // Handle department change
-  const handleSelectDept = (deptId: string) => {
-    setSelectedDeptId(deptId);
-    const dept = naniDepartments.find(d => d.id === deptId);
-    if (dept && dept.units.length > 0) {
-      setSelectedUnit(dept.units[0]);
-      if (dept.units[0] === 'Hostel') {
-        setRequisitionType('transport');
-        setDefaultTransCode('TRN-001');
-      } else if (dept.units[0] === 'Education Welfare') {
-        setRequisitionType('education');
-        setDefaultTransCode('ADM-003');
-      } else if (requisitionType === 'transport' || requisitionType === 'education') {
-        setRequisitionType('cash');
-      }
-    }
-  };
-
-  // Handle unit change
-  const handleSelectUnit = (unit: string) => {
-    setSelectedUnit(unit);
-    if (unit === 'Hostel') {
-      setRequisitionType('transport');
-      setDefaultTransCode('TRN-001');
-    } else if (unit === 'Education Welfare') {
-      setRequisitionType('education');
-      setDefaultTransCode('ADM-003');
-    } else if (unit === 'Logistics/Fleet') {
-      setRequisitionType('cash');
-      setDefaultTransCode('FAC-004');
-    } else if (requisitionType === 'transport' || requisitionType === 'education') {
-      setRequisitionType('cash');
-      setDefaultTransCode('MED-001');
-    }
-  };
-
-  // Standard line items management
-  const addStandardRow = () => {
-    const nextSn = items.length + 1;
-    setItems(prev => [
-      ...prev,
-      {
-        id: Date.now().toString(),
-        sn: nextSn,
-        name: '',
-        quantity: 1,
-        unit: 'Units',
-        unitPrice: 0,
-        transactionCode: defaultTransCode,
-      }
-    ]);
-  };
-
-  const updateStandardRow = (id: string, field: keyof LineItem, value: any) => {
-    setItems(prev => prev.map(item => {
-      if (item.id === id) {
-        return { ...item, [field]: value };
-      }
-      return item;
-    }));
-  };
-
-  const removeStandardRow = (id: string) => {
-    if (items.length <= 1) return;
-    setItems(prev => {
-      const filtered = prev.filter(i => i.id !== id);
-      return filtered.map((item, idx) => ({ ...item, sn: idx + 1 }));
-    });
-  };
-
-  // Transport rows management
+  // Transport Fare Calculations
   const getRateForState = (stateName: string, direction: 'incoming' | 'discharge') => {
     const rateObj = stateTransportRates.find(r => r.state.toLowerCase() === stateName.toLowerCase());
     if (!rateObj) return 15000;
@@ -305,7 +237,68 @@ export default function NewRequestPage() {
     });
   };
 
-  const handleSubmit = () => {
+  // Education Rows
+  const addEducationRow = () => {
+    setEducationRows(prev => [
+      ...prev,
+      {
+        id: `edu-${Date.now()}`,
+        sn: prev.length + 1,
+        patientName: '',
+        schoolName: 'NOMA Model Primary School, Sokoto',
+        classLevel: 'Primary 1',
+        supportType: 'School Fees / Tuition',
+        cost: 35000,
+      }
+    ]);
+  };
+
+  const updateEducationRow = (id: string, field: keyof EducationStudentRowState, value: any) => {
+    setEducationRows(prev => prev.map(row => row.id === id ? { ...row, [field]: value } : row));
+  };
+
+  const removeEducationRow = (id: string) => {
+    if (educationRows.length <= 1) return;
+    setEducationRows(prev => prev.filter(r => r.id !== id).map((r, idx) => ({ ...r, sn: idx + 1 })));
+  };
+
+  // Standard line items
+  const addStandardRow = () => {
+    const nextSn = items.length + 1;
+    setItems(prev => [
+      ...prev,
+      {
+        id: Date.now().toString(),
+        sn: nextSn,
+        name: '',
+        quantity: 1,
+        unit: 'Units',
+        unitPrice: 0,
+        transactionCode: defaultTransCode,
+      }
+    ]);
+  };
+
+  const updateStandardRow = (id: string, field: keyof LineItem, value: any) => {
+    setItems(prev => prev.map(item => {
+      if (item.id === id) {
+        return { ...item, [field]: value };
+      }
+      return item;
+    }));
+  };
+
+  const removeStandardRow = (id: string) => {
+    if (items.length <= 1) return;
+    setItems(prev => {
+      const filtered = prev.filter(i => i.id !== id);
+      return filtered.map((item, idx) => ({ ...item, sn: idx + 1 }));
+    });
+  };
+
+  // Submit Requisition
+  const handleSubmit = (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     const nextNum = Math.floor(100 + Math.random() * 900);
     const newId = `NANI-REQ-${nextNum}`;
     setCreatedReqId(newId);
@@ -329,7 +322,7 @@ export default function NewRequestPage() {
       status: 'supervisor-review',
       currentApprovalLevel: 'supervisor',
       requestedBy: requesterName,
-      requestedByRole: `${selectedUnit} Staff`,
+      requestedByRole: requesterRole || `${selectedUnit} Staff`,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       totalValue: grandTotal,
@@ -358,7 +351,7 @@ export default function NewRequestPage() {
         {
           level: 'requester',
           actor: requesterName,
-          role: `${selectedUnit} Staff`,
+          role: requesterRole || `${selectedUnit} Staff`,
           timestamp: new Date().toISOString(),
           signatureStamp: `${requesterName.replace(/\s+/g,'').toUpperCase()}/VOUCH/2026`
         }
@@ -368,7 +361,7 @@ export default function NewRequestPage() {
           id: `t-${Date.now()}`,
           action: `Requisition Submitted & Routed to ${currentSupervisor.name} (${currentSupervisor.title}) for Level 2 Review ✓`,
           actor: requesterName,
-          role: `${selectedUnit} Staff`,
+          role: requesterRole || `${selectedUnit} Staff`,
           timestamp: new Date().toISOString(),
           type: 'submitted' as const,
           comment: justification || `Initial voucher submission for ${currentDept.name} Department (${selectedUnit} Unit).`
@@ -388,7 +381,7 @@ export default function NewRequestPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
         
         {/* Breadcrumb & Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8 pb-6 border-b border-slate-200">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 pb-6 border-b border-slate-200">
           <div>
             <div className="flex items-center gap-2 text-xs font-mono text-teal-700 mb-1 font-bold">
               <span>NOMA AID NIGERIA INITIATIVE</span>
@@ -399,286 +392,198 @@ export default function NewRequestPage() {
               Raise Departmental Requisition
             </h1>
             <p className="text-xs sm:text-sm text-slate-500 mt-1">
-              Complete the structured voucher. Auto-coded, auto-totalled, and routed through the 4-level approval chain.
+              Structured voucher directly routed to your unit supervisor, finance head, and programme coordinator.
             </p>
           </div>
 
-          {/* Stepper Indicator */}
-          <div className="flex items-center gap-2">
-            {[
-              { n: 1, label: 'Department & Pathway' },
-              { n: 2, label: 'Voucher Items' },
-              { n: 3, label: 'Approval Preview' },
-            ].map((s) => (
-              <div 
-                key={s.n}
-                onClick={() => setStep(s.n)}
-                className={`flex items-center gap-2 px-3.5 py-2 rounded-xl text-xs font-bold cursor-pointer transition-all ${
-                  step === s.n
-                    ? 'bg-teal-50 text-teal-800 border border-teal-300 shadow-sm'
-                    : step > s.n
-                    ? 'bg-slate-100 text-slate-700 border border-slate-200'
-                    : 'bg-white text-slate-400 border border-slate-200'
-                }`}
-              >
-                <div className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] font-black ${
-                  step === s.n ? 'bg-teal-600 text-white' : step > s.n ? 'bg-slate-300 text-slate-800' : 'bg-slate-100 text-slate-400'
-                }`}>
-                  {step > s.n ? <Check size={12} strokeWidth={3} /> : s.n}
-                </div>
-                <span className="hidden md:inline">{s.label}</span>
-              </div>
-            ))}
+          <div className="flex items-center gap-3">
+            <Link
+              href="/dashboard"
+              className="px-4 py-2 bg-white hover:bg-slate-50 border border-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all shadow-sm flex items-center gap-1.5"
+            >
+              <span>My Requisitions Ledger</span>
+            </Link>
           </div>
         </div>
 
         {/* ─────────────────────────────────────────────────────────────────
-            STEP 1: ICON-BASED DEPARTMENT & UNIT SELECTOR
+            SUCCESS SUBMISSION MODAL / CARD
            ───────────────────────────────────────────────────────────────── */}
-        {step === 1 && (
-          <div className="space-y-8 animate-in fade-in duration-200">
-            
-            {/* 1.1 Department Selector: Icon Cards */}
-            <div>
-              <div className="flex items-center justify-between mb-3">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">Step 1.1</span>
-                  <h2 className="text-lg font-black text-slate-900 mt-0.5">Select Originating Department</h2>
-                </div>
-                <span className="text-xs text-slate-500 font-mono">5 NANI Departments</span>
+        {submitted ? (
+          <div className="p-10 rounded-3xl bg-white border border-teal-300 text-center max-w-2xl mx-auto shadow-xl relative overflow-hidden animate-in zoom-in-95 duration-200">
+            <div className="w-16 h-16 rounded-2xl bg-teal-100 text-teal-700 border border-teal-300 flex items-center justify-center mx-auto mb-4 shadow-sm">
+              <Check size={32} strokeWidth={3} />
+            </div>
+            <span className="text-xs font-mono uppercase tracking-widest text-teal-800 font-bold bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
+              VOUCHER TRANSMITTED TO SUPERVISOR DESK
+            </span>
+            <h2 className="text-2xl font-black text-slate-900 mt-3">
+              Requisition {createdReqId} Created
+            </h2>
+            <p className="text-xs text-slate-600 mt-2 max-w-md mx-auto leading-relaxed">
+              Your requisition has been digitally signed and routed to <strong className="text-slate-900 font-bold">{currentSupervisor.name}</strong> ({currentSupervisor.title}) for Level 2 line verification. You will receive an alert once Finance clears the grant allocation.
+            </p>
+
+            <div className="mt-6 p-5 rounded-2xl bg-slate-50 border border-slate-200 max-w-sm mx-auto text-left text-xs font-mono">
+              <div className="flex justify-between py-1 text-slate-600">
+                <span>Voucher No:</span>
+                <strong className="text-teal-700">{createdReqId}</strong>
               </div>
-
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-3">
-                {naniDepartments.map((dept) => {
-                  const isSelected = selectedDeptId === dept.id;
-                  const Icon = deptIcons[dept.id] || Building2;
-                  return (
-                    <div
-                      key={dept.id}
-                      onClick={() => handleSelectDept(dept.id)}
-                      className={`p-4 rounded-2xl border cursor-pointer transition-all relative overflow-hidden flex flex-col justify-between ${
-                        isSelected
-                          ? 'bg-teal-50 border-teal-500 shadow-md ring-2 ring-teal-500/20'
-                          : 'bg-white border-slate-200 hover:border-slate-300 hover:bg-slate-50 shadow-sm'
-                      }`}
-                    >
-                      {isSelected && (
-                        <div className="absolute top-2 right-2 w-2 h-2 rounded-full bg-teal-600 animate-ping"></div>
-                      )}
-                      <div>
-                        <div className={`w-12 h-12 rounded-xl flex items-center justify-center text-2xl mb-3 ${
-                          isSelected ? 'bg-teal-600 text-white shadow-sm' : 'bg-slate-100 text-slate-600'
-                        }`}>
-                          {dept.icon}
-                        </div>
-                        <h3 className="font-black text-base text-slate-900">{dept.name}</h3>
-                        <p className="text-[11px] text-slate-500 mt-1 line-clamp-1">
-                          {dept.units.join(', ')}
-                        </p>
-                      </div>
-
-                      <div className="mt-4 pt-3 border-t border-slate-200/80 flex items-center justify-between text-[11px]">
-                        <span className="text-slate-500 font-mono">{dept.units.length} Units</span>
-                        {isSelected ? (
-                          <span className="text-teal-700 font-bold flex items-center gap-1">
-                            Selected <Check size={12} strokeWidth={3} />
-                          </span>
-                        ) : (
-                          <span className="text-slate-400">Click to choose</span>
-                        )}
-                      </div>
-                    </div>
-                  );
-                })}
+              <div className="flex justify-between py-1 text-slate-600">
+                <span>Department:</span>
+                <strong className="text-slate-900">{currentDept.name} ({selectedUnit})</strong>
+              </div>
+              <div className="flex justify-between py-1 text-slate-600">
+                <span>Assigned Supervisor:</span>
+                <strong className="text-teal-800 font-bold">{currentSupervisor.name}</strong>
+              </div>
+              <div className="flex justify-between py-1 text-slate-600">
+                <span>Total Value:</span>
+                <strong className="text-teal-700 font-black">{formatCurrency(grandTotal)}</strong>
+              </div>
+              <div className="flex justify-between py-1 text-slate-600">
+                <span>Grant Code:</span>
+                <strong className="text-emerald-800 font-bold">{donorGrantCode}</strong>
+              </div>
+              <div className="flex justify-between py-1 text-slate-600 border-t border-slate-200 mt-1 pt-1">
+                <span>Current Stage:</span>
+                <strong className="text-amber-800 font-bold">Level 2: {currentSupervisor.name} Review</strong>
               </div>
             </div>
 
-            {/* 1.2 Unit Selector */}
-            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-              <div className="flex items-center justify-between mb-4">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">Step 1.2</span>
-                  <h3 className="text-base font-black text-slate-900 mt-0.5">
-                    Select Unit under {currentDept.name}
-                  </h3>
-                </div>
-                <span className="text-xs text-slate-500 font-mono">
-                  {currentDept.name} Department
-                </span>
-              </div>
+            <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+              <Link
+                href={`/request/${createdReqId}`}
+                className="px-6 py-2.5 bg-white hover:bg-slate-50 border border-slate-300 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all shadow-sm"
+              >
+                <Printer size={14} className="text-teal-700" />
+                <span>View Printable Voucher</span>
+              </Link>
 
-              <div className="flex flex-wrap gap-2">
-                {currentDept.units.map((unit) => {
-                  const isSelected = selectedUnit === unit;
-                  const isHostel = unit === 'Hostel';
-                  const isEdu = unit === 'Education Welfare';
-                  return (
-                    <button
-                      key={unit}
-                      onClick={() => handleSelectUnit(unit)}
-                      className={`px-4 py-2.5 rounded-xl text-xs font-bold transition-all flex items-center gap-2 ${
-                        isSelected
-                          ? 'bg-teal-600 text-white shadow-md shadow-teal-700/20 ring-2 ring-teal-500'
-                          : 'bg-slate-50 border border-slate-200 text-slate-700 hover:border-slate-300 hover:bg-slate-100'
-                      }`}
-                    >
-                      {isHostel && <span>🚌</span>}
-                      {isEdu && <span>🎓</span>}
-                      <span>{unit}</span>
-                      {isHostel && (
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-teal-800 text-white' : 'bg-teal-50 text-teal-700'}`}>
-                          Patient Transport
-                        </span>
-                      )}
-                      {isEdu && (
-                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-teal-800 text-white' : 'bg-teal-50 text-teal-700'}`}>
-                          Schooling Roster
-                        </span>
-                      )}
-                      {isSelected && <Check size={14} strokeWidth={3} />}
-                    </button>
-                  );
-                })}
-              </div>
+              <Link
+                href="/dashboard"
+                className="px-6 py-2.5 bg-teal-600 hover:bg-teal-700 text-white font-bold text-xs rounded-xl shadow-md shadow-teal-700/20 flex items-center gap-1.5 transition-all"
+              >
+                <span>Go to My Dashboard</span>
+                <ArrowRight size={14} />
+              </Link>
+
+              <button
+                onClick={() => setSubmitted(false)}
+                className="px-6 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all"
+              >
+                + Raise Another Voucher
+              </button>
             </div>
-
-            {/* 1.3 Pathway & Urgency Selector */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              
-              {/* Pathway */}
-              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-                <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">Step 1.3</span>
-                <h3 className="text-base font-black text-slate-900 mt-0.5 mb-3">Requisition Pathway</h3>
-                
-                <div className="space-y-2">
-                  {[
-                    {
-                      id: 'cash',
-                      title: '💵 Cash Disbursement / Purchase Requisition',
-                      desc: 'Cash outflow from NANI bank account. Requires Finance budget verification.',
-                    },
-                    {
-                      id: 'store-issue',
-                      title: '📦 Internal Store Issue (Separate Store Pathway)',
-                      desc: 'Direct issue from central medical/sanitation store. No bank cash disbursed.',
-                    },
-                    {
-                      id: 'transport',
-                      title: '🚌 Hostel Patient / Caregiver Transport',
-                      desc: 'State-rated transport fare for patient admission and discharge returns.',
-                    },
-                    {
-                      id: 'education',
-                      title: '🎓 Patient Educational Welfare & Schooling',
-                      desc: 'School fees, tuition, uniforms & books for Noma survivor child reintegration.',
-                    },
-                    {
-                      id: 'material',
-                      title: '🛒 Medical & Surgical Consumables PO',
-                      desc: 'External procurement from pre-approved pharmaceutical vendors.',
-                    },
-                  ].map((p) => {
-                    const isSelected = requisitionType === p.id;
-                    return (
-                      <div
-                        key={p.id}
-                        onClick={() => setRequisitionType(p.id as any)}
-                        className={`p-3.5 rounded-xl border cursor-pointer transition-all ${
-                          isSelected
-                            ? 'bg-teal-50/80 border-teal-500 text-slate-900 shadow-sm'
-                            : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300 hover:bg-slate-100/60'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between">
-                          <span className="font-bold text-xs text-slate-900">{p.title}</span>
-                          {isSelected && <CheckCircle2 size={16} className="text-teal-600" />}
-                        </div>
-                        <p className="text-[11px] text-slate-500 mt-1">{p.desc}</p>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-
-              {/* Urgency & Priority */}
-              <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm flex flex-col justify-between">
-                <div>
-                  <span className="text-xs font-bold uppercase tracking-wider text-teal-700 font-mono">Step 1.4</span>
-                  <h3 className="text-base font-black text-slate-900 mt-0.5 mb-3">Priority Level</h3>
-
-                  <div className="space-y-2.5">
-                    {[
-                      { id: 'routine', label: 'Routine (48 Hours)', desc: 'Standard monthly or bi-weekly replenishment.', color: 'zinc' },
-                      { id: 'priority', label: 'Priority (24 Hours)', desc: 'Low stock threat. Fast-track supervisor notification.', color: 'amber' },
-                      { id: 'stat', label: 'STAT / Emergency (Immediate)', desc: 'Life-critical clinical supply or acute patient emergency.', color: 'rose' },
-                    ].map((u) => {
-                      const isSelected = urgency === u.id;
-                      return (
-                        <div
-                          key={u.id}
-                          onClick={() => setUrgency(u.id as any)}
-                          className={`p-3 rounded-xl border cursor-pointer transition-all ${
-                            isSelected
-                              ? 'bg-teal-50/80 border-teal-500 text-slate-900 ring-1 ring-teal-500'
-                              : 'bg-slate-50 border-slate-200 text-slate-600 hover:border-slate-300'
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-xs text-slate-900">{u.label}</span>
-                            {isSelected && <CheckCircle2 size={16} className="text-teal-600" />}
-                          </div>
-                          <p className="text-[11px] text-slate-500 mt-0.5">{u.desc}</p>
-                        </div>
-                      );
-                    })}
-                  </div>
-                </div>
-
-                <div className="mt-4 pt-4 border-t border-slate-200 flex justify-end">
-                  <button
-                    onClick={() => setStep(2)}
-                    className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-teal-700/20 flex items-center gap-2 active:scale-95"
-                  >
-                    <span>Proceed to Line Items</span>
-                    <ArrowRight size={14} />
-                  </button>
-                </div>
-              </div>
-
-            </div>
-
           </div>
-        )}
-
-        {/* ─────────────────────────────────────────────────────────────────
-            STEP 2: REQUISITION VOUCHER FORM (EXACT FIELDS FROM CLIENT)
-           ───────────────────────────────────────────────────────────────── */}
-        {step === 2 && (
-          <div className="space-y-6 animate-in fade-in duration-200">
+        ) : (
+          /* ─────────────────────────────────────────────────────────────────
+              THE ACTUAL REQUISITION VOUCHER FORM (IMMEDIATE & DIRECT)
+             ───────────────────────────────────────────────────────────────── */
+          <form onSubmit={handleSubmit} className="space-y-6 animate-in fade-in duration-200">
             
-            {/* Voucher Header Info Card */}
+            {/* ── 1. Originating Department & Supervisor Routing Bar ── */}
             <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+              
+              <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4 pb-4 border-b border-slate-100">
                 <div>
                   <span className="text-[10px] font-mono uppercase tracking-wider text-teal-700 font-bold">
-                    Official Voucher Header
+                    Requisition Context & Routing Authority
                   </span>
                   <h3 className="text-lg font-black text-slate-900 mt-0.5">
-                    {currentDept.name} Requisition — {selectedUnit} Unit
+                    {currentDept.name} Department · {selectedUnit} Unit
                   </h3>
                 </div>
-                <div className="flex items-center gap-2">
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-50 text-teal-800 border border-teal-200">
-                    {requisitionType === 'transport' ? '🚌 Transport Requisition' : requisitionType === 'education' ? '🎓 Education Welfare' : requisitionType === 'store-issue' ? '📦 Store Issue' : '💵 Cash Requisition'}
-                  </span>
-                  <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-50 text-amber-800 border border-amber-200 uppercase">
-                    {urgency}
-                  </span>
+
+                <div className="flex flex-wrap items-center gap-2">
+                  <div className="p-2.5 rounded-xl bg-teal-50 border border-teal-200 flex items-center gap-2 text-xs">
+                    <ShieldCheck size={16} className="text-teal-700" />
+                    <div>
+                      <span className="text-[10px] text-slate-500 font-mono block">LINE SUPERVISOR (LEVEL 2):</span>
+                      <strong className="text-teal-900 font-bold">{currentSupervisor.name} ({currentSupervisor.title})</strong>
+                    </div>
+                  </div>
                 </div>
               </div>
 
-              {/* Form Metadata Fields per AY: Date, Requester, Code, Donor Grant */}
+              {/* Department & Unit Selectors right here on the form */}
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
+                
+                {/* Department Dropdown */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Building2 size={12} className="text-teal-700" />
+                    <span>Originating Department</span>
+                  </label>
+                  <select
+                    value={selectedDeptId}
+                    onChange={(e) => handleDeptChange(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
+                  >
+                    {naniDepartments.map(d => (
+                      <option key={d.id} value={d.id}>{d.name} Department</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Unit Dropdown */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Layers size={12} className="text-teal-700" />
+                    <span>Operating Unit</span>
+                  </label>
+                  <select
+                    value={selectedUnit}
+                    onChange={(e) => handleUnitChange(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-teal-800 font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
+                  >
+                    {currentDept.units.map(u => (
+                      <option key={u} value={u}>{u} Unit</option>
+                    ))}
+                  </select>
+                </div>
+
+                {/* Requisition Pathway */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Package size={12} className="text-teal-700" />
+                    <span>Requisition Pathway</span>
+                  </label>
+                  <select
+                    value={requisitionType}
+                    onChange={(e: any) => setRequisitionType(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-semibold focus:ring-2 focus:ring-teal-600 focus:outline-none"
+                  >
+                    <option value="cash">💵 Cash Disbursement / Purchase Requisition</option>
+                    <option value="transport">🚌 Hostel Patient / Caregiver Transport (State-Rated)</option>
+                    <option value="education">🎓 Patient Educational Welfare & Schooling</option>
+                    <option value="store-issue">📦 Internal Store Issue (Central Medical Store)</option>
+                  </select>
+                </div>
+
+                {/* Priority / Urgency */}
+                <div>
+                  <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
+                    <Clock size={12} className="text-teal-700" />
+                    <span>Priority Level</span>
+                  </label>
+                  <select
+                    value={urgency}
+                    onChange={(e: any) => setUrgency(e.target.value)}
+                    className="w-full px-3 py-2 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
+                  >
+                    <option value="routine">Routine (48 Hours SLA)</option>
+                    <option value="priority">Priority (24 Hours SLA)</option>
+                    <option value="stat">STAT / Emergency (Immediate)</option>
+                  </select>
+                </div>
+
+              </div>
+            </div>
+
+            {/* ── 2. Requisition Voucher Metadata ── */}
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 
                 {/* Date */}
                 <div>
@@ -698,7 +603,7 @@ export default function NewRequestPage() {
                 <div>
                   <label className="block text-[11px] font-bold text-slate-700 mb-1 flex items-center gap-1.5">
                     <UserCheck size={12} className="text-teal-700" />
-                    <span>Name of Requester</span>
+                    <span>Requester Name</span>
                   </label>
                   <input
                     type="text"
@@ -749,10 +654,9 @@ export default function NewRequestPage() {
               </div>
             </div>
 
-            {/* ─────────────────────────────────────────────────────────────
-                CASE A: HOSTEL PATIENT & CAREGIVER TRANSPORT REQUISITION
-               ───────────────────────────────────────────────────────────── */}
+            {/* ── 3. Table: Transport / Education / General Supplies (IMMEDIATE) ── */}
             {isTransportMode ? (
+              /* CASE A: HOSTEL PATIENT & CAREGIVER TRANSPORT REQUISITION */
               <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
                   <div>
@@ -767,6 +671,7 @@ export default function NewRequestPage() {
                     </p>
                   </div>
                   <button
+                    type="button"
                     onClick={addTransportRow}
                     className="px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto shadow-sm"
                   >
@@ -776,7 +681,7 @@ export default function NewRequestPage() {
                 </div>
 
                 {/* Transport Table */}
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto border border-slate-200 rounded-xl">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider font-mono border-b border-slate-200">
@@ -789,7 +694,7 @@ export default function NewRequestPage() {
                         <th className="py-2.5 px-2 w-12 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-sans">
+                    <tbody className="divide-y divide-slate-100 font-sans bg-white">
                       {transportRows.map((row) => (
                         <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3 px-2 text-center font-mono text-slate-500">{row.sn}</td>
@@ -852,6 +757,7 @@ export default function NewRequestPage() {
                           {/* Delete */}
                           <td className="py-3 px-2 text-center">
                             <button
+                              type="button"
                               onClick={() => removeTransportRow(row.id)}
                               disabled={transportRows.length <= 1}
                               className="p-1 text-slate-400 hover:text-rose-600 disabled:opacity-30 transition-colors"
@@ -880,9 +786,7 @@ export default function NewRequestPage() {
                 </div>
               </div>
             ) : isEducationMode ? (
-              /* ─────────────────────────────────────────────────────────────
-                  CASE B: PATIENT EDUCATIONAL WELFARE & SCHOOLING SCHEDULE
-                 ───────────────────────────────────────────────────────────── */
+              /* CASE B: PATIENT EDUCATIONAL WELFARE & SCHOOLING SCHEDULE */
               <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
                   <div>
@@ -898,6 +802,7 @@ export default function NewRequestPage() {
                     </p>
                   </div>
                   <button
+                    type="button"
                     onClick={addEducationRow}
                     className="px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto shadow-sm"
                   >
@@ -907,25 +812,24 @@ export default function NewRequestPage() {
                 </div>
 
                 {/* Education Table */}
-                <div className="overflow-x-auto">
+                <div className="overflow-x-auto border border-slate-200 rounded-xl">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider font-mono border-b border-slate-200">
                         <th className="py-2.5 px-2 w-12 text-center">S/N</th>
-                        <th className="py-2.5 px-3 min-w-[200px]">Patient Full Name</th>
+                        <th className="py-2.5 px-3 min-w-[180px]">Patient Full Name</th>
                         <th className="py-2.5 px-3 min-w-[200px]">School / Institution</th>
-                        <th className="py-2.5 px-3 w-36">Class Level</th>
+                        <th className="py-2.5 px-3 w-32">Class Level</th>
                         <th className="py-2.5 px-3 w-48">Support Category</th>
-                        <th className="py-2.5 px-3 w-32 text-right">Fee / Cost (₦)</th>
+                        <th className="py-2.5 px-3 w-32 text-right">Tuition / Package Cost</th>
                         <th className="py-2.5 px-2 w-12 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-sans">
+                    <tbody className="divide-y divide-slate-100 font-sans bg-white">
                       {educationRows.map((row) => (
                         <tr key={row.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3 px-2 text-center font-mono text-slate-500">{row.sn}</td>
                           
-                          {/* Patient Name */}
                           <td className="py-3 px-3">
                             <input
                               type="text"
@@ -936,26 +840,22 @@ export default function NewRequestPage() {
                             />
                           </td>
 
-                          {/* School */}
                           <td className="py-3 px-3">
                             <input
                               type="text"
                               value={row.schoolName}
-                              placeholder="e.g. NOMA Model Primary School, Sokoto"
+                              placeholder="e.g. NOMA Model Primary School"
                               onChange={(e) => updateEducationRow(row.id, 'schoolName', e.target.value)}
-                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:ring-2 focus:ring-teal-600 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
-                          {/* Class Level */}
                           <td className="py-3 px-3">
                             <select
                               value={row.classLevel}
                               onChange={(e) => updateEducationRow(row.id, 'classLevel', e.target.value)}
-                              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs font-semibold text-slate-700 focus:ring-2 focus:ring-teal-600 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-700 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             >
-                              <option value="Nursery 1">Nursery 1</option>
-                              <option value="Nursery 2">Nursery 2</option>
                               <option value="Primary 1">Primary 1</option>
                               <option value="Primary 2">Primary 2</option>
                               <option value="Primary 3">Primary 3</option>
@@ -965,41 +865,36 @@ export default function NewRequestPage() {
                               <option value="JSS 1">JSS 1</option>
                               <option value="JSS 2">JSS 2</option>
                               <option value="JSS 3">JSS 3</option>
-                              <option value="SSS 1">SSS 1</option>
-                              <option value="SSS 2">SSS 2</option>
-                              <option value="SSS 3">SSS 3</option>
-                              <option value="Vocational / Craft">Vocational / Craft</option>
+                              <option value="Vocational Apprenticeship">Vocational Apprenticeship</option>
                             </select>
                           </td>
 
-                          {/* Support Category */}
                           <td className="py-3 px-3">
                             <select
                               value={row.supportType}
-                              onChange={(e) => updateEducationRow(row.id, 'supportType', e.target.value as any)}
-                              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-teal-800 font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
+                              onChange={(e: any) => updateEducationRow(row.id, 'supportType', e.target.value)}
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-teal-800 font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             >
-                              <option value="School Fees / Tuition">📚 School Fees / Tuition</option>
-                              <option value="Uniform & Footwear">👔 Uniform & Footwear</option>
-                              <option value="Textbooks & Stationery">✏️ Textbooks & Stationery</option>
-                              <option value="Full Schooling Package">🎒 Full Schooling Package</option>
+                              <option value="School Fees / Tuition">School Fees / Tuition</option>
+                              <option value="Uniform & Footwear">Uniform & Footwear</option>
+                              <option value="Textbooks & Stationery">Textbooks & Stationery</option>
+                              <option value="Full Schooling Package">Full Schooling Package</option>
                             </select>
                           </td>
 
-                          {/* Cost */}
                           <td className="py-3 px-3">
                             <input
                               type="number"
                               min={0}
                               value={row.cost}
                               onChange={(e) => updateEducationRow(row.id, 'cost', parseInt(e.target.value) || 0)}
-                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 font-mono text-right font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 font-mono text-right focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
-                          {/* Delete */}
                           <td className="py-3 px-2 text-center">
                             <button
+                              type="button"
                               onClick={() => removeEducationRow(row.id)}
                               disabled={educationRows.length <= 1}
                               className="p-1 text-slate-400 hover:text-rose-600 disabled:opacity-30 transition-colors"
@@ -1013,10 +908,9 @@ export default function NewRequestPage() {
                   </table>
                 </div>
 
-                {/* Education Grand Total Bar */}
                 <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
                   <div className="text-xs text-slate-600">
-                    Total Patients Sponsored: <strong className="text-slate-900 font-mono">{educationRows.length}</strong> Children
+                    Total Students Sponsored: <strong className="text-slate-900 font-mono">{educationRows.length}</strong>
                   </div>
                   <div className="flex items-center gap-3">
                     <span className="text-xs font-bold text-slate-600 uppercase">Auto-Calculated Total:</span>
@@ -1027,20 +921,22 @@ export default function NewRequestPage() {
                 </div>
               </div>
             ) : (
-              /* ─────────────────────────────────────────────────────────────
-                  CASE C: STANDARD VOUCHER ITEMS TABLE (PER AY SPECIFICATIONS)
-                 ───────────────────────────────────────────────────────────── */
+              /* CASE C: GENERAL ITEMS & CONSUMABLES (MEDICAL, FACILITY, KITCHEN, PO) */
               <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-slate-100">
                   <div>
                     <span className="text-xs font-bold text-teal-700 uppercase tracking-wider font-mono">
-                      Requisition Line Items Schedule
+                      Schedule of Supplies & Consumables
                     </span>
                     <h3 className="text-base font-black text-slate-900 mt-0.5">
-                      Itemized Description, Quantity, Unit Price & Code
+                      Itemized Description & Financial Schedule
                     </h3>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      Specify items, quantity, packaging unit, and estimated unit rate in Naira.
+                    </p>
                   </div>
                   <button
+                    type="button"
                     onClick={addStandardRow}
                     className="px-3.5 py-2 bg-teal-50 hover:bg-teal-100 text-teal-800 border border-teal-200 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto shadow-sm"
                   >
@@ -1049,43 +945,41 @@ export default function NewRequestPage() {
                   </button>
                 </div>
 
-                {/* Line Items Table */}
-                <div className="overflow-x-auto">
+                {/* Items Table */}
+                <div className="overflow-x-auto border border-slate-200 rounded-xl">
                   <table className="w-full text-left text-xs">
                     <thead>
                       <tr className="bg-slate-100 text-slate-700 uppercase tracking-wider font-mono border-b border-slate-200">
                         <th className="py-2.5 px-2 w-12 text-center">S/N</th>
-                        <th className="py-2.5 px-3 min-w-[240px]">Description</th>
-                        <th className="py-2.5 px-3 w-36">Code</th>
-                        <th className="py-2.5 px-3 w-24">Qty</th>
-                        <th className="py-2.5 px-3 w-28">Unit</th>
-                        <th className="py-2.5 px-3 w-32 text-right">Unit Price</th>
-                        <th className="py-2.5 px-3 w-32 text-right">Total</th>
+                        <th className="py-2.5 px-3 min-w-[220px]">Item Description</th>
+                        <th className="py-2.5 px-3 w-44">Transaction Code</th>
+                        <th className="py-2.5 px-3 w-28 text-center">Quantity</th>
+                        <th className="py-2.5 px-3 w-32">Unit Type</th>
+                        <th className="py-2.5 px-3 w-36 text-right">Unit Price (₦)</th>
+                        <th className="py-2.5 px-3 w-36 text-right">Total Price</th>
                         <th className="py-2.5 px-2 w-12 text-center">Action</th>
                       </tr>
                     </thead>
-                    <tbody className="divide-y divide-slate-100 font-sans">
+                    <tbody className="divide-y divide-slate-100 font-sans bg-white">
                       {items.map((item) => (
                         <tr key={item.id} className="hover:bg-slate-50 transition-colors">
                           <td className="py-3 px-2 text-center font-mono text-slate-500">{item.sn}</td>
-                          
-                          {/* Description */}
+
                           <td className="py-3 px-3">
                             <input
                               type="text"
                               value={item.name}
-                              placeholder="e.g. Paracetamol Infusion 1000mg"
+                              placeholder="e.g. Parboiled Rice (50kg Bag) or Surgical Gloves"
                               onChange={(e) => updateStandardRow(item.id, 'name', e.target.value)}
                               className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-slate-900 focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             />
                           </td>
 
-                          {/* Code */}
                           <td className="py-3 px-3">
                             <select
                               value={item.transactionCode}
                               onChange={(e) => updateStandardRow(item.id, 'transactionCode', e.target.value)}
-                              className="w-full px-2 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-teal-800 font-mono font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
+                              className="w-full px-2.5 py-1.5 bg-white border border-slate-300 rounded-lg text-xs text-teal-800 font-mono font-bold focus:ring-2 focus:ring-teal-600 focus:outline-none"
                             >
                               {transactionCodes.map(tc => (
                                 <option key={tc.code} value={tc.code}>{tc.code}</option>
@@ -1093,7 +987,6 @@ export default function NewRequestPage() {
                             </select>
                           </td>
 
-                          {/* Qty */}
                           <td className="py-3 px-3">
                             <input
                               type="number"
@@ -1104,7 +997,6 @@ export default function NewRequestPage() {
                             />
                           </td>
 
-                          {/* Unit */}
                           <td className="py-3 px-3">
                             <input
                               type="text"
@@ -1114,7 +1006,6 @@ export default function NewRequestPage() {
                             />
                           </td>
 
-                          {/* Unit Price */}
                           <td className="py-3 px-3">
                             <input
                               type="number"
@@ -1125,14 +1016,13 @@ export default function NewRequestPage() {
                             />
                           </td>
 
-                          {/* Total Row */}
                           <td className="py-3 px-3 text-right font-mono font-bold text-teal-700">
                             {formatCurrency(item.quantity * item.unitPrice)}
                           </td>
 
-                          {/* Delete */}
                           <td className="py-3 px-2 text-center">
                             <button
+                              type="button"
                               onClick={() => removeStandardRow(item.id)}
                               disabled={items.length <= 1}
                               className="p-1 text-slate-400 hover:text-rose-600 disabled:opacity-30 transition-colors"
@@ -1146,7 +1036,6 @@ export default function NewRequestPage() {
                   </table>
                 </div>
 
-                {/* Grand Total Bar */}
                 <div className="mt-4 pt-4 border-t border-slate-100 flex flex-col sm:flex-row items-center justify-between gap-3 bg-slate-50 p-4 rounded-xl border border-slate-200">
                   <div className="text-xs text-slate-600">
                     Total Line Items: <strong className="text-slate-900 font-mono">{items.length}</strong>
@@ -1161,7 +1050,7 @@ export default function NewRequestPage() {
               </div>
             )}
 
-            {/* Justification & Clinical Note */}
+            {/* ── 4. Operational Justification Memo ── */}
             <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
               <label className="block text-xs font-bold text-slate-800 mb-2">
                 Operational Justification / Clinical Case Memo
@@ -1170,274 +1059,90 @@ export default function NewRequestPage() {
                 rows={3}
                 value={justification}
                 onChange={(e) => setJustification(e.target.value)}
-                placeholder="State clearly why these items are required, patient volume affected, or urgency justification..."
+                placeholder="State clearly why these items or transport fares are required, patient volume affected, or operational urgency..."
                 className="w-full p-3 bg-white border border-slate-300 rounded-xl text-xs text-slate-900 placeholder-slate-400 focus:ring-2 focus:ring-teal-600 focus:outline-none"
               />
             </div>
 
-            {/* Buttons */}
-            <div className="flex items-center justify-between pt-4">
-              <button
-                onClick={() => setStep(1)}
-                className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all border border-slate-300"
-              >
-                <ChevronLeft size={14} />
-                <span>Back to Department</span>
-              </button>
+            {/* ── 5. 4-Level Approval Chain Stamp Preview ── */}
+            <div className="p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <span className="text-[10px] font-mono uppercase tracking-wider text-teal-700 font-bold block mb-1">
+                4-LEVEL DIGITAL APPROVAL ROUTING CHAIN
+              </span>
+              <h3 className="text-base font-black text-slate-900 mb-4">
+                Automatic Workflow Stamps Applied on Submission
+              </h3>
 
-              <button
-                onClick={() => setStep(3)}
-                className="px-7 py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-teal-700/20 flex items-center gap-2 active:scale-95"
-              >
-                <span>Preview Official Voucher & Signatures</span>
-                <ChevronRight size={14} />
-              </button>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+                
+                {/* Level 1: Requester */}
+                <div className="p-3.5 rounded-xl bg-teal-50 border border-teal-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-[10px] text-teal-800 font-bold uppercase">LEVEL 1 · REQUESTER</span>
+                    <span className="text-[9px] text-teal-700 font-bold">DIGITAL SIGN</span>
+                  </div>
+                  <div className="font-bold text-slate-900">{requesterName}</div>
+                  <div className="text-[11px] text-slate-600">{requesterRole || `${selectedUnit} Staff`}</div>
+                  <div className="mt-2 text-[9px] font-mono text-teal-800">STAMP: READY TO APPLY</div>
+                </div>
+
+                {/* Level 2: Supervisor */}
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-[10px] text-slate-500 font-bold uppercase">LEVEL 2 · SUPERVISOR</span>
+                    <span className="text-[9px] text-amber-700 font-bold">NEXT REVIEW</span>
+                  </div>
+                  <div className="font-bold text-slate-900">{currentSupervisor.name}</div>
+                  <div className="text-[11px] text-slate-600">{currentSupervisor.title}</div>
+                  <div className="mt-2 text-[9px] font-mono text-slate-500">STAMP: {currentSupervisor.stamp}</div>
+                </div>
+
+                {/* Level 3: Finance */}
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-[10px] text-slate-500 font-bold uppercase">LEVEL 3 · FINANCE HEAD</span>
+                    <span className="text-[9px] text-slate-400 font-bold">BUDGET LOCK</span>
+                  </div>
+                  <div className="font-bold text-slate-900">Mr. AY, FCA</div>
+                  <div className="text-[11px] text-slate-600">Head of Finance & Grants</div>
+                  <div className="mt-2 text-[9px] font-mono text-slate-500">STAMP: AY/FIN/2026</div>
+                </div>
+
+                {/* Level 4: Coordinator */}
+                <div className="p-3.5 rounded-xl bg-slate-50 border border-slate-200">
+                  <div className="flex items-center justify-between mb-1">
+                    <span className="font-mono text-[10px] text-slate-500 font-bold uppercase">LEVEL 4 · COORDINATOR</span>
+                    <span className="text-[9px] text-slate-400 font-bold">FINAL AUTH</span>
+                  </div>
+                  <div className="font-bold text-slate-900">Dr. Emmanuel Bawa</div>
+                  <div className="text-[11px] text-slate-600">Programme Coordinator</div>
+                  <div className="mt-2 text-[9px] font-mono text-slate-500">STAMP: EB/CORD/2026</div>
+                </div>
+
+              </div>
             </div>
 
-          </div>
-        )}
-
-        {/* ─────────────────────────────────────────────────────────────────
-            STEP 3: VERIFICATION, SIGNATURE STAMPS & APPROVAL CHAIN PREVIEW
-           ───────────────────────────────────────────────────────────────── */}
-        {step === 3 && (
-          <div className="space-y-6 animate-in fade-in duration-200">
-            
-            {submitted ? (
-              /* Success Screen */
-              <div className="p-10 rounded-3xl bg-white border border-teal-300 text-center max-w-2xl mx-auto shadow-xl relative overflow-hidden">
-                <div className="w-16 h-16 rounded-2xl bg-teal-100 text-teal-700 border border-teal-300 flex items-center justify-center mx-auto mb-4 shadow-sm">
-                  <Check size={32} strokeWidth={3} />
-                </div>
-                <span className="text-xs font-mono uppercase tracking-widest text-teal-800 font-bold bg-teal-50 px-3 py-1 rounded-full border border-teal-200">
-                  VOUCHER TRANSMITTED TO SUPERVISOR DESK
+            {/* ── 6. Bottom Submission Bar ── */}
+            <div className="flex items-center justify-between p-6 rounded-2xl bg-white border border-slate-200 shadow-sm">
+              <div>
+                <span className="text-xs text-slate-500 uppercase font-mono block">Grand Total Requisition Value:</span>
+                <span className="text-2xl font-black text-teal-700 font-mono">
+                  {formatCurrency(grandTotal)}
                 </span>
-                <h2 className="text-2xl font-black text-slate-900 mt-3">
-                  Requisition {createdReqId} Created
-                </h2>
-                <p className="text-xs text-slate-600 mt-2 max-w-md mx-auto leading-relaxed">
-                  Your requisition has been digitally signed and routed to <strong className="text-slate-900 font-bold">{currentSupervisor.name}</strong> ({currentSupervisor.title}) for Level 2 line verification. You will receive an alert once Finance clears the grant allocation.
-                </p>
-
-                <div className="mt-6 p-5 rounded-2xl bg-slate-50 border border-slate-200 max-w-sm mx-auto text-left text-xs font-mono">
-                  <div className="flex justify-between py-1 text-slate-600">
-                    <span>Voucher No:</span>
-                    <strong className="text-teal-700">{createdReqId}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 text-slate-600">
-                    <span>Department:</span>
-                    <strong className="text-slate-900">{currentDept.name} ({selectedUnit})</strong>
-                  </div>
-                  <div className="flex justify-between py-1 text-slate-600">
-                    <span>Assigned Supervisor:</span>
-                    <strong className="text-teal-800 font-bold">{currentSupervisor.name}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 text-slate-600">
-                    <span>Total Value:</span>
-                    <strong className="text-teal-700 font-black">{formatCurrency(grandTotal)}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 text-slate-600">
-                    <span>Grant Code:</span>
-                    <strong className="text-emerald-800 font-bold">{donorGrantCode}</strong>
-                  </div>
-                  <div className="flex justify-between py-1 text-slate-600 border-t border-slate-200 mt-1 pt-1">
-                    <span>Current Stage:</span>
-                    <strong className="text-amber-800 font-bold">Level 2: {currentSupervisor.name} Review</strong>
-                  </div>
-                </div>
-
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
-                  <button
-                    onClick={() => router.push(`/hod?dept=${selectedDeptId}`)}
-                    className="px-6 py-3 bg-teal-600 hover:bg-teal-700 text-white font-black text-xs rounded-xl transition-all shadow-md shadow-teal-700/20 flex items-center gap-2"
-                  >
-                    <span>Open {currentSupervisor.name}&apos;s Approval Desk</span>
-                    <ArrowRight size={14} />
-                  </button>
-
-                  <button
-                    onClick={() => router.push(`/request/${createdReqId}`)}
-                    className="px-5 py-3 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl transition-all flex items-center gap-2 border border-slate-300"
-                  >
-                    <FileText size={14} className="text-teal-700" />
-                    <span>View Printable Voucher</span>
-                  </button>
-                </div>
               </div>
-            ) : (
-              /* Voucher Verification Preview */
-              <>
-                <div className="p-8 rounded-3xl bg-white border border-slate-200 shadow-md relative">
-                  
-                  {/* Top Seal */}
-                  <div className="flex flex-col sm:flex-row sm:items-center justify-between pb-6 border-b border-slate-200 gap-4">
-                    <div className="flex items-center gap-3">
-                      <div className="w-12 h-12 rounded-2xl bg-teal-50 border border-teal-200 flex items-center justify-center text-teal-700 shadow-sm">
-                        <Heart size={24} strokeWidth={2.5} className="text-teal-600" />
-                      </div>
-                      <div>
-                        <h2 className="text-xl font-black text-slate-900 tracking-tight">NOMA AID NIGERIA INITIATIVE (NANI)</h2>
-                        <p className="text-xs text-teal-700 font-mono font-bold">OFFICIAL REQUISITION VOUCHER · AUDIT PRE-FLIGHT</p>
-                      </div>
-                    </div>
-                    <div className="text-right font-mono text-xs text-slate-600">
-                      <div>Date: <strong className="text-slate-900">{reqDate}</strong></div>
-                      <div>Voucher ID: <strong className="text-teal-700 font-bold">NANI-REQ-PENDING</strong></div>
-                    </div>
-                  </div>
 
-                  {/* Voucher Summary Strip */}
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4 py-6 border-b border-slate-200 text-xs">
-                    <div>
-                      <span className="text-slate-500 font-mono block">DEPARTMENT</span>
-                      <strong className="text-slate-900 text-sm">{currentDept.name}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 font-mono block">UNIT</span>
-                      <strong className="text-slate-900 text-sm">{selectedUnit}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 font-mono block">DONOR GRANT LINE</span>
-                      <strong className="text-emerald-800 text-sm font-mono font-bold">{donorGrantCode}</strong>
-                    </div>
-                    <div>
-                      <span className="text-slate-500 font-mono block">TOTAL ESTIMATED DISBURSEMENT</span>
-                      <strong className="text-teal-700 text-lg font-black font-mono">{formatCurrency(grandTotal)}</strong>
-                    </div>
-                  </div>
+              <div className="flex items-center gap-3">
+                <button
+                  type="submit"
+                  className="px-8 py-3.5 bg-teal-600 hover:bg-teal-700 text-white font-black text-sm rounded-xl transition-all shadow-md shadow-teal-700/20 flex items-center gap-2 active:scale-95"
+                >
+                  <Send size={15} />
+                  <span>Submit Requisition to {currentSupervisor.name}</span>
+                </button>
+              </div>
+            </div>
 
-                  {/* Items Preview Table */}
-                  <div className="py-6 border-b border-slate-200">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-slate-500 font-bold mb-3">
-                      {isTransportMode ? 'PASSENGER TRANSPORT SCHEDULE' : isEducationMode ? 'PATIENT SCHOOLING & EDUCATION WELFARE SCHEDULE' : 'SCHEDULE OF LINE ITEMS'}
-                    </h4>
-
-                    {isTransportMode ? (
-                      <div className="space-y-1 text-xs">
-                        {transportRows.map(r => (
-                          <div key={r.id} className="flex justify-between py-2 px-3 rounded-lg bg-slate-50 border border-slate-200 font-mono text-slate-800">
-                            <span>#{r.sn} {r.name} ({r.type.toUpperCase()}) — {r.stateOfOrigin} [{r.direction}]</span>
-                            <span className="font-bold text-teal-700">{formatCurrency(r.cost)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : isEducationMode ? (
-                      <div className="space-y-1 text-xs">
-                        {educationRows.map(e => (
-                          <div key={e.id} className="flex justify-between py-2 px-3 rounded-lg bg-slate-50 border border-slate-200 font-mono text-slate-800">
-                            <span>#{e.sn} {e.patientName} — {e.schoolName} ({e.classLevel}) [{e.supportType}]</span>
-                            <span className="font-bold text-teal-700">{formatCurrency(e.cost)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    ) : (
-                      <div className="space-y-1 text-xs">
-                        {items.map(i => (
-                          <div key={i.id} className="flex justify-between py-2 px-3 rounded-lg bg-slate-50 border border-slate-200 font-mono text-slate-800">
-                            <span>#{i.sn} {i.name} ({i.quantity} {i.unit} @ {formatCurrency(i.unitPrice)}) [Code: {i.transactionCode}]</span>
-                            <span className="font-bold text-teal-700">{formatCurrency(i.quantity * i.unitPrice)}</span>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-
-                  {/* ── 4-Level Approval Chain & Digital Signature Preview ── */}
-                  <div className="pt-6">
-                    <h4 className="text-xs font-mono uppercase tracking-wider text-teal-700 font-bold mb-4">
-                      4-LEVEL APPROVAL CHAIN & DIGITAL SIGNATURE WATERMARKS
-                    </h4>
-
-                    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-                      
-                      {/* Level 1: Requester (Active / Auto-Signed) */}
-                      <div className="p-4 rounded-xl bg-teal-50 border border-teal-300 relative shadow-sm">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-teal-800 font-bold">LEVEL 1 · REQUESTER</span>
-                          <span className="px-1.5 py-0.5 rounded bg-teal-200/60 text-teal-900 text-[10px] font-bold">
-                            SIGNED ✓
-                          </span>
-                        </div>
-                        <p className="font-bold text-xs text-slate-900">{requesterName}</p>
-                        <p className="text-[10px] text-slate-500">{selectedUnit} Unit Staff</p>
-                        <div className="mt-3 pt-2 border-t border-teal-200 text-[9px] font-mono text-teal-800">
-                          DIGITAL SIGNATURE STAMP:<br />
-                          {requesterName.replace(/\s+/g, '').toUpperCase()}/VOUCH/{new Date().getFullYear()}
-                        </div>
-                      </div>
-
-                      {/* Level 2: Supervisor (Pending) */}
-                      <div className="p-4 rounded-xl bg-amber-50/60 border border-amber-300 shadow-sm">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-amber-800 font-bold">LEVEL 2 · LINE SUPERVISOR</span>
-                          <span className="px-1.5 py-0.5 rounded bg-amber-200/60 text-amber-900 text-[10px] font-bold">
-                            NEXT IN QUEUE
-                          </span>
-                        </div>
-                        <p className="font-bold text-xs text-slate-900">{currentSupervisor.name}</p>
-                        <p className="text-[10px] text-slate-500">{currentSupervisor.title}</p>
-                        <div className="mt-3 pt-2 border-t border-amber-200 text-[9px] font-mono text-amber-800">
-                          TARGET STAMP: {currentSupervisor.stamp}
-                        </div>
-                      </div>
-
-                      {/* Level 3: Finance (Pending) */}
-                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-slate-500 font-bold">LEVEL 3 · FINANCE</span>
-                          <span className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 text-[10px]">
-                            AWAITING L2
-                          </span>
-                        </div>
-                        <p className="font-bold text-xs text-slate-900">Mr. AY, FCA</p>
-                        <p className="text-[10px] text-slate-500">Head of Finance & CA</p>
-                        <div className="mt-3 pt-2 border-t border-slate-200 text-[9px] font-mono text-slate-500">
-                          Locks {donorGrantCode}
-                        </div>
-                      </div>
-
-                      {/* Level 4: Coordinator (Pending) */}
-                      <div className="p-4 rounded-xl bg-slate-50 border border-slate-200">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-slate-500 font-bold">LEVEL 4 · COORDINATOR</span>
-                          <span className="px-1.5 py-0.5 rounded bg-slate-200 text-slate-600 text-[10px]">
-                            AWAITING L3
-                          </span>
-                        </div>
-                        <p className="font-bold text-xs text-slate-900">Dr. Emmanuel Bawa</p>
-                        <p className="text-[10px] text-slate-500">Programme Coordinator</p>
-                        <div className="mt-3 pt-2 border-t border-slate-200 text-[9px] font-mono text-slate-500">
-                          Executive authorization
-                        </div>
-                      </div>
-
-                    </div>
-                  </div>
-
-                </div>
-
-                {/* Submit Action Bar */}
-                <div className="flex items-center justify-between pt-4">
-                  <button
-                    onClick={() => setStep(2)}
-                    className="px-5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs rounded-xl flex items-center gap-1.5 transition-all border border-slate-300"
-                  >
-                    <ChevronLeft size={14} />
-                    <span>Edit Line Items</span>
-                  </button>
-
-                  <button
-                    onClick={handleSubmit}
-                    className="px-8 py-4 bg-teal-600 hover:bg-teal-700 text-white font-black text-sm rounded-xl transition-all shadow-lg shadow-teal-700/25 flex items-center gap-2 active:scale-95"
-                  >
-                    <span>Apply Signature & Submit to Supervisor</span>
-                    <ArrowRight size={16} />
-                  </button>
-                </div>
-              </>
-            )}
-
-          </div>
+          </form>
         )}
 
       </main>
