@@ -113,6 +113,7 @@ export default function RequestDetailPage() {
   };
 
   const isTransport = request.requisitionType === 'transport' || request.unit === 'Hostel';
+  const isEducation = request.requisitionType === 'education' || request.unit === 'Education Welfare';
   const isDisbursed = request.status === 'disbursement-ready' || request.status === 'dispatched';
   const isRetired = request.status === 'closed';
 
@@ -266,10 +267,14 @@ export default function RequestDetailPage() {
             </p>
           </div>
 
-          {/* Schedule of Items / Transport Passengers */}
+          {/* Schedule of Items / Transport Passengers / Education Students */}
           <div className="py-6 border-b border-zinc-800 print:border-zinc-300">
             <h3 className="text-xs font-mono uppercase tracking-wider text-zinc-400 print:text-zinc-600 mb-3">
-              {isTransport ? 'PASSENGER TRANSPORT SCHEDULE (STATE-RATED)' : 'SCHEDULE OF LINE ITEMS & TRANSACTION CODES'}
+              {isTransport 
+                ? 'PASSENGER TRANSPORT SCHEDULE (STATE-RATED)' 
+                : isEducation 
+                ? 'PATIENT EDUCATION WELFARE & SCHOOLING SPONSORSHIP ROSTER' 
+                : 'SCHEDULE OF LINE ITEMS & TRANSACTION CODES'}
             </h3>
 
             {isTransport && request.transportPassengers && request.transportPassengers.length > 0 ? (
@@ -294,6 +299,33 @@ export default function RequestDetailPage() {
                         <td className="py-2.5 px-3 text-teal-400 print:text-teal-700">{p.stateOfOrigin}</td>
                         <td className="py-2.5 px-3 text-zinc-300">{p.direction}</td>
                         <td className="py-2.5 px-3 text-right font-bold text-teal-400 print:text-zinc-900">{formatCurrency(p.transportCost)}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            ) : isEducation && request.educationStudents && request.educationStudents.length > 0 ? (
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-xs font-mono">
+                  <thead>
+                    <tr className="border-b border-zinc-800 print:border-zinc-300 text-zinc-400 uppercase">
+                      <th className="py-2 px-2 text-center w-12">S/N</th>
+                      <th className="py-2 px-3">Patient Full Name</th>
+                      <th className="py-2 px-3">School / Institution</th>
+                      <th className="py-2 px-3">Class Level</th>
+                      <th className="py-2 px-3">Support Category</th>
+                      <th className="py-2 px-3 text-right">Sponsorship Cost</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-zinc-800/60 print:divide-zinc-200">
+                    {request.educationStudents.map(s => (
+                      <tr key={s.id}>
+                        <td className="py-2.5 px-2 text-center text-zinc-500">{s.sn}</td>
+                        <td className="py-2.5 px-3 font-sans font-bold text-white print:text-zinc-900">{s.patientName}</td>
+                        <td className="py-2.5 px-3 text-zinc-300 print:text-zinc-800">{s.schoolName}</td>
+                        <td className="py-2.5 px-3 text-zinc-400">{s.classLevel}</td>
+                        <td className="py-2.5 px-3 text-teal-400 print:text-teal-700">{s.supportType}</td>
+                        <td className="py-2.5 px-3 text-right font-bold text-teal-400 print:text-zinc-900">{formatCurrency(s.cost)}</td>
                       </tr>
                     ))}
                   </tbody>

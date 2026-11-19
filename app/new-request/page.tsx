@@ -8,15 +8,16 @@ import {
   stateTransportRates, 
   transactionCodes, 
   currentUser,
-  formatCurrency 
+  formatCurrency,
+  departmentSupervisors
 } from '@/lib/mock-data';
 import { addStoredRequest, getStoredUser } from '@/lib/storage';
-import { Request, RequestItem, TransportPassenger } from '@/lib/types';
+import { Request, RequestItem, TransportPassenger, EducationStudentRow, RequisitionType } from '@/lib/types';
 import { 
   Building2, ShieldCheck, Heart, DollarSign, Users, 
   Check, ChevronRight, ChevronLeft, AlertTriangle, Plus, 
   Trash2, Info, Sparkles, FileText, Bus, Package, Calendar, 
-  UserCheck, CheckCircle2, ArrowRight, Printer
+  UserCheck, CheckCircle2, ArrowRight, Printer, GraduationCap
 } from 'lucide-react';
 
 interface LineItem {
@@ -39,6 +40,16 @@ interface TransportPassengerRow {
   cost: number;
 }
 
+interface EducationStudentRowState {
+  id: string;
+  sn: number;
+  patientName: string;
+  schoolName: string;
+  classLevel: string;
+  supportType: 'School Fees / Tuition' | 'Uniform & Footwear' | 'Textbooks & Stationery' | 'Full Schooling Package';
+  cost: number;
+}
+
 const deptIcons: Record<string, any> = {
   facility: Building2,
   finance: DollarSign,
@@ -56,7 +67,7 @@ export default function NewRequestPage() {
   // ── Step 1 State: Department, Unit, Pathway ──────────────────────────────
   const [selectedDeptId, setSelectedDeptId] = useState('clinicals');
   const [selectedUnit, setSelectedUnit] = useState('Nursing');
-  const [requisitionType, setRequisitionType] = useState<'material' | 'cash' | 'store-issue' | 'transport'>('cash');
+  const [requisitionType, setRequisitionType] = useState<RequisitionType>('cash');
   const [urgency, setUrgency] = useState<'routine' | 'priority' | 'stat'>('routine');
 
   // ── Step 2 State: Requisition Header & Items ─────────────────────────────
@@ -80,6 +91,37 @@ export default function NewRequestPage() {
     { id: '3', sn: 3, name: 'Ibrahim Hassan', type: 'patient', stateOfOrigin: 'Adamawa', direction: 'incoming', cost: 25000 },
   ]);
 
+  // Special Education Welfare & Patient Schooling Rows
+  const [educationRows, setEducationRows] = useState<EducationStudentRowState[]>([
+    { id: '1', sn: 1, patientName: 'Maryam Sani (Noma survivor)', schoolName: 'NOMA Model Primary School, Sokoto', classLevel: 'Primary 3', supportType: 'School Fees / Tuition', cost: 45000 },
+    { id: '2', sn: 2, patientName: 'Aliyu Garba (Post-reconstruction)', schoolName: 'Community Islamic Academy', classLevel: 'Primary 1', supportType: 'Uniform & Footwear', cost: 18000 },
+    { id: '3', sn: 3, patientName: 'Bilkisu Danjuma', schoolName: 'NOMA Model Primary School, Sokoto', classLevel: 'Primary 2', supportType: 'Textbooks & Stationery', cost: 22000 },
+  ]);
+
+  const addEducationRow = () => {
+    setEducationRows(prev => [
+      ...prev,
+      {
+        id: `edu-${Date.now()}`,
+        sn: prev.length + 1,
+        patientName: '',
+        schoolName: 'NOMA Model Primary School, Sokoto',
+        classLevel: 'Primary 1',
+        supportType: 'School Fees / Tuition',
+        cost: 35000,
+      }
+    ]);
+  };
+
+  const updateEducationRow = (id: string, field: keyof EducationStudentRowState, value: any) => {
+    setEducationRows(prev => prev.map(row => row.id === id ? { ...row, [field]: value } : row));
+  };
+
+  const removeEducationRow = (id: string) => {
+    if (educationRows.length <= 1) return;
+    setEducationRows(prev => prev.filter(r => r.id !== id).map((r, idx) => ({ ...r, sn: idx + 1 })));
+  };
+
   useEffect(() => {
     const user = getStoredUser();
     if (user && user.name) {
@@ -98,6 +140,9 @@ export default function NewRequestPage() {
             if (unitParam === 'Hostel') {
               setRequisitionType('transport');
               setDefaultTransCode('TRN-001');
+            } else if (unitParam === 'Education Welfare') {
+              setRequisitionType('education');
+              setDefaultTransCode('ADM-003');
             } else if (unitParam === 'Logistics/Fleet') {
               setRequisitionType('cash');
               setDefaultTransCode('FAC-004');
@@ -113,6 +158,9 @@ export default function NewRequestPage() {
             if (user.unit === 'Hostel') {
               setRequisitionType('transport');
               setDefaultTransCode('TRN-001');
+            } else if (user.unit === 'Education Welfare') {
+              setRequisitionType('education');
+              setDefaultTransCode('ADM-003');
             } else if (user.unit === 'Logistics/Fleet') {
               setRequisitionType('cash');
               setDefaultTransCode('FAC-004');
@@ -124,6 +172,8 @@ export default function NewRequestPage() {
   }, []);
 
   const isTransportMode = requisitionType === 'transport' || selectedUnit === 'Hostel';
+  const isEducationMode = requisitionType === 'education' || selectedUnit === 'Education Welfare';
+  const currentSupervisor = departmentSupervisors[selectedDeptId] || departmentSupervisors.clinicals;
 
   // Selected department details
   const currentDept = useMemo(() => {
@@ -133,7 +183,8 @@ export default function NewRequestPage() {
   // Calculations
   const standardTotal = items.reduce((acc, item) => acc + (item.quantity * item.unitPrice), 0);
   const transportTotal = transportRows.reduce((acc, row) => acc + row.cost, 0);
-  const grandTotal = isTransportMode ? transportTotal : standardTotal;
+  const educationTotal = educationRows.reduce((acc, row) => acc + row.cost, 0);
+  const grandTotal = isTransportMode ? transportTotal : isEducationMode ? educationTotal : standardTotal;
 
   // Handle department change
   const handleSelectDept = (deptId: string) => {
@@ -144,7 +195,10 @@ export default function NewRequestPage() {
       if (dept.units[0] === 'Hostel') {
         setRequisitionType('transport');
         setDefaultTransCode('TRN-001');
-      } else if (requisitionType === 'transport') {
+      } else if (dept.units[0] === 'Education Welfare') {
+        setRequisitionType('education');
+        setDefaultTransCode('ADM-003');
+      } else if (requisitionType === 'transport' || requisitionType === 'education') {
         setRequisitionType('cash');
       }
     }
@@ -156,7 +210,13 @@ export default function NewRequestPage() {
     if (unit === 'Hostel') {
       setRequisitionType('transport');
       setDefaultTransCode('TRN-001');
-    } else if (requisitionType === 'transport') {
+    } else if (unit === 'Education Welfare') {
+      setRequisitionType('education');
+      setDefaultTransCode('ADM-003');
+    } else if (unit === 'Logistics/Fleet') {
+      setRequisitionType('cash');
+      setDefaultTransCode('FAC-004');
+    } else if (requisitionType === 'transport' || requisitionType === 'education') {
       setRequisitionType('cash');
       setDefaultTransCode('MED-001');
     }
@@ -252,6 +312,8 @@ export default function NewRequestPage() {
 
     const title = isTransportMode
       ? `Patient Transport — ${transportRows.map(r => r.stateOfOrigin).filter((v,i,a) => a.indexOf(v) === i).join(', ')} States (${transportRows.length} Passengers)`
+      : isEducationMode
+      ? `Patient Education & Schooling Welfare — ${educationRows.length} Students Sponsored`
       : items[0]?.name ? `${items[0].name}${items.length > 1 ? ` (+ ${items.length - 1} more items)` : ''}` : `${selectedUnit} Consumables Requisition`;
 
     const newReq: Request = {
@@ -260,7 +322,7 @@ export default function NewRequestPage() {
       requisitionType,
       department: currentDept.name,
       unit: selectedUnit,
-      category: isTransportMode ? 'Patient Transport' : 'Clinical Consumables',
+      category: isTransportMode ? 'Patient Transport' : isEducationMode ? 'Patient Education & Schooling Welfare' : `${selectedUnit} Supplies`,
       transactionCode: defaultTransCode,
       donorGrantCode: donorGrantCode,
       urgency,
@@ -271,9 +333,9 @@ export default function NewRequestPage() {
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       totalValue: grandTotal,
-      justification: justification || 'Voucher raised via Staff Portal.',
+      justification: justification || `Requisition raised for ${currentDept.name} Department (${selectedUnit} Unit).`,
       budgetCode: `${currentDept.id.toUpperCase()}-${selectedUnit.slice(0,3).toUpperCase()}-2026-VCH`,
-      items: isTransportMode ? [] : items.map((i, idx) => ({ ...i, sn: idx + 1, totalPrice: i.quantity * i.unitPrice })),
+      items: (isTransportMode || isEducationMode) ? [] : items.map((i, idx) => ({ ...i, sn: idx + 1, totalPrice: i.quantity * i.unitPrice })),
       transportPassengers: isTransportMode ? transportRows.map((r, idx) => ({
         id: `tp-${Date.now()}-${idx}`,
         sn: idx + 1,
@@ -282,6 +344,15 @@ export default function NewRequestPage() {
         stateOfOrigin: r.stateOfOrigin,
         transportCost: r.cost,
         direction: r.direction
+      })) : [],
+      educationStudents: isEducationMode ? educationRows.map((r, idx) => ({
+        id: `edu-${Date.now()}-${idx}`,
+        sn: idx + 1,
+        patientName: r.patientName || `Patient ${idx + 1}`,
+        schoolName: r.schoolName || 'NOMA Primary School',
+        classLevel: r.classLevel || 'Primary 1',
+        supportType: r.supportType,
+        cost: r.cost,
       })) : [],
       signatures: [
         {
@@ -295,12 +366,12 @@ export default function NewRequestPage() {
       timeline: [
         {
           id: `t-${Date.now()}`,
-          action: 'Requisition Submitted & Digitally Signed ✓',
+          action: `Requisition Submitted & Routed to ${currentSupervisor.name} (${currentSupervisor.title}) for Level 2 Review ✓`,
           actor: requesterName,
           role: `${selectedUnit} Staff`,
           timestamp: new Date().toISOString(),
           type: 'submitted' as const,
-          comment: justification || 'Initial voucher submission'
+          comment: justification || `Initial voucher submission for ${currentDept.name} Department (${selectedUnit} Unit).`
         }
       ],
       comments: []
@@ -440,6 +511,7 @@ export default function NewRequestPage() {
                 {currentDept.units.map((unit) => {
                   const isSelected = selectedUnit === unit;
                   const isHostel = unit === 'Hostel';
+                  const isEdu = unit === 'Education Welfare';
                   return (
                     <button
                       key={unit}
@@ -451,10 +523,16 @@ export default function NewRequestPage() {
                       }`}
                     >
                       {isHostel && <span>🚌</span>}
+                      {isEdu && <span>🎓</span>}
                       <span>{unit}</span>
                       {isHostel && (
                         <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-zinc-950 text-teal-300' : 'bg-teal-500/10 text-teal-400'}`}>
                           Patient Transport
+                        </span>
+                      )}
+                      {isEdu && (
+                        <span className={`text-[10px] px-1.5 py-0.2 rounded-full ${isSelected ? 'bg-zinc-950 text-teal-300' : 'bg-teal-500/10 text-teal-400'}`}>
+                          Schooling Roster
                         </span>
                       )}
                       {isSelected && <Check size={14} strokeWidth={3} />}
@@ -488,6 +566,11 @@ export default function NewRequestPage() {
                       id: 'transport',
                       title: '🚌 Hostel Patient / Caregiver Transport',
                       desc: 'State-rated transport fare for patient admission and discharge returns.',
+                    },
+                    {
+                      id: 'education',
+                      title: '🎓 Patient Educational Welfare & Schooling',
+                      desc: 'School fees, tuition, uniforms & books for Noma survivor child reintegration.',
                     },
                     {
                       id: 'material',
@@ -586,7 +669,7 @@ export default function NewRequestPage() {
                 </div>
                 <div className="flex items-center gap-2">
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-teal-500/10 text-teal-300 border border-teal-500/30">
-                    {requisitionType === 'transport' ? '🚌 Transport Requisition' : requisitionType === 'store-issue' ? '📦 Store Issue' : '💵 Cash Requisition'}
+                    {requisitionType === 'transport' ? '🚌 Transport Requisition' : requisitionType === 'education' ? '🎓 Education Welfare' : requisitionType === 'store-issue' ? '📦 Store Issue' : '💵 Cash Requisition'}
                   </span>
                   <span className="px-3 py-1 rounded-full text-xs font-bold bg-amber-500/10 text-amber-300 border border-amber-500/30 uppercase">
                     {urgency}
@@ -796,9 +879,156 @@ export default function NewRequestPage() {
                   </div>
                 </div>
               </div>
+            ) : isEducationMode ? (
+              /* ─────────────────────────────────────────────────────────────
+                  CASE B: PATIENT EDUCATIONAL WELFARE & SCHOOLING SCHEDULE
+                 ───────────────────────────────────────────────────────────── */
+              <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-800">
+                  <div>
+                    <span className="text-xs font-bold text-teal-400 uppercase tracking-wider flex items-center gap-1.5">
+                      <GraduationCap size={15} />
+                      <span>Patient Educational Rehabilitation System</span>
+                    </span>
+                    <h3 className="text-base font-black text-white mt-0.5">
+                      Noma Survivors Schooling Sponsorship Schedule
+                    </h3>
+                    <p className="text-xs text-zinc-400 mt-0.5">
+                      Enter patient names, schooling institutions, class level, and support package. Auto-sums for Finance & Donor verification.
+                    </p>
+                  </div>
+                  <button
+                    onClick={addEducationRow}
+                    className="px-3.5 py-2 bg-teal-500/10 hover:bg-teal-500/20 text-teal-300 border border-teal-500/30 rounded-xl text-xs font-bold flex items-center gap-1.5 transition-all self-start sm:self-auto"
+                  >
+                    <Plus size={14} />
+                    <span>+ Add Student</span>
+                  </button>
+                </div>
+
+                {/* Education Table */}
+                <div className="overflow-x-auto">
+                  <table className="w-full text-left text-xs">
+                    <thead>
+                      <tr className="border-b border-zinc-800 text-zinc-400 uppercase tracking-wider font-mono">
+                        <th className="py-2.5 px-2 w-12 text-center">S/N</th>
+                        <th className="py-2.5 px-3 min-w-[200px]">Patient Full Name</th>
+                        <th className="py-2.5 px-3 min-w-[200px]">School / Institution</th>
+                        <th className="py-2.5 px-3 w-36">Class Level</th>
+                        <th className="py-2.5 px-3 w-48">Support Category</th>
+                        <th className="py-2.5 px-3 w-32 text-right">Fee / Cost (₦)</th>
+                        <th className="py-2.5 px-2 w-12 text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-zinc-800/60 font-sans">
+                      {educationRows.map((row) => (
+                        <tr key={row.id} className="hover:bg-zinc-800/30 transition-colors">
+                          <td className="py-3 px-2 text-center font-mono text-zinc-500">{row.sn}</td>
+                          
+                          {/* Patient Name */}
+                          <td className="py-3 px-3">
+                            <input
+                              type="text"
+                              value={row.patientName}
+                              placeholder="e.g. Maryam Sani"
+                              onChange={(e) => updateEducationRow(row.id, 'patientName', e.target.value)}
+                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                            />
+                          </td>
+
+                          {/* School */}
+                          <td className="py-3 px-3">
+                            <input
+                              type="text"
+                              value={row.schoolName}
+                              placeholder="e.g. NOMA Model Primary School, Sokoto"
+                              onChange={(e) => updateEducationRow(row.id, 'schoolName', e.target.value)}
+                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                            />
+                          </td>
+
+                          {/* Class Level */}
+                          <td className="py-3 px-3">
+                            <select
+                              value={row.classLevel}
+                              onChange={(e) => updateEducationRow(row.id, 'classLevel', e.target.value)}
+                              className="w-full px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs font-semibold text-zinc-300 focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                            >
+                              <option value="Nursery 1">Nursery 1</option>
+                              <option value="Nursery 2">Nursery 2</option>
+                              <option value="Primary 1">Primary 1</option>
+                              <option value="Primary 2">Primary 2</option>
+                              <option value="Primary 3">Primary 3</option>
+                              <option value="Primary 4">Primary 4</option>
+                              <option value="Primary 5">Primary 5</option>
+                              <option value="Primary 6">Primary 6</option>
+                              <option value="JSS 1">JSS 1</option>
+                              <option value="JSS 2">JSS 2</option>
+                              <option value="JSS 3">JSS 3</option>
+                              <option value="SSS 1">SSS 1</option>
+                              <option value="SSS 2">SSS 2</option>
+                              <option value="SSS 3">SSS 3</option>
+                              <option value="Vocational / Craft">Vocational / Craft</option>
+                            </select>
+                          </td>
+
+                          {/* Support Category */}
+                          <td className="py-3 px-3">
+                            <select
+                              value={row.supportType}
+                              onChange={(e) => updateEducationRow(row.id, 'supportType', e.target.value as any)}
+                              className="w-full px-2 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-teal-300 font-semibold focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                            >
+                              <option value="School Fees / Tuition">📚 School Fees / Tuition</option>
+                              <option value="Uniform & Footwear">👔 Uniform & Footwear</option>
+                              <option value="Textbooks & Stationery">✏️ Textbooks & Stationery</option>
+                              <option value="Full Schooling Package">🎒 Full Schooling Package</option>
+                            </select>
+                          </td>
+
+                          {/* Cost */}
+                          <td className="py-3 px-3">
+                            <input
+                              type="number"
+                              min={0}
+                              value={row.cost}
+                              onChange={(e) => updateEducationRow(row.id, 'cost', parseInt(e.target.value) || 0)}
+                              className="w-full px-2.5 py-1.5 bg-zinc-950 border border-zinc-800 rounded-lg text-xs text-white font-mono text-right focus:ring-1 focus:ring-teal-500 focus:outline-none"
+                            />
+                          </td>
+
+                          {/* Delete */}
+                          <td className="py-3 px-2 text-center">
+                            <button
+                              onClick={() => removeEducationRow(row.id)}
+                              disabled={educationRows.length <= 1}
+                              className="p-1 text-zinc-500 hover:text-rose-400 disabled:opacity-30 transition-colors"
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Education Grand Total Bar */}
+                <div className="mt-4 pt-4 border-t border-zinc-800 flex flex-col sm:flex-row items-center justify-between gap-3 bg-zinc-950/60 p-4 rounded-xl">
+                  <div className="text-xs text-zinc-400">
+                    Total Patients Sponsored: <strong className="text-white font-mono">{educationRows.length}</strong> Children
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <span className="text-xs font-bold text-zinc-400 uppercase">Auto-Calculated Total:</span>
+                    <span className="text-xl font-black text-teal-400 font-mono">
+                      {formatCurrency(educationTotal)}
+                    </span>
+                  </div>
+                </div>
+              </div>
             ) : (
               /* ─────────────────────────────────────────────────────────────
-                  CASE B: STANDARD VOUCHER ITEMS TABLE (PER AY SPECIFICATIONS)
+                  CASE C: STANDARD VOUCHER ITEMS TABLE (PER AY SPECIFICATIONS)
                  ───────────────────────────────────────────────────────────── */
               <div className="p-6 rounded-2xl bg-zinc-900 border border-zinc-800 shadow-xl">
                 <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-4 pb-3 border-b border-zinc-800">
@@ -986,7 +1216,7 @@ export default function NewRequestPage() {
                   Requisition {createdReqId} Created
                 </h2>
                 <p className="text-xs text-zinc-400 mt-2 max-w-md mx-auto leading-relaxed">
-                  Your requisition has been digitally signed and routed to your Unit Supervisor for Level 2 verification. You will receive an alert once Finance clears the grant allocation.
+                  Your requisition has been digitally signed and routed to <strong className="text-white">{currentSupervisor.name}</strong> ({currentSupervisor.title}) for Level 2 line verification. You will receive an alert once Finance clears the grant allocation.
                 </p>
 
                 <div className="mt-6 p-4 rounded-xl bg-zinc-950 border border-zinc-800 max-w-sm mx-auto text-left text-xs font-mono">
@@ -999,6 +1229,10 @@ export default function NewRequestPage() {
                     <strong className="text-white">{currentDept.name} ({selectedUnit})</strong>
                   </div>
                   <div className="flex justify-between py-1 text-zinc-400">
+                    <span>Assigned Supervisor:</span>
+                    <strong className="text-teal-300">{currentSupervisor.name}</strong>
+                  </div>
+                  <div className="flex justify-between py-1 text-zinc-400">
                     <span>Total Value:</span>
                     <strong className="text-teal-400">{formatCurrency(grandTotal)}</strong>
                   </div>
@@ -1008,7 +1242,7 @@ export default function NewRequestPage() {
                   </div>
                   <div className="flex justify-between py-1 text-zinc-400 border-t border-zinc-900 mt-1 pt-1">
                     <span>Current Stage:</span>
-                    <strong className="text-amber-400">Level 2: Supervisor Review</strong>
+                    <strong className="text-amber-400">Level 2: {currentSupervisor.name} Review</strong>
                   </div>
                 </div>
 
@@ -1017,7 +1251,7 @@ export default function NewRequestPage() {
                     onClick={() => router.push(`/hod?dept=${selectedDeptId}`)}
                     className="px-6 py-3 bg-teal-500 hover:bg-teal-400 text-zinc-950 font-black text-xs rounded-xl transition-all shadow-lg shadow-teal-500/20 flex items-center gap-2"
                   >
-                    <span>View in Supervisor Approval Desk</span>
+                    <span>Open {currentSupervisor.name}&apos;s Approval Desk</span>
                     <ArrowRight size={14} />
                   </button>
 
@@ -1075,7 +1309,7 @@ export default function NewRequestPage() {
                   {/* Items Preview Table */}
                   <div className="py-6 border-b border-zinc-800">
                     <h4 className="text-xs font-mono uppercase tracking-wider text-zinc-400 mb-3">
-                      {isTransportMode ? 'PASSENGER TRANSPORT SCHEDULE' : 'SCHEDULE OF LINE ITEMS'}
+                      {isTransportMode ? 'PASSENGER TRANSPORT SCHEDULE' : isEducationMode ? 'PATIENT SCHOOLING & EDUCATION WELFARE SCHEDULE' : 'SCHEDULE OF LINE ITEMS'}
                     </h4>
 
                     {isTransportMode ? (
@@ -1084,6 +1318,15 @@ export default function NewRequestPage() {
                           <div key={r.id} className="flex justify-between py-1.5 px-3 rounded-lg bg-zinc-950 border border-zinc-800/80 font-mono">
                             <span>#{r.sn} {r.name} ({r.type.toUpperCase()}) — {r.stateOfOrigin} [{r.direction}]</span>
                             <span className="font-bold text-teal-400">{formatCurrency(r.cost)}</span>
+                          </div>
+                        ))}
+                      </div>
+                    ) : isEducationMode ? (
+                      <div className="space-y-1 text-xs">
+                        {educationRows.map(e => (
+                          <div key={e.id} className="flex justify-between py-1.5 px-3 rounded-lg bg-zinc-950 border border-zinc-800/80 font-mono">
+                            <span>#{e.sn} {e.patientName} — {e.schoolName} ({e.classLevel}) [{e.supportType}]</span>
+                            <span className="font-bold text-teal-400">{formatCurrency(e.cost)}</span>
                           </div>
                         ))}
                       </div>
@@ -1126,15 +1369,15 @@ export default function NewRequestPage() {
                       {/* Level 2: Supervisor (Pending) */}
                       <div className="p-4 rounded-xl bg-zinc-950 border border-zinc-800">
                         <div className="flex items-center justify-between mb-2">
-                          <span className="text-[10px] font-mono text-zinc-400 font-bold">LEVEL 2 · SUPERVISOR</span>
+                          <span className="text-[10px] font-mono text-zinc-400 font-bold">LEVEL 2 · LINE SUPERVISOR</span>
                           <span className="px-1.5 py-0.5 rounded bg-amber-500/10 text-amber-300 text-[10px] font-bold">
                             NEXT IN QUEUE
                           </span>
                         </div>
-                        <p className="font-bold text-xs text-zinc-200">Unit / Dept Head</p>
-                        <p className="text-[10px] text-zinc-500">{currentDept.name} Desk</p>
-                        <div className="mt-3 pt-2 border-t border-zinc-900 text-[9px] font-mono text-zinc-600">
-                          Auto-signs upon 1-click approval
+                        <p className="font-bold text-xs text-white">{currentSupervisor.name}</p>
+                        <p className="text-[10px] text-zinc-400">{currentSupervisor.title}</p>
+                        <div className="mt-3 pt-2 border-t border-zinc-900 text-[9px] font-mono text-teal-400">
+                          TARGET STAMP: {currentSupervisor.stamp}
                         </div>
                       </div>
 

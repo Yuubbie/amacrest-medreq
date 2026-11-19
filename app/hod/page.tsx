@@ -134,7 +134,13 @@ export default function HODHubPage() {
     if (activeProfile.id === 'national') {
       return r.status === 'national-coordinator-review' || r.totalValue >= 500000;
     }
-    return r.department.toLowerCase() === activeProfile.departmentName.toLowerCase().replace(' department', '');
+    const rDept = (r.department || '').toLowerCase();
+    const pDept = activeProfile.id.toLowerCase();
+    if (pDept === 'hr') return rDept.includes('hr') || rDept.includes('human');
+    if (pDept === 'facility') return rDept.includes('facil');
+    if (pDept === 'admin') return rDept.includes('admin') || rDept.includes('kitchen');
+    if (pDept === 'clinicals') return rDept.includes('clinic') || rDept.includes('pharm') || rDept.includes('hostel');
+    return rDept === activeProfile.departmentName.toLowerCase().replace(' department', '');
   });
 
   const pendingCount = filteredRequests.filter(r => {
@@ -387,6 +393,7 @@ export default function HODHubPage() {
             <div className="space-y-3">
               {filteredRequests.map((req) => {
                 const isTransport = req.requisitionType === 'transport' || req.unit === 'Hostel';
+                const isEducation = req.requisitionType === 'education' || req.unit === 'Education Welfare';
                 const isStoreIssue = req.requisitionType === 'store-issue';
                 const isHighValue = req.totalValue >= 500000;
                 
@@ -417,6 +424,11 @@ export default function HODHubPage() {
                             🚌 Transport Schedule
                           </span>
                         )}
+                        {isEducation && (
+                          <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-300 border border-emerald-500/20 font-bold">
+                            🎓 Education Welfare
+                          </span>
+                        )}
                         {isStoreIssue && (
                           <span className="text-[10px] px-2 py-0.5 rounded-full bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold">
                             📦 Internal Store Issue
@@ -436,15 +448,19 @@ export default function HODHubPage() {
                         Requested by <strong className="text-zinc-200">{req.requestedBy}</strong> ({req.requestedByRole}) · {formatDate(req.createdAt)}
                       </p>
 
-                      {/* Items / Passengers mini-preview */}
+                      {/* Items / Passengers / Education mini-preview */}
                       <div className="mt-2 text-xs text-zinc-400 line-clamp-1 font-mono">
                         {isTransport ? (
                           <span>
-                            Passengers: {req.transportPassengers?.map(p => `${p.name} (${p.stateOfOrigin})`).join(', ') || '3 Passengers'}
+                            Passengers: {req.transportPassengers?.map(p => `${p.name} (${p.stateOfOrigin})`).join(', ') || 'Passengers Roster'}
+                          </span>
+                        ) : isEducation ? (
+                          <span>
+                            Students: {req.educationStudents?.map(s => `${s.patientName} (${s.schoolName})`).join(', ') || 'Patient Students Sponsored'}
                           </span>
                         ) : (
                           <span>
-                            Items: {req.items.map(i => `${i.name} (${i.quantity} ${i.unit})`).join(', ')}
+                            Items: {req.items?.map(i => `${i.name} (${i.quantity} ${i.unit})`).join(', ')}
                           </span>
                         )}
                       </div>
@@ -559,7 +575,7 @@ export default function HODHubPage() {
               </div>
             </div>
 
-            {/* Line items or Transport Passengers */}
+            {/* Line items, Transport Passengers, or Education Students */}
             <div className="my-4">
               <h4 className="text-xs font-mono uppercase text-zinc-400 mb-2">Voucher Schedule Breakdown</h4>
               {activeReqModal.transportPassengers && activeReqModal.transportPassengers.length > 0 ? (
@@ -571,9 +587,18 @@ export default function HODHubPage() {
                     </div>
                   ))}
                 </div>
+              ) : activeReqModal.educationStudents && activeReqModal.educationStudents.length > 0 ? (
+                <div className="space-y-1.5 text-xs">
+                  {activeReqModal.educationStudents.map(s => (
+                    <div key={s.id} className="flex justify-between p-2 rounded-lg bg-zinc-950 border border-zinc-800 font-mono">
+                      <span>#{s.sn} {s.patientName} — {s.schoolName} ({s.classLevel}) [{s.supportType}]</span>
+                      <strong className="text-teal-400">{formatCurrency(s.cost)}</strong>
+                    </div>
+                  ))}
+                </div>
               ) : (
                 <div className="space-y-1.5 text-xs">
-                  {activeReqModal.items.map(i => (
+                  {activeReqModal.items?.map(i => (
                     <div key={i.id} className="flex justify-between p-2 rounded-lg bg-zinc-950 border border-zinc-800 font-mono">
                       <span>#{i.sn || 1} {i.name} ({i.quantity} {i.unit} @ {formatCurrency(i.unitPrice)})</span>
                       <strong className="text-teal-400">{formatCurrency(i.totalPrice)}</strong>

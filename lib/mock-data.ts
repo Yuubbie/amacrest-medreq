@@ -25,7 +25,7 @@ export const naniDepartments: Department[] = [
     name: 'Clinicals',
     icon: '🏥',
     color: 'teal',
-    units: ['Pharmacy', 'Hostel', 'Social Assistance', 'Art & Craft', 'Dental Clinic', 'Physiotherapy', 'Nursing', 'Others'],
+    units: ['Pharmacy', 'Hostel', 'Social Assistance', 'Art & Craft', 'Dental Clinic', 'Physiotherapy', 'Nursing', 'Education Welfare', 'Others'],
     budget: 12000000,
     spent: 8450000,
   },
@@ -34,7 +34,7 @@ export const naniDepartments: Department[] = [
     name: 'Admin',
     icon: '🏢',
     color: 'blue',
-    units: ['Kitchen', 'Admin', 'Others'],
+    units: ['Kitchen', 'Admin', 'Education Welfare', 'Others'],
     budget: 3800000,
     spent: 2100000,
   },
@@ -48,6 +48,59 @@ export const naniDepartments: Department[] = [
     spent: 3200000,
   },
 ];
+
+// ─── Dedicated Departmental Supervisors (Level 2 Line Authority) ───────────
+export interface DeptSupervisorInfo {
+  name: string;
+  title: string;
+  stamp: string;
+  deskId: string;
+  deskUrl: string;
+  departmentName: string;
+}
+
+export const departmentSupervisors: Record<string, DeptSupervisorInfo> = {
+  facility: {
+    name: 'Mr. Patrick Adaeze',
+    title: 'Head of Facility & Operations',
+    stamp: 'PA/FAC/2026',
+    deskId: 'facility',
+    deskUrl: '/hod?dept=Facility',
+    departmentName: 'Facility Department',
+  },
+  finance: {
+    name: 'Mr. AY, FCA',
+    title: 'Head of Finance & Chartered Accountant',
+    stamp: 'AY/FIN/2026',
+    deskId: 'finance',
+    deskUrl: '/finance',
+    departmentName: 'Finance Department',
+  },
+  clinicals: {
+    name: 'Dr. Grace Mshelia',
+    title: 'Director of Clinical Services',
+    stamp: 'GM/CLN/2026',
+    deskId: 'clinicals',
+    deskUrl: '/hod?dept=Clinicals',
+    departmentName: 'Clinicals Department',
+  },
+  admin: {
+    name: 'Mrs. Stella Eze',
+    title: 'Head of Hospital Administration',
+    stamp: 'SE/ADM/2026',
+    deskId: 'admin',
+    deskUrl: '/hod?dept=Admin',
+    departmentName: 'Admin Department',
+  },
+  hr: {
+    name: 'Mrs. Zainab Aliyu',
+    title: 'Head of Human Resources',
+    stamp: 'ZA/HR/2026',
+    deskId: 'hr',
+    deskUrl: '/hod?dept=HR',
+    departmentName: 'Human Resources Department',
+  },
+};
 
 // ─── State Transport Rates ───────────────────────────────────────────────────
 export const stateTransportRates: StateTransportRate[] = [

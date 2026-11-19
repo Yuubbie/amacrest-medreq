@@ -1,6 +1,6 @@
 export type Urgency = 'routine' | 'priority' | 'stat';
 
-export type RequisitionType = 'material' | 'cash' | 'store-issue' | 'transport';
+export type RequisitionType = 'material' | 'cash' | 'store-issue' | 'transport' | 'education';
 
 export type RequestStatus =
   | 'draft'
@@ -43,6 +43,16 @@ export interface TransportPassenger {
   stateOfOrigin: string;
   transportCost: number;
   direction: 'incoming' | 'discharge';
+}
+
+export interface EducationStudentRow {
+  id: string;
+  sn: number;
+  patientName: string;
+  schoolName: string;
+  classLevel: string;
+  supportType: 'School Fees / Tuition' | 'Uniform & Footwear' | 'Textbooks & Stationery' | 'Full Schooling Package';
+  cost: number;
 }
 
 export interface ApprovalSignature {
@@ -98,6 +108,7 @@ export interface Request {
   transactionCode?: string;
   items: RequestItem[];
   transportPassengers?: TransportPassenger[];
+  educationStudents?: EducationStudentRow[];
   urgency: Urgency;
   status: RequestStatus;
   currentApprovalLevel?: ApprovalLevel;
